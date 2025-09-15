@@ -17,6 +17,9 @@ public class UserService {
     }
 
     public User signup(User user) {
+        if (findByUsername(user.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("Username already exists");
+        }
         user.setPassword(encoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
