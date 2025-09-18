@@ -1,15 +1,15 @@
-import React from "react";
-import SignupForm from "./components/SignupForm";
-import LoginForm from "./components/LoginForm";
+import { Routes, Route } from "react-router-dom";
+import LandingPage from "./pages/LandingPage";
+import LoginForm from "./pages/LoginForm";
+import SignupForm from "./pages/SignupForm";
 
 function App() {
   return (
-    <div>
-      <h1>Auth Demo</h1>
-      <SignupForm />
-      <hr />
-      <LoginForm />
-    </div>
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<LoginForm />} />
+      <Route path="/signup" element={<SignupForm />} />
+    </Routes>
   );
 }
 
