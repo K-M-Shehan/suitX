@@ -1,3 +1,3 @@
-## Frontend directory
+# Frontend directory 
 
-This is where all the frontend stuff goes.
+This is the directory where we will do all frontend work.

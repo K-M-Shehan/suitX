@@ -12,6 +12,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
+@CrossOrigin(origins = "http://localhost:5173") // this allows requests from frontend
 public class AuthController {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
