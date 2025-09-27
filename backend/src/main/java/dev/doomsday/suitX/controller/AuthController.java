@@ -1,41 +1,43 @@
 package dev.doomsday.suitX.controller;
 
+import dev.doomsday.suitX.dto.LoginRequest;
 import dev.doomsday.suitX.model.User;
 import dev.doomsday.suitX.service.UserService;
+import dev.doomsday.suitX.config.JwtUtil;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
+@CrossOrigin(origins = "http://localhost:5173") // this allows requests from frontend
 public class AuthController {
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
-    public AuthController(UserService userService) {
+    public AuthController(UserService userService, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     @PostMapping("/signup")
-    public String signup(@RequestBody User user) {
+    public ResponseEntity<String> signup(@RequestBody User user) {
         userService.signup(user);
-        return "User registered!";
+        return ResponseEntity.ok("User registered!");
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody Map<String, String> body) {
-        String username = body.get("username");
-        String password = body.get("password");
-
-        return userService.findByUsername(username)
-                .filter(u -> userService.checkPassword(password, u.getPassword()))
-                .map(u -> "JWT_TOKEN_PLACEHOLDER") // TODO: replace with real JWT token
-                .orElse("Invalid credentials");
+    public ResponseEntity<Map<String, String>> login(@RequestBody LoginRequest request) {
+        return userService.findByUsername(request.getUsername())
+                .filter(u -> passwordEncoder.matches(request.getPassword(), u.getPassword()))
+                .map(u -> {
+                    String token = jwtUtil.generateToken(u.getUsername());
+                    return ResponseEntity.ok(Map.of("token", token));
+                })
+                .orElse(ResponseEntity.status(401).body(Map.of("error", "Invalid credentials")));
     }
-
-    // test
-    @GetMapping("/")
-    public String authHome() {
-        return "Auth API is running!";
-    }
-    // end test
 }
