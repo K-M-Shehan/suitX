@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { signup } from "../services/AuthService";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -8,6 +9,7 @@ export default function SignupForm() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,6 +21,12 @@ export default function SignupForm() {
     try {
       const msg = await signup(username, password);
       setMessage(msg);
+      // Redirect to Launchpad after successful signup
+      if (msg.includes('success') || msg.includes('created') || !msg.includes('error')) {
+        setTimeout(() => {
+          navigate("/launchpad");
+        }, 1000);
+      }
     } catch (err) {
       setMessage(err.message);
     }
