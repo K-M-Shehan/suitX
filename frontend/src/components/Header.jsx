@@ -7,7 +7,9 @@ const Header = ({ isLanding = false }) => {
       <header className="bg-black text-white px-6 py-4 flex justify-between items-center">
         {/* Logo */}
         <div className="flex items-center">
-          <h1 className="text-4xl font-bold">suitX</h1>
+          <Link to="/" className="hover:opacity-80 transition-opacity">
+            <h1 className="text-4xl font-bold">suitX</h1>
+          </Link>
         </div>
 
         {/* Right side navigation */}
