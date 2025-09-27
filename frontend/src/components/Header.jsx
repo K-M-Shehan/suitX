@@ -1,7 +1,41 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import notificationIcon from '../assets/header/notification-bell.png';
+import settingsIcon from '../assets/header/settings-cog.png';
+import profileIcon from '../assets/header/profile.png';
 
 const Header = ({ isLanding = false }) => {
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const navigate = useNavigate();
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleLogout = () => {
+    // Clear authentication token
+    localStorage.removeItem('token');
+    // Close dropdown
+    setIsProfileDropdownOpen(false);
+    // Navigate to landing page
+    navigate('/');
+  };
+
+  const handleProfile = () => {
+    // Close dropdown for now (no functionality implemented)
+    setIsProfileDropdownOpen(false);
+  };
   if (isLanding) {
     return (
       <header className="bg-black text-white px-6 py-4 flex justify-between items-center">
@@ -35,32 +69,55 @@ const Header = ({ isLanding = false }) => {
     <header className="bg-black text-white px-6 py-4 flex justify-between items-center">
       {/* Logo */}
       <div className="flex items-center">
-        <h1 className="text-xl font-bold">suitX</h1>
+        <h1 className="text-4xl font-bold">suitX</h1>
       </div>
 
       {/* Right side icons */}
       <div className="flex items-center space-x-4">
         {/* Notification icon */}
         <button className="p-2 hover:bg-gray-800 rounded transition-colors">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-3.5-3.5a3.536 3.536 0 00-5 0L15 17zM15 17H9m6-10V4a3 3 0 00-6 0v3m6 0V4" />
-          </svg>
+          <img src={notificationIcon} alt="Notifications" className="w-5 h-5" />
         </button>
 
         {/* Settings icon */}
         <button className="p-2 hover:bg-gray-800 rounded transition-colors">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
+          <img src={settingsIcon} alt="Settings" className="w-5 h-5" />
         </button>
 
-        {/* Profile icon */}
-        <button className="p-2 hover:bg-gray-800 rounded transition-colors">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-          </svg>
-        </button>
+        {/* Profile icon with dropdown */}
+        <div className="relative" ref={dropdownRef}>
+          <button 
+            className="p-2 hover:bg-gray-800 rounded transition-colors"
+            onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+          >
+            <img src={profileIcon} alt="Profile" className="w-5 h-5" />
+          </button>
+
+          {/* Dropdown Menu */}
+          {isProfileDropdownOpen && (
+            <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+              <button
+                onClick={handleProfile}
+                className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100 transition-colors flex items-center space-x-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <span>Profile</span>
+              </button>
+              
+              <button
+                onClick={handleLogout}
+                className="w-full px-4 py-2 text-left text-red-600 hover:bg-red-50 transition-colors flex items-center space-x-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span>Logout</span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

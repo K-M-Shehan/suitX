@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { login } from "../services/AuthService";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -7,6 +8,7 @@ export default function LoginForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -14,6 +16,10 @@ export default function LoginForm() {
       const data = await login(username, password);
       localStorage.setItem("token", data.token);
       setMessage("Login successful!");
+      // Redirect to Launchpad after successful login
+      setTimeout(() => {
+        navigate("/launchpad");
+      }, 1000);
     } catch (err) {
       setMessage(err.message);
     }
