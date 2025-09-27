@@ -1,6 +1,34 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
-const Header = () => {
+const Header = ({ isLanding = false }) => {
+  if (isLanding) {
+    return (
+      <header className="bg-black text-white px-6 py-4 flex justify-between items-center">
+        {/* Logo */}
+        <div className="flex items-center">
+          <h1 className="text-4xl font-bold">suitX</h1>
+        </div>
+
+        {/* Right side navigation */}
+        <div className="flex items-center space-x-6">
+
+          {/* Auth buttons */}
+          <Link to="/signup">
+            <button className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors text-sm font-medium">
+              Get started
+            </button>
+          </Link>
+          <Link to="/login">
+            <button className="px-4 py-2 border border-gray-600 text-white rounded hover:bg-gray-800 transition-colors text-sm">
+              Sign in
+            </button>
+          </Link>
+        </div>
+      </header>
+    );
+  }
+
   return (
     <header className="bg-black text-white px-6 py-4 flex justify-between items-center">
       {/* Logo */}
