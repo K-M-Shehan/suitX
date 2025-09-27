@@ -1,20 +1,21 @@
-package dev.doomsday.suitX.controller;
+// package dev.doomsday.suitX.controller;
 
-import org.springframework.web.bind.annotation.*;
+// import org.springframework.web.bind.annotation.*;
+// import dev.doomsday.suitX.service.SettingsService;
 
-@RestController
-@RequestMapping("/settings")
-public class SettingsController {
+// @RestController
+// @RequestMapping("/settings")
+// public class SettingsController {
 
-    private final SettingsService settingsService;
+//     private final SettingsService settingsService;
 
-    public SettingsController(SettingsService settingsService) {
-        this.settingsService = settingsService;
-    }
+//     public SettingsController(SettingsService settingsService) {
+//         this.settingsService = settingsService;
+//     }
 
-    // Example endpoint
-    @GetMapping("/")
-    public String settingsHome() {
-        return "Settings API is running!";
-    }
-}
+//     // Example endpoint
+//     @GetMapping("/")
+//     public String settingsHome() {
+//         return "Settings API is running!";
+//     }
+// }

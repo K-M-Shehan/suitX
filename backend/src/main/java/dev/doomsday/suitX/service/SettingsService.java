@@ -1,15 +1,15 @@
-package dev.doomsday.suitX.service;
+// package dev.doomsday.suitX.service;
 
-import org.springframework.stereotype.Service;
+// import org.springframework.stereotype.Service;
 
-@Service
-public class SettingsService {
+// @Service
+// public class SettingsService {
 
-    private final SettingsRepository settingsRepository;
+//     private final SettingsRepository settingsRepository;
 
-    public SettingsService(SettingsRepository settingsRepository) {
-        this.settingsRepository = settingsRepository;
-    }
+//     public SettingsService(SettingsRepository settingsRepository) {
+//         this.settingsRepository = settingsRepository;
+//     }
 
-    // Business logic placeholders
-}
+//     // Business logic placeholders
+// }
