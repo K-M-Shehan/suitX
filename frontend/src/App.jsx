@@ -8,6 +8,8 @@ import LoginForm from "./pages/LoginForm";
 import SignupForm from "./pages/SignupForm";
 import ProjectsPage from "./pages/ProjectsPage";
 import LaunchpadPage from "./pages/LaunchpadPage";
+import RiskDashboard from "./pages/RiskDashboard";
+import MitigationPage from "./pages/MitigationPage";
 
 function App() {
   const [activeMenuItem, setActiveMenuItem] = useState('Launchpad');
@@ -94,6 +96,22 @@ function App() {
         element={
           <DashboardLayout>
             <ProjectsPage />
+          </DashboardLayout>
+        } 
+      />
+      <Route 
+        path="/risks" 
+        element={
+          <DashboardLayout>
+            <RiskDashboard />
+          </DashboardLayout>
+        } 
+      />
+      <Route 
+        path="/mitigations" 
+        element={
+          <DashboardLayout>
+            <MitigationPage />
           </DashboardLayout>
         } 
       />
