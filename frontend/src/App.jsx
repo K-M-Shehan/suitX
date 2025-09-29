@@ -12,7 +12,8 @@ import ProjectsPage from "./pages/ProjectsPage";
 import LaunchpadPage from "./pages/LaunchpadPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
-
+import RiskDashboard from "./pages/RiskDashboard";
+import MitigationPage from "./pages/MitigationPage";
 
 function App() {
   const [activeMenuItem, setActiveMenuItem] = useState("Launchpad");
@@ -58,11 +59,48 @@ function App() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginForm />} />
       <Route path="/signup" element={<SignupForm />} />
-      <Route path="/launchpad" element={<DashboardLayout><LaunchpadPage /></DashboardLayout>} />
-      <Route path="/dashboard" element={<DashboardLayout><LaunchpadPage /></DashboardLayout>} />
-      <Route path="/projects" element={<DashboardLayout><ProjectsPage /></DashboardLayout>} />
       <Route path="/profile" element={<DashboardLayout><ProfilePage /></DashboardLayout>} />
       <Route path="/settings" element={<DashboardLayout><SettingsPage /></DashboardLayout>} />
+      <Route 
+        path="/launchpad" 
+        element={
+          <DashboardLayout>
+            <LaunchpadPage />
+          </DashboardLayout>
+        } 
+      />
+      <Route 
+        path="/dashboard" 
+        element={
+          <DashboardLayout>
+            <LaunchpadPage />
+          </DashboardLayout>
+        } 
+      />
+      <Route 
+        path="/projects" 
+        element={
+          <DashboardLayout>
+            <ProjectsPage />
+          </DashboardLayout>
+        } 
+      />
+      <Route 
+        path="/risks" 
+        element={
+          <DashboardLayout>
+            <RiskDashboard />
+          </DashboardLayout>
+        } 
+      />
+      <Route 
+        path="/mitigations" 
+        element={
+          <DashboardLayout>
+            <MitigationPage />
+          </DashboardLayout>
+        } 
+      />
     </Routes>
   );
 }
