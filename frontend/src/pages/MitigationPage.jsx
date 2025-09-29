@@ -1,69 +1,88 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import MitigationService from '../services/MitigationService';
 
 const MitigationPage = () => {
   const [selectedStatus, setSelectedStatus] = useState('All');
+  const [mitigationSummary, setMitigationSummary] = useState({
+    totalMitigations: 0,
+    activeMitigations: 0
+  });
+  const [mitigations, setMitigations] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const mitigationSummary = [
-    { title: 'Total Mitigations', count: 5 },
-    { title: 'Active Mitigations', count: 3 }
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch mitigation summary
+        const summary = await MitigationService.getMitigationSummary();
+        setMitigationSummary({
+          totalMitigations: summary.totalMitigations,
+          activeMitigations: summary.activeMitigations
+        });
 
-  const mitigations = [
-    {
-      id: 1,
-      title: 'Scope Management',
-      description: 'Implement strict change control process with approval gates and impact assessments for all scope modifications.',
-      status: 'Active',
-      priority: 'High',
-      assignee: 'Project Manager',
-      dueDate: '2025-10-15',
-      relatedRisk: 'Scope Creep'
-    },
-    {
-      id: 2,
-      title: 'Frontend Integration Testing',
-      description: 'Establish comprehensive integration testing framework with automated CI/CD pipeline validation.',
-      status: 'Active',
-      priority: 'Medium',
-      assignee: 'Frontend Team Lead',
-      dueDate: '2025-10-20',
-      relatedRisk: 'Frontend Int.'
-    },
-    {
-      id: 3,
-      title: 'Deployment Automation',
-      description: 'Create automated deployment pipeline with rollback capabilities and environment validation checks.',
-      status: 'Active',
-      priority: 'High',
-      assignee: 'DevOps Engineer',
-      dueDate: '2025-10-10',
-      relatedRisk: 'Deployment'
-    },
-    {
-      id: 4,
-      title: 'Code Review Process',
-      description: 'Implement mandatory peer review process with quality gates and automated code analysis.',
-      status: 'Completed',
-      priority: 'Medium',
-      assignee: 'Tech Lead',
-      dueDate: '2025-09-25',
-      relatedRisk: 'Code Quality'
-    },
-    {
-      id: 5,
-      title: 'Backup Strategy',
-      description: 'Establish comprehensive backup and disaster recovery procedures with regular testing.',
-      status: 'Planned',
-      priority: 'Low',
-      assignee: 'System Admin',
-      dueDate: '2025-11-01',
-      relatedRisk: 'Data Loss'
-    }
-  ];
+        // Fetch mitigations
+        const mitigationsData = await MitigationService.getAllMitigations();
+        setMitigations(mitigationsData);
+
+      } catch (error) {
+        console.error('Error fetching mitigation data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const filteredMitigations = selectedStatus === 'All' 
     ? mitigations 
-    : mitigations.filter(mitigation => mitigation.status === selectedStatus);
+    : mitigations.filter(mitigation => mitigation.status.toUpperCase() === selectedStatus.toUpperCase());
+
+  const handleMarkComplete = async (mitigationId) => {
+    try {
+      await MitigationService.markAsCompleted(mitigationId);
+      // Refresh mitigations data
+      const updatedMitigations = await MitigationService.getAllMitigations();
+      setMitigations(updatedMitigations);
+      
+      // Refresh summary
+      const summary = await MitigationService.getMitigationSummary();
+      setMitigationSummary({
+        totalMitigations: summary.totalMitigations,
+        activeMitigations: summary.activeMitigations
+      });
+    } catch (error) {
+      console.error('Error marking mitigation as completed:', error);
+    }
+  };
+
+  const handleDeleteMitigation = async (mitigationId) => {
+    try {
+      await MitigationService.deleteMitigation(mitigationId);
+      // Refresh mitigations data
+      const updatedMitigations = await MitigationService.getAllMitigations();
+      setMitigations(updatedMitigations);
+      
+      // Refresh summary
+      const summary = await MitigationService.getMitigationSummary();
+      setMitigationSummary({
+        totalMitigations: summary.totalMitigations,
+        activeMitigations: summary.activeMitigations
+      });
+    } catch (error) {
+      console.error('Error deleting mitigation:', error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex-1 p-8 bg-gray-50 flex items-center justify-center">
+        <div className="text-lg text-gray-600">Loading mitigation data...</div>
+      </div>
+    );
+  }
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -135,14 +154,18 @@ const MitigationPage = () => {
       <div className="mb-8">
         <h2 className="text-xl font-semibold text-gray-900 mb-6">Mitigation Summary</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
-          {mitigationSummary.map((item, index) => (
-            <div key={index} className="bg-black rounded-lg p-6 text-white">
-              <div className="flex flex-col items-center">
-                <div className="text-6xl font-bold mb-2">{item.count}</div>
-                <div className="text-lg font-medium">{item.title}</div>
-              </div>
+          <div className="bg-black rounded-lg p-6 text-white">
+            <div className="flex flex-col items-center">
+              <div className="text-6xl font-bold mb-2">{mitigationSummary.totalMitigations}</div>
+              <div className="text-lg font-medium">Total Mitigations</div>
             </div>
-          ))}
+          </div>
+          <div className="bg-black rounded-lg p-6 text-white">
+            <div className="flex flex-col items-center">
+              <div className="text-6xl font-bold mb-2">{mitigationSummary.activeMitigations}</div>
+              <div className="text-lg font-medium">Active Mitigations</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -180,7 +203,9 @@ const MitigationPage = () => {
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-500">Due Date:</span>
-                  <span className="font-medium text-gray-900">{mitigation.dueDate}</span>
+                  <span className="font-medium text-gray-900">
+                    {mitigation.dueDate ? new Date(mitigation.dueDate).toLocaleDateString() : 'Not set'}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-500">Related Risk:</span>
@@ -192,10 +217,17 @@ const MitigationPage = () => {
                 <button className="px-3 py-1 text-blue-600 hover:bg-white hover:bg-opacity-50 rounded-md text-sm font-medium transition-colors">
                   Edit
                 </button>
-                <button className="px-3 py-1 text-green-600 hover:bg-white hover:bg-opacity-50 rounded-md text-sm font-medium transition-colors">
-                  Mark Complete
+                <button 
+                  onClick={() => handleMarkComplete(mitigation.id)}
+                  className="px-3 py-1 text-green-600 hover:bg-white hover:bg-opacity-50 rounded-md text-sm font-medium transition-colors"
+                  disabled={mitigation.status === 'COMPLETED'}
+                >
+                  {mitigation.status === 'COMPLETED' ? 'Completed' : 'Mark Complete'}
                 </button>
-                <button className="px-3 py-1 text-red-600 hover:bg-white hover:bg-opacity-50 rounded-md text-sm font-medium transition-colors">
+                <button 
+                  onClick={() => handleDeleteMitigation(mitigation.id)}
+                  className="px-3 py-1 text-red-600 hover:bg-white hover:bg-opacity-50 rounded-md text-sm font-medium transition-colors"
+                >
                   Delete
                 </button>
               </div>
@@ -212,7 +244,7 @@ const MitigationPage = () => {
             <div className="text-center">
               <h3 className="text-sm font-medium text-gray-700 mb-1">High Priority</h3>
               <div className="text-3xl font-bold text-red-600">
-                {mitigations.filter(m => m.priority === 'High').length}
+                {mitigations.filter(m => m.priority === 'HIGH').length}
               </div>
             </div>
           </div>
@@ -220,7 +252,7 @@ const MitigationPage = () => {
             <div className="text-center">
               <h3 className="text-sm font-medium text-gray-700 mb-1">Medium Priority</h3>
               <div className="text-3xl font-bold text-orange-600">
-                {mitigations.filter(m => m.priority === 'Medium').length}
+                {mitigations.filter(m => m.priority === 'MEDIUM').length}
               </div>
             </div>
           </div>
@@ -228,14 +260,19 @@ const MitigationPage = () => {
             <div className="text-center">
               <h3 className="text-sm font-medium text-gray-700 mb-1">Completed</h3>
               <div className="text-3xl font-bold text-green-600">
-                {mitigations.filter(m => m.status === 'Completed').length}
+                {mitigations.filter(m => m.status === 'COMPLETED').length}
               </div>
             </div>
           </div>
           <div className="bg-gray-200 rounded-lg p-6">
             <div className="text-center">
               <h3 className="text-sm font-medium text-gray-700 mb-1">Overdue</h3>
-              <div className="text-3xl font-bold text-gray-600">0</div>
+              <div className="text-3xl font-bold text-gray-600">
+                {mitigations.filter(m => {
+                  if (!m.dueDate || m.status === 'COMPLETED') return false;
+                  return new Date(m.dueDate) < new Date();
+                }).length}
+              </div>
             </div>
           </div>
         </div>

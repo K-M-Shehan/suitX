@@ -1,0 +1,78 @@
+package dev.doomsday.suitX.controller;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import dev.doomsday.suitX.dto.ProjectDto;
+import dev.doomsday.suitX.service.ProjectService;
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequestMapping("/api/projects")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "*")
+public class ProjectController {
+
+    private final ProjectService projectService;
+
+    @GetMapping
+    public ResponseEntity<List<ProjectDto>> getAllProjects() {
+        List<ProjectDto> projects = projectService.getAllProjects();
+        return ResponseEntity.ok(projects);
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<List<ProjectDto>> getActiveProjects() {
+        List<ProjectDto> activeProjects = projectService.getActiveProjects();
+        return ResponseEntity.ok(activeProjects);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProjectDto> getProjectById(@PathVariable String id) {
+        Optional<ProjectDto> project = projectService.getProjectById(id);
+        return project.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public ResponseEntity<ProjectDto> createProject(@RequestBody ProjectDto projectDto) {
+        try {
+            ProjectDto createdProject = projectService.createProject(projectDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdProject);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ProjectDto> updateProject(@PathVariable String id, @RequestBody ProjectDto projectDto) {
+        try {
+            ProjectDto updatedProject = projectService.updateProject(id, projectDto);
+            return ResponseEntity.ok(updatedProject);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProject(@PathVariable String id) {
+        try {
+            projectService.deleteProject(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+}

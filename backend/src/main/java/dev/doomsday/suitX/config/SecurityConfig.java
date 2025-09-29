@@ -1,6 +1,5 @@
 package dev.doomsday.suitX.config;
 
-import dev.doomsday.suitX.config.JwtFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,6 +23,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())  // modern syntax
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/api/risks/**").permitAll()
+                        .requestMatchers("/api/mitigations/**").permitAll()
+                        .requestMatchers("/api/projects/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

@@ -1,37 +1,82 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import RiskService from '../services/RiskService';
+import ProjectService from '../services/ProjectService';
 
 const RiskDashboard = () => {
-  const riskSummary = [
-    { title: 'Total Projects', count: 3 },
-    { title: 'Total Risks', count: 3 }
-  ];
+  const [riskSummary, setRiskSummary] = useState({
+    totalProjects: 0,
+    totalRisks: 0
+  });
+  const [risks, setRisks] = useState([]);
+  const [activeProjects, setActiveProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const risks = [
-    {
-      id: 1,
-      title: 'Scope Creep',
-      description: ' Requirements expanding beyond original project scope due to stakeholder requests.',
-      type: 'scope'
-    },
-    {
-      id: 2,
-      title: 'Frontend Int.',
-      description: 'Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis.',
-      type: 'frontend'
-    },
-    {
-      id: 3,
-      title: 'Deployment',
-      description: 'Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis.',
-      type: 'deployment'
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch risk summary
+        const summary = await RiskService.getRiskSummary();
+        setRiskSummary({
+          totalProjects: summary.totalProjects,
+          totalRisks: summary.totalRisks
+        });
+
+        // Fetch risks
+        const risksData = await RiskService.getAllRisks();
+        setRisks(risksData);
+
+        // Fetch active projects
+        const projectsData = await ProjectService.getActiveProjects();
+        setActiveProjects(projectsData);
+
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleResolveRisk = async (riskId) => {
+    try {
+      await RiskService.resolveRisk(riskId);
+      // Refresh risks data
+      const updatedRisks = await RiskService.getAllRisks();
+      setRisks(updatedRisks);
+      
+      // Refresh summary
+      const summary = await RiskService.getRiskSummary();
+      setRiskSummary({
+        totalProjects: summary.totalProjects,
+        totalRisks: summary.totalRisks
+      });
+    } catch (error) {
+      console.error('Error resolving risk:', error);
     }
-  ];
+  };
 
-  const activeProjects = [
-    { id: 1, name: 'Platform Redesign', progress: 50 },
-    { id: 2, name: 'Mobile MVP', progress: 75 },
-    { id: 3, name: 'Data Mitigation', progress: 95 }
-  ];
+  const handleIgnoreRisk = async (riskId) => {
+    try {
+      await RiskService.ignoreRisk(riskId);
+      // Refresh risks data
+      const updatedRisks = await RiskService.getAllRisks();
+      setRisks(updatedRisks);
+    } catch (error) {
+      console.error('Error ignoring risk:', error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex-1 p-8 bg-gray-50 flex items-center justify-center">
+        <div className="text-lg text-gray-600">Loading dashboard data...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 p-8 bg-gray-50">
@@ -49,14 +94,18 @@ const RiskDashboard = () => {
       <div className="mb-8">
         <h2 className="text-xl font-semibold text-gray-900 mb-6">Risk Summary</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
-          {riskSummary.map((item, index) => (
-            <div key={index} className="bg-black rounded-lg p-6 text-white">
-              <div className="flex flex-col items-center">
-                <div className="text-6xl font-bold mb-2">{item.count}</div>
-                <div className="text-lg font-medium">{item.title}</div>
-              </div>
+          <div className="bg-black rounded-lg p-6 text-white">
+            <div className="flex flex-col items-center">
+              <div className="text-6xl font-bold mb-2">{riskSummary.totalProjects}</div>
+              <div className="text-lg font-medium">Total Projects</div>
             </div>
-          ))}
+          </div>
+          <div className="bg-black rounded-lg p-6 text-white">
+            <div className="flex flex-col items-center">
+              <div className="text-6xl font-bold mb-2">{riskSummary.totalRisks}</div>
+              <div className="text-lg font-medium">Total Risks</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -73,11 +122,19 @@ const RiskDashboard = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-3">{risk.title}</h3>
               <p className="text-gray-600 text-sm mb-4 leading-relaxed">{risk.description}</p>
               <div className="flex space-x-2">
-                <button className="px-4 py-2 text-blue-600 hover:bg-white hover:bg-opacity-50 rounded-md text-sm font-medium transition-colors">
-                  Resolve
+                <button 
+                  onClick={() => handleResolveRisk(risk.id)}
+                  className="px-4 py-2 text-blue-600 hover:bg-white hover:bg-opacity-50 rounded-md text-sm font-medium transition-colors"
+                  disabled={risk.status === 'RESOLVED'}
+                >
+                  {risk.status === 'RESOLVED' ? 'Resolved' : 'Resolve'}
                 </button>
-                <button className="px-4 py-2 text-gray-600 hover:bg-white hover:bg-opacity-50 rounded-md text-sm font-medium transition-colors">
-                  Ignore
+                <button 
+                  onClick={() => handleIgnoreRisk(risk.id)}
+                  className="px-4 py-2 text-gray-600 hover:bg-white hover:bg-opacity-50 rounded-md text-sm font-medium transition-colors"
+                  disabled={risk.status === 'IGNORED'}
+                >
+                  {risk.status === 'IGNORED' ? 'Ignored' : 'Ignore'}
                 </button>
               </div>
             </div>
@@ -93,7 +150,7 @@ const RiskDashboard = () => {
             <div key={project.id} className="bg-gray-200 rounded-lg p-6">
               <div className="text-center">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">{project.name}</h3>
-                <div className="text-2xl font-bold text-gray-900">{project.progress}%</div>
+                <div className="text-2xl font-bold text-gray-900">{Math.round(project.progressPercentage || 0)}%</div>
               </div>
             </div>
           ))}
