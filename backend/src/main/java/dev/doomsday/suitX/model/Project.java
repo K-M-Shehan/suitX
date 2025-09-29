@@ -14,12 +14,12 @@ public class Project {
     private String id;
     private String name;
     private String description;
-    private String status; // ACTIVE, COMPLETED, ON_HOLD, CANCELLED
-    private Double progressPercentage;
+    private String status = "ACTIVE"; // ACTIVE, COMPLETED, ON_HOLD, CANCELLED, ARCHIVED
+    private Double progressPercentage = 0.0;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private String createdBy;
+    private String createdBy; // Username of the creator
     private String projectManager;
 }

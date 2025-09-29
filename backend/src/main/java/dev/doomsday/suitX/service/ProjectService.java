@@ -24,8 +24,26 @@ public class ProjectService {
                 .collect(Collectors.toList());
     }
 
+    public List<ProjectDto> getAllProjectsByUser(String username) {
+        if (username == null) {
+            return getAllProjects();
+        }
+        return projectRepository.findByCreatedBy(username).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
     public List<ProjectDto> getActiveProjects() {
         return projectRepository.findByStatus("ACTIVE").stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<ProjectDto> getActiveProjectsByUser(String username) {
+        if (username == null) {
+            return getActiveProjects();
+        }
+        return projectRepository.findByCreatedByAndStatus(username, "ACTIVE").stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
@@ -39,8 +57,12 @@ public class ProjectService {
         Project project = convertToEntity(projectDto);
         project.setCreatedAt(LocalDateTime.now());
         project.setUpdatedAt(LocalDateTime.now());
-        project.setStatus("ACTIVE"); // Default status
-        project.setProgressPercentage(0.0); // Default progress
+        if (project.getStatus() == null) {
+            project.setStatus("ACTIVE"); // Default status
+        }
+        if (project.getProgressPercentage() == null) {
+            project.setProgressPercentage(0.0); // Default progress
+        }
         Project savedProject = projectRepository.save(project);
         return convertToDto(savedProject);
     }
@@ -59,6 +81,12 @@ public class ProjectService {
 
     public void deleteProject(String id) {
         projectRepository.deleteById(id);
+    }
+
+    public boolean isProjectOwner(String projectId, String username) {
+        return projectRepository.findById(projectId)
+                .map(project -> project.getCreatedBy().equals(username))
+                .orElse(false);
     }
 
     private ProjectDto convertToDto(Project project) {

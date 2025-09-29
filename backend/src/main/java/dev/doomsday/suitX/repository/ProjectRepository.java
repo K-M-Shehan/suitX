@@ -11,6 +11,7 @@ import dev.doomsday.suitX.model.Project;
 public interface ProjectRepository extends MongoRepository<Project, String> {
     List<Project> findByStatus(String status);
     List<Project> findByCreatedBy(String createdBy);
+    List<Project> findByCreatedByAndStatus(String createdBy, String status);
     List<Project> findByProjectManager(String projectManager);
     Long countByStatus(String status);
 }

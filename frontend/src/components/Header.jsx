@@ -80,9 +80,9 @@ const Header = ({ isLanding = false }) => {
         </button>
 
         {/* Settings icon */}
-        <button className="p-2 hover:bg-gray-800 rounded transition-colors">
+        <Link to="/settings" className="p-2 hover:bg-gray-800 rounded transition-colors">
           <img src={settingsIcon} alt="Settings" className="w-5 h-5" />
-        </button>
+        </Link>
 
         {/* Profile icon with dropdown */}
         <div className="relative" ref={dropdownRef}>
@@ -96,15 +96,16 @@ const Header = ({ isLanding = false }) => {
           {/* Dropdown Menu */}
           {isProfileDropdownOpen && (
             <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-              <button
-                onClick={handleProfile}
+              <Link
+                to="/profile"
+                onClick={() => setIsProfileDropdownOpen(false)}
                 className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100 transition-colors flex items-center space-x-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
                 <span>Profile</span>
-              </button>
+              </Link>
               
               <button
                 onClick={handleLogout}
