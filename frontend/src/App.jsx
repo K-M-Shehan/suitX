@@ -11,6 +11,7 @@ import SignupForm from "./pages/SignupForm";
 import ProjectsPage from "./pages/ProjectsPage";
 import LaunchpadPage from "./pages/LaunchpadPage";
 import ProfilePage from "./pages/ProfilePage";
+import SettingsPage from "./pages/SettingsPage";
 
 
 function App() {
@@ -61,18 +62,9 @@ function App() {
       <Route path="/dashboard" element={<DashboardLayout><LaunchpadPage /></DashboardLayout>} />
       <Route path="/projects" element={<DashboardLayout><ProjectsPage /></DashboardLayout>} />
       <Route path="/profile" element={<DashboardLayout><ProfilePage /></DashboardLayout>} />
+      <Route path="/settings" element={<DashboardLayout><SettingsPage /></DashboardLayout>} />
     </Routes>
   );
 }
 
 export default App;
-
-
-// import React from "react";
-// import ProfilePage from "./pages/ProfilePage";
-
-// function App() {
-//   return <ProfilePage />;
-// }
-
-// export default App;

@@ -1,25 +1,17 @@
-// frontend/src/pages/ProfilePage.jsx
-import React, { useEffect, useState } from "react";
+// src/pages/ProfilePage.jsx
+import React from "react";
+import Profile from "../components/Profile";
 
-function ProfilePage() {
-  const [user, setUser] = useState({ username: "", email: "" });
+export default function ProfilePage() {
+  const user = {
+    username: "John Doe",
+    email: "john@example.com",
+    bio: "This is my bio",
+    phone: "123-456-7890",
+    address: "123 Main St, City",
+    gender: "Male",
+    birthday: "1990-01-01",
+  };
 
-  useEffect(() => {
-    // Example: fetch user data from localStorage (replace with backend API if available)
-    const username = localStorage.getItem("username") || "John Doe";
-    const email = localStorage.getItem("email") || "john@example.com";
-    setUser({ username, email });
-  }, []);
-
-  return (
-    <div className="flex-1 p-8 bg-gray-50">
-      <h1 className="text-2xl font-bold mb-6">My Profile</h1>
-      <div className="bg-white shadow rounded-lg p-6 max-w-md">
-        <p className="mb-2"><strong>Username:</strong> {user.username}</p>
-        <p><strong>Email:</strong> {user.email}</p>
-      </div>
-    </div>
-  );
+  return <Profile user={user} />;
 }
-
-export default ProfilePage;

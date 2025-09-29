@@ -1,84 +1,156 @@
-import { useState, useEffect } from "react";
+// src/components/Profile.jsx
+import React, { useState, useEffect } from "react";
+import profilePic from "../assets/profile-pic.jpg";
 
 export default function Profile({ user }) {
-  // Local state for profile details
   const [profile, setProfile] = useState({
     username: "",
     email: "",
     bio: "",
+    phone: "",
+    address: "",
+    gender: "",
+    birthday: "",
+    image: profilePic,
   });
   const [isEditing, setIsEditing] = useState(false);
 
-  // Load user info when component mounts or user changes
   useEffect(() => {
     if (user) {
       setProfile({
         username: user.username || "",
         email: user.email || "",
-        bio: user.bio || "This is your bio.",
+        bio: user.bio || "This is my bio",
+        phone: user.phone || "123-456-7890",
+        address: user.address || "123 Main St, City",
+        gender: user.gender || "Male",
+        birthday: user.birthday || "1990-01-01",
+        image: profilePic,
       });
     }
   }, [user]);
 
-  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProfile((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Save changes
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setProfile((prev) => ({ ...prev, image: imageUrl }));
+    }
+  };
+
   const handleSave = () => {
     setIsEditing(false);
     console.log("Profile saved:", profile);
-    // TODO: Connect to backend API to update profile in DB
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="bg-white shadow-lg rounded-2xl p-6 w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-4 text-center">Profile</h2>
+    <div className="flex justify-center items-start min-h-screen bg-gray-100 p-8">
+      <div className="bg-white shadow-lg rounded-2xl p-6 w-full max-w-md text-center">
+        {/* Profile Image */}
+        <img
+          src={profile.image}
+          alt="Profile"
+          className="w-28 h-28 rounded-full mx-auto mb-4 object-cover border-2 border-gray-300"
+        />
 
-        <div className="space-y-4">
-          {/* Username */}
+        {isEditing && (
+          <div className="mb-4">
+            <input type="file" accept="image/*" onChange={handleImageChange} />
+          </div>
+        )}
+
+        <h2 className="text-2xl font-bold mb-4">My Profile</h2>
+
+        <div className="space-y-4 text-left">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Username</label>
+            <label>Username</label>
             <input
               type="text"
               name="username"
               value={profile.username}
               onChange={handleChange}
               disabled={!isEditing}
-              className="mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-blue-200 disabled:bg-gray-100"
+              className="mt-1 block w-full px-3 py-2 border rounded-lg disabled:bg-gray-100"
             />
           </div>
 
-          {/* Email */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <label>Email</label>
             <input
               type="email"
               name="email"
               value={profile.email}
               onChange={handleChange}
               disabled={!isEditing}
-              className="mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-blue-200 disabled:bg-gray-100"
+              className="mt-1 block w-full px-3 py-2 border rounded-lg disabled:bg-gray-100"
             />
           </div>
 
-          {/* Bio */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Bio</label>
+            <label>Phone</label>
+            <input
+              type="text"
+              name="phone"
+              value={profile.phone}
+              onChange={handleChange}
+              disabled={!isEditing}
+              className="mt-1 block w-full px-3 py-2 border rounded-lg disabled:bg-gray-100"
+            />
+          </div>
+
+          <div>
+            <label>Address</label>
+            <input
+              type="text"
+              name="address"
+              value={profile.address}
+              onChange={handleChange}
+              disabled={!isEditing}
+              className="mt-1 block w-full px-3 py-2 border rounded-lg disabled:bg-gray-100"
+            />
+          </div>
+
+          <div>
+            <label>Gender</label>
+            <input
+              type="text"
+              name="gender"
+              value={profile.gender}
+              onChange={handleChange}
+              disabled={!isEditing}
+              className="mt-1 block w-full px-3 py-2 border rounded-lg disabled:bg-gray-100"
+            />
+          </div>
+
+          <div>
+            <label>Birthday</label>
+            <input
+              type="date"
+              name="birthday"
+              value={profile.birthday}
+              onChange={handleChange}
+              disabled={!isEditing}
+              className="mt-1 block w-full px-3 py-2 border rounded-lg disabled:bg-gray-100"
+            />
+          </div>
+
+          <div>
+            <label>Bio</label>
             <textarea
               name="bio"
               value={profile.bio}
               onChange={handleChange}
               disabled={!isEditing}
-              className="mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-blue-200 disabled:bg-gray-100"
+              className="mt-1 block w-full px-3 py-2 border rounded-lg disabled:bg-gray-100"
             />
           </div>
         </div>
 
-        {/* Action buttons */}
         <div className="flex justify-end mt-6 space-x-3">
           {isEditing ? (
             <button
