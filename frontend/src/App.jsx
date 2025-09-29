@@ -10,6 +10,7 @@ import ProjectsPage from "./pages/ProjectsPage";
 import LaunchpadPage from "./pages/LaunchpadPage";
 import RiskDashboard from "./pages/RiskDashboard";
 import MitigationPage from "./pages/MitigationPage";
+import ApiTest from "./components/ApiTest";
 
 function App() {
   const [activeMenuItem, setActiveMenuItem] = useState('Launchpad');
@@ -115,6 +116,7 @@ function App() {
           </DashboardLayout>
         } 
       />
+      <Route path="/test" element={<ApiTest />} />
     </Routes>
   );
 }

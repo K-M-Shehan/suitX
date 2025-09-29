@@ -3,6 +3,7 @@ package dev.doomsday.suitX.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
@@ -57,7 +58,7 @@ public class DataInitializationService implements CommandLineRunner {
             project2.setProjectManager("Sarah Johnson");
 
             Project project3 = new Project();
-            project3.setName("Data Mitigation");
+            project3.setName("Data Security Project");
             project3.setDescription("Implementation of comprehensive data security and backup strategies");
             project3.setStatus("ACTIVE");
             project3.setProgressPercentage(95.0);
@@ -68,19 +69,32 @@ public class DataInitializationService implements CommandLineRunner {
             project3.setCreatedBy("admin");
             project3.setProjectManager("Mike Davis");
 
-            projectRepository.saveAll(Arrays.asList(project1, project2, project3));
+            // Save each project individually to debug any issues
+            projectRepository.save(project1);
+            projectRepository.save(project2);
+            projectRepository.save(project3);
+            
+            // Verify all projects were saved
+            long savedProjects = projectRepository.count();
+            System.out.println("Projects saved: " + savedProjects);
         }
     }
 
     private void initializeRisks() {
         if (riskRepository.count() == 0) {
+            // Get all projects and ensure we have them
+            List<Project> projects = projectRepository.findAll();
+            if (projects.size() < 2) {
+                throw new RuntimeException("Expected at least 2 projects for risk initialization, found: " + projects.size());
+            }
+
             Risk risk1 = new Risk();
             risk1.setTitle("Scope Creep");
             risk1.setDescription("Requirements expanding beyond original project scope due to stakeholder requests.");
             risk1.setType("scope");
             risk1.setSeverity("HIGH");
             risk1.setStatus("ACTIVE");
-            risk1.setProjectId(projectRepository.findAll().get(0).getId());
+            risk1.setProjectId(projects.get(0).getId());
             risk1.setAssignedTo("Project Manager");
             risk1.setCreatedAt(LocalDateTime.now());
             risk1.setUpdatedAt(LocalDateTime.now());
@@ -92,7 +106,7 @@ public class DataInitializationService implements CommandLineRunner {
             risk2.setType("frontend");
             risk2.setSeverity("MEDIUM");
             risk2.setStatus("ACTIVE");
-            risk2.setProjectId(projectRepository.findAll().get(1).getId());
+            risk2.setProjectId(projects.get(1).getId());
             risk2.setAssignedTo("Frontend Team Lead");
             risk2.setCreatedAt(LocalDateTime.now());
             risk2.setUpdatedAt(LocalDateTime.now());
@@ -104,7 +118,7 @@ public class DataInitializationService implements CommandLineRunner {
             risk3.setType("deployment");
             risk3.setSeverity("HIGH");
             risk3.setStatus("ACTIVE");
-            risk3.setProjectId(projectRepository.findAll().get(2).getId());
+            risk3.setProjectId(projects.size() > 2 ? projects.get(2).getId() : projects.get(0).getId());
             risk3.setAssignedTo("DevOps Engineer");
             risk3.setCreatedAt(LocalDateTime.now());
             risk3.setUpdatedAt(LocalDateTime.now());
@@ -116,6 +130,12 @@ public class DataInitializationService implements CommandLineRunner {
 
     private void initializeMitigations() {
         if (mitigationRepository.count() == 0) {
+            // Get all projects and ensure we have them
+            List<Project> projects = projectRepository.findAll();
+            if (projects.size() < 2) {
+                throw new RuntimeException("Expected at least 2 projects for mitigation initialization, found: " + projects.size());
+            }
+
             Mitigation mitigation1 = new Mitigation();
             mitigation1.setTitle("Scope Management");
             mitigation1.setDescription("Implement strict change control process with approval gates and impact assessments for all scope modifications.");
@@ -124,7 +144,7 @@ public class DataInitializationService implements CommandLineRunner {
             mitigation1.setAssignee("Project Manager");
             mitigation1.setDueDate(LocalDate.of(2025, 10, 15));
             mitigation1.setRelatedRisk("Scope Creep");
-            mitigation1.setProjectId(projectRepository.findAll().get(0).getId());
+            mitigation1.setProjectId(projects.get(0).getId());
             mitigation1.setCreatedAt(LocalDateTime.now());
             mitigation1.setUpdatedAt(LocalDateTime.now());
             mitigation1.setCreatedBy("admin");
@@ -138,7 +158,7 @@ public class DataInitializationService implements CommandLineRunner {
             mitigation2.setAssignee("Frontend Team Lead");
             mitigation2.setDueDate(LocalDate.of(2025, 10, 20));
             mitigation2.setRelatedRisk("Frontend Int.");
-            mitigation2.setProjectId(projectRepository.findAll().get(1).getId());
+            mitigation2.setProjectId(projects.get(1).getId());
             mitigation2.setCreatedAt(LocalDateTime.now());
             mitigation2.setUpdatedAt(LocalDateTime.now());
             mitigation2.setCreatedBy("admin");
@@ -152,7 +172,7 @@ public class DataInitializationService implements CommandLineRunner {
             mitigation3.setAssignee("DevOps Engineer");
             mitigation3.setDueDate(LocalDate.of(2025, 10, 10));
             mitigation3.setRelatedRisk("Deployment");
-            mitigation3.setProjectId(projectRepository.findAll().get(2).getId());
+            mitigation3.setProjectId(projects.size() > 2 ? projects.get(2).getId() : projects.get(1).getId());
             mitigation3.setCreatedAt(LocalDateTime.now());
             mitigation3.setUpdatedAt(LocalDateTime.now());
             mitigation3.setCreatedBy("admin");
@@ -166,7 +186,7 @@ public class DataInitializationService implements CommandLineRunner {
             mitigation4.setAssignee("Tech Lead");
             mitigation4.setDueDate(LocalDate.of(2025, 9, 25));
             mitigation4.setRelatedRisk("Code Quality");
-            mitigation4.setProjectId(projectRepository.findAll().get(0).getId());
+            mitigation4.setProjectId(projects.get(0).getId());
             mitigation4.setCreatedAt(LocalDateTime.now());
             mitigation4.setUpdatedAt(LocalDateTime.now());
             mitigation4.setCompletedAt(LocalDateTime.of(2025, 9, 20, 14, 30));
@@ -181,7 +201,7 @@ public class DataInitializationService implements CommandLineRunner {
             mitigation5.setAssignee("System Admin");
             mitigation5.setDueDate(LocalDate.of(2025, 11, 1));
             mitigation5.setRelatedRisk("Data Loss");
-            mitigation5.setProjectId(projectRepository.findAll().get(2).getId());
+            mitigation5.setProjectId(projects.size() > 2 ? projects.get(2).getId() : projects.get(0).getId());
             mitigation5.setCreatedAt(LocalDateTime.now());
             mitigation5.setUpdatedAt(LocalDateTime.now());
             mitigation5.setCreatedBy("admin");
