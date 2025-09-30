@@ -22,7 +22,8 @@ export default function SignupForm() {
       const msg = await signup(username, password);
       setMessage(msg);
       // Redirect to Launchpad after successful signup
-      if (msg.includes('success') || msg.includes('created') || !msg.includes('error')) {
+      // Check for successful signup messages
+      if (msg.includes('registered') || msg.includes('success') || msg.includes('created') || (!msg.includes('error') && !msg.includes('failed'))) {
         setTimeout(() => {
           navigate("/launchpad");
         }, 1000);
