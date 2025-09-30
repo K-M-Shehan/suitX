@@ -4,10 +4,28 @@ const ApiTest = () => {
   const [results, setResults] = useState({});
   const [loading, setLoading] = useState(false);
 
+  // Get JWT token from localStorage
+  const getToken = () => {
+    const token = localStorage.getItem('token');
+    return token ? `Bearer ${token}` : null;
+  };
+
   const testApi = async (endpoint, name) => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:8080/api${endpoint}`);
+      
+      const token = getToken();
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = token;
+      }
+
+      const response = await fetch(`http://localhost:8080/api${endpoint}`, {
+        headers: headers,
+      });
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
