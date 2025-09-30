@@ -1,18 +1,21 @@
 package dev.doomsday.suitX.controller;
 
+import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import dev.doomsday.suitX.config.JwtUtil;
 import dev.doomsday.suitX.dto.LoginRequest;
 import dev.doomsday.suitX.model.User;
 import dev.doomsday.suitX.service.UserService;
-import dev.doomsday.suitX.config.JwtUtil;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin(origins = "http://localhost:5173") // this allows requests from frontend
 public class AuthController {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;

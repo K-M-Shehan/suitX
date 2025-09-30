@@ -1,10 +1,11 @@
 package dev.doomsday.suitX.model;
 
-import lombok.Data;
+import java.time.LocalDateTime;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDateTime;
+import lombok.Data;
 
 @Data
 @Document(collection = "projects")
@@ -13,8 +14,12 @@ public class Project {
     private String id;
     private String name;
     private String description;
-    private String status = "ACTIVE"; // ACTIVE, COMPLETED, ARCHIVED
+    private String status = "ACTIVE"; // ACTIVE, COMPLETED, ON_HOLD, CANCELLED, ARCHIVED
+    private Double progressPercentage = 0.0;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private String createdBy; // Username of the creator
-    private LocalDateTime createdAt = LocalDateTime.now();
-    private LocalDateTime updatedAt = LocalDateTime.now();
+    private String projectManager;
 }

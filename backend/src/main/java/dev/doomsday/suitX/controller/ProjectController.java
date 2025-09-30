@@ -1,70 +1,102 @@
 package dev.doomsday.suitX.controller;
 
-import dev.doomsday.suitX.model.Project;
-import dev.doomsday.suitX.service.ProjectService;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import dev.doomsday.suitX.dto.ProjectDto;
+import dev.doomsday.suitX.service.ProjectService;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/projects")
-@CrossOrigin(origins = "http://localhost:5173")
+@RequiredArgsConstructor
 public class ProjectController {
 
     private final ProjectService projectService;
 
-    public ProjectController(ProjectService projectService) {
-        this.projectService = projectService;
-    }
-
     @GetMapping
-    public ResponseEntity<List<Project>> getAllProjects(Authentication authentication) {
-        String username = authentication.getName();
-        List<Project> projects = projectService.getAllProjectsByUser(username);
+    public ResponseEntity<List<ProjectDto>> getAllProjects(Authentication authentication) {
+        String username = authentication != null ? authentication.getName() : null;
+        List<ProjectDto> projects = projectService.getAllProjectsByUser(username);
         return ResponseEntity.ok(projects);
     }
 
-    @PostMapping
-    public ResponseEntity<Project> createProject(@RequestBody Project project, Authentication authentication) {
-        String username = authentication.getName();
-        Project createdProject = projectService.createProject(project, username);
-        return ResponseEntity.ok(createdProject);
+    @GetMapping("/active")
+    public ResponseEntity<List<ProjectDto>> getActiveProjects(Authentication authentication) {
+        String username = authentication != null ? authentication.getName() : null;
+        List<ProjectDto> activeProjects = projectService.getActiveProjectsByUser(username);
+        return ResponseEntity.ok(activeProjects);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Project> getProject(@PathVariable String id, Authentication authentication) {
-        String username = authentication.getName();
-        return projectService.getProjectById(id)
-                .filter(project -> project.getCreatedBy().equals(username))
-                .map(ResponseEntity::ok)
+    public ResponseEntity<ProjectDto> getProjectById(@PathVariable String id, Authentication authentication) {
+        String username = authentication != null ? authentication.getName() : null;
+        Optional<ProjectDto> project = projectService.getProjectById(id);
+        
+        // Check if user has access to this project
+        if (project.isPresent() && username != null && !project.get().getCreatedBy().equals(username)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        
+        return project.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Project> updateProject(@PathVariable String id, @RequestBody Project project, 
-                                               Authentication authentication) {
-        String username = authentication.getName();
-        
-        if (!projectService.isProjectOwner(id, username)) {
-            return ResponseEntity.status(403).build();
+    @PostMapping
+    public ResponseEntity<ProjectDto> createProject(@RequestBody ProjectDto projectDto, Authentication authentication) {
+        try {
+            String username = authentication != null ? authentication.getName() : "anonymous";
+            projectDto.setCreatedBy(username);
+            ProjectDto createdProject = projectService.createProject(projectDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdProject);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-        
-        project.setId(id);
-        Project updatedProject = projectService.updateProject(project);
-        return ResponseEntity.ok(updatedProject);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ProjectDto> updateProject(@PathVariable String id, @RequestBody ProjectDto projectDto, Authentication authentication) {
+        try {
+            String username = authentication != null ? authentication.getName() : null;
+            
+            // Check ownership before updating
+            if (username != null && !projectService.isProjectOwner(id, username)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+            
+            ProjectDto updatedProject = projectService.updateProject(id, projectDto);
+            return ResponseEntity.ok(updatedProject);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProject(@PathVariable String id, Authentication authentication) {
-        String username = authentication.getName();
-        
-        if (!projectService.isProjectOwner(id, username)) {
-            return ResponseEntity.status(403).build();
+        try {
+            String username = authentication != null ? authentication.getName() : null;
+            
+            // Check ownership before deleting
+            if (username != null && !projectService.isProjectOwner(id, username)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+            
+            projectService.deleteProject(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
         }
-        
-        projectService.deleteProject(id);
-        return ResponseEntity.ok().build();
     }
 }

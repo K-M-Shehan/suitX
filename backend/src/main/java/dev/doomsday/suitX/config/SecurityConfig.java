@@ -1,6 +1,5 @@
 package dev.doomsday.suitX.config;
 
-import dev.doomsday.suitX.config.JwtFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -28,6 +27,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/api/risks/**").permitAll()
+                        .requestMatchers("/api/mitigations/**").permitAll()
+                        .requestMatchers("/api/projects/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
