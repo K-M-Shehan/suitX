@@ -4,16 +4,15 @@ import { useState, useEffect } from "react";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 import Footer from "./components/Footer";
-
 import LandingPage from "./pages/LandingPage";
 import LoginForm from "./pages/LoginForm";
 import SignupForm from "./pages/SignupForm";
-import ProjectsPage from "./pages/ProjectsPage";
 import LaunchpadPage from "./pages/LaunchpadPage";
+import ProjectsPage from "./pages/ProjectsPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
-import RiskDashboard from "./pages/RiskDashboard";
-import MitigationPage from "./pages/MitigationPage";
+import RiskDashboard from "./pages/RiskDashboardSimple";
+import MitigationPage from "./pages/MitigationPageSimple";
 import ApiTest from "./components/ApiTest";
 
 function App() {
@@ -60,48 +59,46 @@ function App() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginForm />} />
       <Route path="/signup" element={<SignupForm />} />
-      <Route path="/profile" element={<DashboardLayout><ProfilePage /></DashboardLayout>} />
-      <Route path="/settings" element={<DashboardLayout><SettingsPage /></DashboardLayout>} />
-      <Route 
-        path="/launchpad" 
-        element={
-          <DashboardLayout>
-            <LaunchpadPage />
-          </DashboardLayout>
-        } 
-      />
-      <Route 
-        path="/dashboard" 
-        element={
-          <DashboardLayout>
-            <LaunchpadPage />
-          </DashboardLayout>
-        } 
-      />
-      <Route 
-        path="/projects" 
-        element={
-          <DashboardLayout>
-            <ProjectsPage />
-          </DashboardLayout>
-        } 
-      />
-      <Route 
-        path="/risks" 
-        element={
-          <DashboardLayout>
-            <RiskDashboard />
-          </DashboardLayout>
-        } 
-      />
-      <Route 
-        path="/mitigations" 
-        element={
-          <DashboardLayout>
-            <MitigationPage />
-          </DashboardLayout>
-        } 
-      />
+      <Route path="/dashboard" element={
+        <DashboardLayout>
+          <LaunchpadPage />
+        </DashboardLayout>
+      } />
+      <Route path="/launchpad" element={
+        <DashboardLayout>
+          <LaunchpadPage />
+        </DashboardLayout>
+      } />
+      <Route path="/projects" element={
+        <DashboardLayout>
+          <ProjectsPage />
+        </DashboardLayout>
+      } />
+      <Route path="/profile" element={
+        <DashboardLayout>
+          <ProfilePage />
+        </DashboardLayout>
+      } />
+      <Route path="/settings" element={
+        <DashboardLayout>
+          <SettingsPage />
+        </DashboardLayout>
+      } />
+      <Route path="/risks" element={
+        <DashboardLayout>
+          <RiskDashboard />
+        </DashboardLayout>
+      } />
+      <Route path="/mitigations" element={
+        <DashboardLayout>
+          <MitigationPage />
+        </DashboardLayout>
+      } />
+      <Route path="/history" element={
+        <DashboardLayout>
+          <div style={{ padding: '20px' }}>History - Coming Soon</div>
+        </DashboardLayout>
+      } />
       <Route path="/test" element={<ApiTest />} />
     </Routes>
   );
