@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuitX AI Assistant Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+        h1 {
+            text-align: center;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 14px;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        .results {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .risk-item, .mitigation-item {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .risk-item h4, .mitigation-item h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .priority {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .priority.HIGH { background: #ff4444; color: white; }
+        .priority.MEDIUM { background: #ff8800; color: white; }
+        .priority.LOW { background: #44ff44; color: #333; }
+        .error {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff4444;
+            color: #ff4444;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .success {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid #44ff44;
+            color: #44ff44;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>🤖 SuitX AI Assistant Test</h1>
+    
+    <div class="container">
+        <h2>Project Risk Analysis</h2>
+        <form id="aiForm">
+            <div class="form-group">
+                <label for="projectName">Project Name *</label>
+                <input type="text" id="projectName" value="E-commerce Platform" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="projectType">Project Type</label>
+                <select id="projectType">
+                    <option value="Software Development">Software Development</option>
+                    <option value="Web Application" selected>Web Application</option>
+                    <option value="Mobile Application">Mobile Application</option>
+                    <option value="Data Analysis">Data Analysis</option>
+                    <option value="Infrastructure">Infrastructure</option>
+                    <option value="Research">Research</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="projectDescription">Project Description *</label>
+                <textarea id="projectDescription" required>Building a comprehensive e-commerce platform with user authentication, product catalog, shopping cart, payment processing, and order management. The platform will support multiple vendors and include admin dashboard for inventory management.</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="timeline">Timeline</label>
+                <select id="timeline">
+                    <option value="1-3 months">1-3 months</option>
+                    <option value="3-6 months" selected>3-6 months</option>
+                    <option value="6-12 months">6-12 months</option>
+                    <option value="1+ years">1+ years</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="teamSize">Team Size</label>
+                <input type="number" id="teamSize" value="8" min="1" max="100">
+            </div>
+            
+            <div class="form-group">
+                <label for="budget">Budget</label>
+                <select id="budget">
+                    <option value="Low">Low (&lt; $50K)</option>
+                    <option value="Medium" selected>Medium ($50K - $200K)</option>
+                    <option value="High">High ($200K - $1M)</option>
+                    <option value="Very High">Very High (&gt; $1M)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="complexity">Complexity</label>
+                <select id="complexity">
+                    <option value="LOW">Low</option>
+                    <option value="MEDIUM" selected>Medium</option>
+                    <option value="HIGH">High</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="technologyStack">Technology Stack</label>
+                <input type="text" id="technologyStack" value="React, Spring Boot, MongoDB, Docker, AWS">
+            </div>
+            
+            <div class="form-group">
+                <label for="specificConcerns">Specific Concerns (Optional)</label>
+                <textarea id="specificConcerns">Concerned about scalability during peak shopping seasons, security for payment processing, and integration with multiple payment gateways.</textarea>
+            </div>
+            
+            <button type="submit" id="analyzeBtn">🔍 Analyze Project Risks</button>
+        </form>
+        
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>AI is analyzing your project...</p>
+        </div>
+        
+        <div id="error" class="error" style="display: none;"></div>
+        <div id="success" class="success" style="display: none;"></div>
+        <div id="results" class="results" style="display: none;"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8080/api';
+        
+        document.getElementById('aiForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const form = e.target;
+            const submitBtn = document.getElementById('analyzeBtn');
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const success = document.getElementById('success');
+            const results = document.getElementById('results');
+            
+            // Reset previous states
+            error.style.display = 'none';
+            success.style.display = 'none';
+            results.style.display = 'none';
+            loading.style.display = 'block';
+            submitBtn.disabled = true;
+            
+            try {
+                // Prepare request data
+                const requestData = {
+                    projectName: document.getElementById('projectName').value,
+                    projectType: document.getElementById('projectType').value,
+                    projectDescription: document.getElementById('projectDescription').value,
+                    timeline: document.getElementById('timeline').value,
+                    teamSize: parseInt(document.getElementById('teamSize').value),
+                    budget: document.getElementById('budget').value,
+                    complexity: document.getElementById('complexity').value,
+                    technologyStack: document.getElementById('technologyStack').value,
+                    specificConcerns: document.getElementById('specificConcerns').value
+                };
+                
+                console.log('Sending request:', requestData);
+                
+                // Make API call
+                const response = await fetch(`${API_BASE_URL}/ai/analyze-project`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                loading.style.display = 'none';
+                
+                if (!response.ok) {
+                    const errorData = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorData}`);
+                }
+                
+                const result = await response.json();
+                console.log('AI Analysis Result:', result);
+                
+                // Display success message
+                success.innerHTML = `✅ Analysis completed! Found ${result.identifiedRisks?.length || 0} risks and generated ${result.suggestedMitigations?.length || 0} mitigation strategies.`;
+                success.style.display = 'block';
+                
+                // Display results
+                displayResults(result);
+                
+            } catch (err) {
+                loading.style.display = 'none';
+                console.error('Error:', err);
+                
+                if (err.name === 'TypeError' && err.message.includes('fetch')) {
+                    error.innerHTML = '❌ Cannot connect to backend server. Make sure the Spring Boot application is running on port 8080.';
+                } else {
+                    error.innerHTML = `❌ Error: ${err.message}`;
+                }
+                error.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+        
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            
+            let html = '<h3>🎯 Analysis Results</h3>';
+            
+            // Project Insights
+            if (data.projectInsights) {
+                html += `
+                    <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <h4>📊 Project Overview</h4>
+                        <p><strong>Overall Risk Level:</strong> <span class="priority ${data.projectInsights.overallRiskLevel}">${data.projectInsights.overallRiskLevel}</span></p>
+                        <p><strong>Success Probability:</strong> ${data.projectInsights.successProbability}</p>
+                    </div>
+                `;
+            }
+            
+            // Identified Risks
+            if (data.identifiedRisks && data.identifiedRisks.length > 0) {
+                html += '<h4>⚠️ Identified Risks</h4>';
+                data.identifiedRisks.forEach(risk => {
+                    html += `
+                        <div class="risk-item">
+                            <h4>${risk.title} <span class="priority ${risk.priority}">${risk.priority}</span></h4>
+                            <p>${risk.description}</p>
+                            <small>Category: ${risk.category} | Probability: ${Math.round(risk.probability)}% | Impact: ${risk.impact}</small>
+                        </div>
+                    `;
+                });
+            }
+            
+            // Mitigation Strategies
+            if (data.suggestedMitigations && data.suggestedMitigations.length > 0) {
+                html += '<h4>💡 Recommended Mitigations</h4>';
+                data.suggestedMitigations.forEach(mitigation => {
+                    html += `
+                        <div class="mitigation-item">
+                            <h4>${mitigation.title}</h4>
+                            <p>${mitigation.description}</p>
+                            <small>
+                                Type: ${mitigation.type} | 
+                                Effort: ${mitigation.implementationEffort} | 
+                                Timeline: ${mitigation.timelineWeeks} weeks | 
+                                Cost: ${mitigation.costEstimate}
+                            </small>
+                        </div>
+                    `;
+                });
+            }
+            
+            resultsDiv.innerHTML = html;
+            resultsDiv.style.display = 'block';
+        }
+        
+        // Test backend connection on page load
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/test`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+                
+                if (response.ok) {
+                    console.log('✅ Backend connection successful');
+                    document.getElementById('success').innerHTML = '✅ Connected to SuitX Backend Server';
+                    document.getElementById('success').style.display = 'block';
+                } else {
+                    throw new Error(`Backend responded with status ${response.status}`);
+                }
+            } catch (err) {
+                console.log('❌ Backend connection failed:', err.message);
+                document.getElementById('error').innerHTML = '❌ Backend server not available. Please start the Spring Boot application.';
+                document.getElementById('error').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

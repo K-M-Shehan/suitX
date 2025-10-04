@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import MitigationService from '../services/MitigationService';
+import AIAssistant from '../components/AIAssistant';
 
 const MitigationPage = () => {
   const [selectedStatus, setSelectedStatus] = useState('All');
@@ -10,6 +11,7 @@ const MitigationPage = () => {
   const [mitigations, setMitigations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -92,6 +94,15 @@ const MitigationPage = () => {
     } catch (error) {
       console.error('Error deleting mitigation:', error);
       setError('Failed to delete mitigation.');
+    }
+  };
+
+  const handleAIResults = (aiResults) => {
+    console.log('AI Analysis Results:', aiResults);
+    // You can process AI results here, e.g., convert to mitigations
+    if (aiResults.suggestedMitigations && aiResults.suggestedMitigations.length > 0) {
+      // Show success message or integrate with your mitigation creation flow
+      alert(`AI generated ${aiResults.suggestedMitigations.length} mitigation strategies!`);
     }
   };
 
@@ -208,9 +219,20 @@ const MitigationPage = () => {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-gray-900">Mitigation Strategies</h2>
-          <button className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors text-sm font-medium">
-            + Add New Mitigation
-          </button>
+          <div className="flex space-x-3">
+            <button 
+              onClick={() => setShowAIAssistant(true)}
+              className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-md hover:from-purple-700 hover:to-blue-700 transition-all text-sm font-medium flex items-center space-x-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+              <span>AI Assistant</span>
+            </button>
+            <button className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors text-sm font-medium">
+              + Add New Mitigation
+            </button>
+          </div>
         </div>
         
         {filteredMitigations.length > 0 ? (
@@ -319,6 +341,13 @@ const MitigationPage = () => {
           </div>
         </div>
       </div>
+
+      {/* AI Assistant Modal */}
+      <AIAssistant
+        isOpen={showAIAssistant}
+        onClose={() => setShowAIAssistant(false)}
+        onResultsGenerated={handleAIResults}
+      />
     </div>
   );
 };
