@@ -29,8 +29,14 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody User user) {
-        userService.signup(user);
-        return ResponseEntity.ok("User registered!");
+        try {
+            userService.signup(user);
+            return ResponseEntity.ok("User registered!");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("An error occurred during signup: " + e.getMessage());
+        }
     }
 
     @PostMapping("/login")
