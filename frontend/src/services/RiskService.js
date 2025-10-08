@@ -1,9 +1,26 @@
 const API_BASE_URL = 'http://localhost:8080/api';
 
+// Get JWT token from localStorage
+const getToken = () => {
+  const token = localStorage.getItem('token');
+  return token ? `Bearer ${token}` : null;
+};
+
 class RiskService {
   async getAllRisks() {
     try {
-      const response = await fetch(`${API_BASE_URL}/risks`);
+      const token = getToken();
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = token;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/risks`, {
+        headers: headers,
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch risks');
       }
@@ -94,8 +111,18 @@ class RiskService {
 
   async resolveRisk(id) {
     try {
+      const token = getToken();
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = token;
+      }
+
       const response = await fetch(`${API_BASE_URL}/risks/${id}/resolve`, {
         method: 'PATCH',
+        headers: headers,
       });
       if (!response.ok) {
         throw new Error(`Failed to resolve risk with id: ${id}`);
@@ -109,13 +136,37 @@ class RiskService {
 
   async ignoreRisk(id) {
     try {
+      const token = getToken();
+      console.log('Token:', token ? 'Present' : 'Missing');
+      
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = token;
+      }
+
+      console.log('Ignoring risk with id:', id);
+      console.log('Request URL:', `${API_BASE_URL}/risks/${id}/ignore`);
+      
       const response = await fetch(`${API_BASE_URL}/risks/${id}/ignore`, {
         method: 'PATCH',
+        headers: headers,
       });
+      
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+      
       if (!response.ok) {
-        throw new Error(`Failed to ignore risk with id: ${id}`);
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        throw new Error(`Failed to ignore risk with id: ${id}. Status: ${response.status}`);
       }
-      return await response.json();
+      
+      const data = await response.json();
+      console.log('Success response:', data);
+      return data;
     } catch (error) {
       console.error('Error ignoring risk:', error);
       throw error;
