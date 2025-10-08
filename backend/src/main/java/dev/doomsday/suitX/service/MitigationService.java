@@ -128,7 +128,7 @@ public class MitigationService {
         
         // Calculate overdue mitigations
         List<Mitigation> allMitigations = mitigationRepository.findAll();
-        LocalDate today = LocalDate.now();
+        LocalDateTime today = LocalDateTime.now();
         long overdue = allMitigations.stream()
                 .filter(m -> !"COMPLETED".equals(m.getStatus()))
                 .filter(m -> m.getDueDate() != null && m.getDueDate().isBefore(today))
@@ -147,7 +147,7 @@ public class MitigationService {
         dto.setPriority(mitigation.getPriority());
         dto.setAssignee(mitigation.getAssignee());
         dto.setDueDate(mitigation.getDueDate());
-        dto.setRelatedRisk(mitigation.getRelatedRisk());
+        dto.setRelatedRisk(mitigation.getRelatedRiskId());
         dto.setProjectId(mitigation.getProjectId());
         dto.setCreatedAt(mitigation.getCreatedAt());
         dto.setUpdatedAt(mitigation.getUpdatedAt());
@@ -166,7 +166,7 @@ public class MitigationService {
         mitigation.setPriority(dto.getPriority());
         mitigation.setAssignee(dto.getAssignee());
         mitigation.setDueDate(dto.getDueDate());
-        mitigation.setRelatedRisk(dto.getRelatedRisk());
+        mitigation.setRelatedRiskId(dto.getRelatedRisk());
         mitigation.setProjectId(dto.getProjectId());
         mitigation.setCreatedAt(dto.getCreatedAt());
         mitigation.setUpdatedAt(dto.getUpdatedAt());
@@ -183,7 +183,7 @@ public class MitigationService {
         if (dto.getPriority() != null) mitigation.setPriority(dto.getPriority());
         if (dto.getAssignee() != null) mitigation.setAssignee(dto.getAssignee());
         if (dto.getDueDate() != null) mitigation.setDueDate(dto.getDueDate());
-        if (dto.getRelatedRisk() != null) mitigation.setRelatedRisk(dto.getRelatedRisk());
+        if (dto.getRelatedRisk() != null) mitigation.setRelatedRiskId(dto.getRelatedRisk());
         if (dto.getProjectId() != null) mitigation.setProjectId(dto.getProjectId());
         if (dto.getProgressPercentage() != null) mitigation.setProgressPercentage(dto.getProgressPercentage());
     }

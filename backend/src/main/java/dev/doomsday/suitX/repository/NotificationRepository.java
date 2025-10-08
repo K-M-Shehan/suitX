@@ -52,14 +52,9 @@ public interface NotificationRepository extends MongoRepository<Notification, St
     // Count notifications by type for a user
     long countByUserIdAndType(String userId, String type);
     
-    // Mark all notifications as read for a user
-    @Query(value = "{ 'userId': ?0, 'isRead': false }", update = "{ '$set': { 'isRead': true, 'readAt': ?1 } }")
-    void markAllAsReadForUser(String userId, LocalDateTime readAt);
-    
     // Delete all notifications for a user (cleanup)
     void deleteByUserId(String userId);
     
-    // Delete old read notifications (maintenance)
-    @Query(value = "{ 'isRead': true, 'createdAt': { $lt: ?0 } }")
-    void deleteOldReadNotifications(LocalDateTime beforeDate);
+    // Delete read notifications older than a certain date (maintenance)
+    void deleteByIsReadAndCreatedAtBefore(Boolean isRead, LocalDateTime beforeDate);
 }

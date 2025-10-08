@@ -142,8 +142,8 @@ public class DataInitializationService implements CommandLineRunner {
             mitigation1.setStatus("ACTIVE");
             mitigation1.setPriority("HIGH");
             mitigation1.setAssignee("Project Manager");
-            mitigation1.setDueDate(LocalDate.of(2025, 10, 15));
-            mitigation1.setRelatedRisk("Scope Creep");
+            mitigation1.setDueDate(LocalDateTime.of(2025, 10, 15, 17, 0));
+            mitigation1.setRelatedRiskId("Scope Creep");
             mitigation1.setProjectId(projects.get(0).getId());
             mitigation1.setCreatedAt(LocalDateTime.now());
             mitigation1.setUpdatedAt(LocalDateTime.now());
@@ -156,8 +156,8 @@ public class DataInitializationService implements CommandLineRunner {
             mitigation2.setStatus("ACTIVE");
             mitigation2.setPriority("MEDIUM");
             mitigation2.setAssignee("Frontend Team Lead");
-            mitigation2.setDueDate(LocalDate.of(2025, 10, 20));
-            mitigation2.setRelatedRisk("Frontend Int.");
+            mitigation2.setDueDate(LocalDateTime.of(2025, 10, 20, 17, 0));
+            mitigation2.setRelatedRiskId("Frontend Int.");
             mitigation2.setProjectId(projects.get(1).getId());
             mitigation2.setCreatedAt(LocalDateTime.now());
             mitigation2.setUpdatedAt(LocalDateTime.now());
@@ -170,8 +170,8 @@ public class DataInitializationService implements CommandLineRunner {
             mitigation3.setStatus("ACTIVE");
             mitigation3.setPriority("HIGH");
             mitigation3.setAssignee("DevOps Engineer");
-            mitigation3.setDueDate(LocalDate.of(2025, 10, 10));
-            mitigation3.setRelatedRisk("Deployment");
+            mitigation3.setDueDate(LocalDateTime.of(2025, 10, 10, 17, 0));
+            mitigation3.setRelatedRiskId("Deployment");
             mitigation3.setProjectId(projects.size() > 2 ? projects.get(2).getId() : projects.get(1).getId());
             mitigation3.setCreatedAt(LocalDateTime.now());
             mitigation3.setUpdatedAt(LocalDateTime.now());
@@ -184,8 +184,8 @@ public class DataInitializationService implements CommandLineRunner {
             mitigation4.setStatus("COMPLETED");
             mitigation4.setPriority("MEDIUM");
             mitigation4.setAssignee("Tech Lead");
-            mitigation4.setDueDate(LocalDate.of(2025, 9, 25));
-            mitigation4.setRelatedRisk("Code Quality");
+            mitigation4.setDueDate(LocalDateTime.of(2025, 9, 25, 17, 0));
+            mitigation4.setRelatedRiskId("Code Quality");
             mitigation4.setProjectId(projects.get(0).getId());
             mitigation4.setCreatedAt(LocalDateTime.now());
             mitigation4.setUpdatedAt(LocalDateTime.now());
@@ -199,8 +199,8 @@ public class DataInitializationService implements CommandLineRunner {
             mitigation5.setStatus("PLANNED");
             mitigation5.setPriority("LOW");
             mitigation5.setAssignee("System Admin");
-            mitigation5.setDueDate(LocalDate.of(2025, 11, 1));
-            mitigation5.setRelatedRisk("Data Loss");
+            mitigation5.setDueDate(LocalDateTime.of(2025, 11, 1, 17, 0));
+            mitigation5.setRelatedRiskId("Data Loss");
             mitigation5.setProjectId(projects.size() > 2 ? projects.get(2).getId() : projects.get(0).getId());
             mitigation5.setCreatedAt(LocalDateTime.now());
             mitigation5.setUpdatedAt(LocalDateTime.now());
