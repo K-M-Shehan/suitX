@@ -1,6 +1,5 @@
 package dev.doomsday.suitX.dto;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import lombok.Data;
@@ -13,7 +12,7 @@ public class MitigationDto {
     private String status;
     private String priority;
     private String assignee;
-    private LocalDate dueDate;
+    private LocalDateTime dueDate;
     private String relatedRisk;
     private String projectId;
     private LocalDateTime createdAt;
