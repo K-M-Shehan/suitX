@@ -1,32 +1,77 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import ProjectCard from "../components/ProjectCard";
+import AddProjectCard from "../components/AddProjectCard";
+import { getAllProjects, createProject as apiCreateProject, deleteProject as apiDeleteProject } from "../services/ProjectService";
 
 function LaunchpadPage() {
+  const [projects, setProjects] = useState([]);
+  const [error, setError] = useState('');
+
+  // Load projects from API on mount
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const data = await getAllProjects();
+        if (mounted) {
+          // Show only first 5 projects on launchpad
+          setProjects(data.slice(0, 5));
+        }
+      } catch (e) {
+        console.error('Failed to load projects:', e);
+        if (mounted) setError('Please login to view your projects.');
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
+
+  const handleAddProject = async (projectName) => {
+    try {
+      const created = await apiCreateProject(projectName);
+      setProjects((prev) => [...prev, created].slice(0, 5));
+    } catch (e) {
+      console.error('Failed to create project:', e);
+      setError('Failed to create project. Make sure you are logged in.');
+    }
+  };
+
+  const handleDeleteProject = async (projectId) => {
+    try {
+      await apiDeleteProject(projectId);
+      setProjects((prev) => prev.filter((p) => p.id !== projectId));
+    } catch (e) {
+      console.error('Failed to delete project:', e);
+      setError('Failed to delete project.');
+    }
+  };
+
   return (
     <div className="flex-1 p-8 bg-gray-50">
       {/* Page title */}
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-gray-900">Launchpad</h1>
       </div>
+
+      {/* Error */}
+      {error && (
+        <div className="mb-4 p-3 rounded bg-red-100 text-red-700">{error}</div>
+      )}
       
       {/* Projects Section */}
       <section className="mb-8">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Projects</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">My Projects</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
           {/* Add Project Card */}
-          <button className="bg-gray-300 rounded-lg h-32 p-4 hover:bg-gray-400 transition-colors flex items-center justify-center group">
-            <svg 
-              className="w-12 h-12 text-gray-600 group-hover:text-gray-700 transition-colors" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-          </button>
+          <AddProjectCard onAddProject={handleAddProject} />
           
           {/* Project Cards */}
-          <div className="bg-gray-300 rounded-lg h-32"></div>
-          <div className="bg-gray-300 rounded-lg h-32"></div>
+          {projects.map((project) => (
+            <ProjectCard
+              key={project.id}
+              project={project}
+              onDelete={handleDeleteProject}
+            />
+          ))}
         </div>
       </section>
 
