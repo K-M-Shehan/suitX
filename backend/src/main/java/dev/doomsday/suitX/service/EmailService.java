@@ -156,7 +156,7 @@ public class EmailService {
                 </div>
                 <div class="content">
                     <h2>Welcome to SuitX, %s!</h2>
-                    <p>Thank you for joining SuitX - Your project's sixth sense.</p>
+                    <p>Thank you for joining SuitX : Your project's sixth sense.</p>
                     
                     <p>Your account is ready. Start managing your projects with AI-powered risk insights.</p>
                     
