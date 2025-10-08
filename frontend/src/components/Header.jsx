@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import notificationIcon from '../assets/header/notification-bell.png';
+import notificationIcon from '../assets/header/notifications.png';
 import settingsIcon from '../assets/header/settings-cog.png';
 import profileIcon from '../assets/header/profile.png';
 
