@@ -74,10 +74,12 @@ const Header = ({ isLanding = false }) => {
 
       {/* Right side icons */}
       <div className="flex items-center space-x-4">
-        {/* Notification icon */}
-        <button className="p-2 hover:bg-gray-800 rounded transition-colors">
+        {/* Notification icon with badge */}
+        <Link to="/notifications" className="relative p-2 hover:bg-gray-800 rounded transition-colors">
           <img src={notificationIcon} alt="Notifications" className="w-5 h-5" />
-        </button>
+          {/* Unread badge - you can replace this with actual unread count from backend */}
+          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+        </Link>
 
         {/* Settings icon */}
         <Link to="/settings" className="p-2 hover:bg-gray-800 rounded transition-colors">

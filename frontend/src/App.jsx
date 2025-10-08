@@ -11,6 +11,7 @@ import LaunchpadPage from "./pages/LaunchpadPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
+import NotificationsPage from "./pages/NotificationsPage";
 import RiskDashboard from "./pages/RiskDashboardSimple";
 import MitigationPage from "./pages/MitigationPageSimple";
 import ApiTest from "./components/ApiTest";
@@ -82,6 +83,11 @@ function App() {
       <Route path="/settings" element={
         <DashboardLayout>
           <SettingsPage />
+        </DashboardLayout>
+      } />
+      <Route path="/notifications" element={
+        <DashboardLayout>
+          <NotificationsPage />
         </DashboardLayout>
       } />
       <Route path="/risks" element={
