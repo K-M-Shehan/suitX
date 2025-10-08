@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getCurrentUsername } from '../utils/jwtUtils';
 
 const ProjectCard = ({ project, onDelete }) => {
   const navigate = useNavigate();
@@ -15,6 +16,29 @@ const ProjectCard = ({ project, onDelete }) => {
     }
   };
 
+  // Get user's role in the project
+  const getUserRole = () => {
+    const currentUsername = getCurrentUsername();
+    if (!currentUsername) return null;
+    
+    // Check if user is the owner
+    if (project.createdBy === currentUsername || project.ownerId === currentUsername) {
+      return 'Owner';
+    }
+    
+    // Check if user is the project manager
+    if (project.projectManager === currentUsername) {
+      return 'Manager';
+    }
+    
+    // Check if user is a member
+    if (project.memberIds && project.memberIds.includes(currentUsername)) {
+      return 'Member';
+    }
+    
+    return 'Viewer';
+  };
+
   // Get status badge color
   const getStatusColor = (status) => {
     const statusColors = {
@@ -27,6 +51,17 @@ const ProjectCard = ({ project, onDelete }) => {
     return statusColors[status] || 'bg-gray-100 text-gray-700';
   };
 
+  // Get role badge color
+  const getRoleColor = (role) => {
+    const roleColors = {
+      'Owner': 'bg-purple-100 text-purple-700',
+      'Manager': 'bg-blue-100 text-blue-700',
+      'Member': 'bg-cyan-100 text-cyan-700',
+      'Viewer': 'bg-gray-100 text-gray-600'
+    };
+    return roleColors[role] || 'bg-gray-100 text-gray-600';
+  };
+
   // Format status text
   const formatStatus = (status) => {
     if (!status) return 'Active';
@@ -35,6 +70,8 @@ const ProjectCard = ({ project, onDelete }) => {
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   };
+
+  const userRole = getUserRole();
 
   return (
     <button
@@ -48,11 +85,19 @@ const ProjectCard = ({ project, onDelete }) => {
         </span>
       </div>
 
-      {/* Status Badge */}
-      <div className="w-full mt-2">
+      {/* Badges Row */}
+      <div className="w-full mt-2 flex gap-1 justify-center flex-wrap">
+        {/* Status Badge */}
         <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(project.status)} font-medium inline-block`}>
           {formatStatus(project.status)}
         </span>
+        
+        {/* Role Badge */}
+        {userRole && (
+          <span className={`text-xs px-2 py-1 rounded-full ${getRoleColor(userRole)} font-medium inline-block`}>
+            {userRole}
+          </span>
+        )}
       </div>
 
       {/* Progress (if available) */}

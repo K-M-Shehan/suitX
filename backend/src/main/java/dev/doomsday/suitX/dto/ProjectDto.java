@@ -1,6 +1,7 @@
 package dev.doomsday.suitX.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import lombok.Data;
 
@@ -16,5 +17,7 @@ public class ProjectDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String createdBy;
+    private String ownerId;
     private String projectManager;
+    private List<String> memberIds;
 }
