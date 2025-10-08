@@ -2,6 +2,9 @@ package dev.doomsday.suitX.service;
 
 import dev.doomsday.suitX.model.User;
 import dev.doomsday.suitX.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -9,12 +12,16 @@ import java.util.Optional;
 
 @Service
 public class UserService {
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+    
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     public void signup(User user) {
@@ -53,7 +60,23 @@ public class UserService {
         
         // Encode password and save user
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        
+        // Send welcome email asynchronously (don't block signup process)
+        try {
+            sendWelcomeEmailAsync(savedUser.getEmail(), savedUser.getUsername());
+        } catch (Exception e) {
+            // Log the error but don't fail the signup
+            logger.error("Failed to send welcome email to {}: {}", savedUser.getEmail(), e.getMessage());
+        }
+    }
+    
+    /**
+     * Sends welcome email asynchronously to avoid blocking the signup process
+     */
+    @Async
+    private void sendWelcomeEmailAsync(String email, String username) {
+        emailService.sendWelcomeEmail(email, username);
     }
 
     public Optional<User> findByUsername(String username) {
