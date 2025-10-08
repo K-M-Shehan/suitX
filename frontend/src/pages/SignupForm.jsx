@@ -6,6 +6,7 @@ import Footer from "../components/Footer";
 
 export default function SignupForm() {
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -19,7 +20,7 @@ export default function SignupForm() {
     }
 
     try {
-      const msg = await signup(username, password);
+      const msg = await signup(username, email, password);
       setMessage(msg);
       // Redirect to Launchpad after successful signup
       // Check for successful signup messages
@@ -74,6 +75,17 @@ export default function SignupForm() {
                   placeholder="Username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all"
+                />
+              </div>
+              
+              <div>
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all"
                 />
