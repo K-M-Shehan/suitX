@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import ProjectCard from "../components/ProjectCard";
 import AddProjectCard from "../components/AddProjectCard";
 import { getAllProjects, createProject as apiCreateProject, deleteProject as apiDeleteProject } from "../services/ProjectService";
@@ -59,7 +60,18 @@ function LaunchpadPage() {
       
       {/* Projects Section */}
       <section className="mb-8">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">My Projects</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-900">My Projects</h2>
+          <Link 
+            to="/projects"
+            className="text-sm font-medium text-cyan-600 hover:text-cyan-700 transition-colors flex items-center gap-1"
+          >
+            View All
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+        </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
           {/* Add Project Card */}
           <AddProjectCard onAddProject={handleAddProject} />
