@@ -159,7 +159,10 @@ export async function updateTask(id, taskData) {
     });
     
     if (!response.ok) {
-      throw new Error(`Failed to update task with id: ${id}`);
+      const error = new Error(`Failed to update task with id: ${id}`);
+      error.status = response.status;
+      error.response = { status: response.status };
+      throw error;
     }
     return await response.json();
   } catch (error) {

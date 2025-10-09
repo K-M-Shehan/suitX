@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getProjectById, updateProject } from '../services/ProjectService';
-import { getTasksByProject, createTask } from '../services/TaskService';
+import { getTasksByProject, createTask, updateTask } from '../services/TaskService';
 import ProjectEditDialog from '../components/ProjectEditDialog';
 import TaskFormDialog from '../components/TaskFormDialog';
+import TaskEditDialog from '../components/TaskEditDialog';
+import StatusDropdown from '../components/StatusDropdown';
 
 const ProjectDetailsPage = () => {
   const { projectId } = useParams();
@@ -15,6 +17,8 @@ const ProjectDetailsPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
+  const [isTaskEditDialogOpen, setIsTaskEditDialogOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
 
   useEffect(() => {
     loadProjectDetails();
@@ -79,9 +83,100 @@ const ProjectDetailsPage = () => {
       setTasks((prev) => [...prev, newTask]);
       setIsTaskDialogOpen(false);
       setError('');
+      
+      // Refresh project data to get updated progress
+      try {
+        const updatedProject = await getProjectById(projectId);
+        setProject(updatedProject);
+      } catch (refreshError) {
+        console.error('Failed to refresh project data:', refreshError);
+        // Continue even if refresh fails
+      }
     } catch (e) {
       console.error('Failed to create task:', e);
       alert('Failed to create task. Please try again.');
+    }
+  };
+
+  const handleTaskClick = (task) => {
+    setSelectedTask(task);
+    setIsTaskEditDialogOpen(true);
+  };
+
+  const handleEditTask = async (updatedTaskData) => {
+    try {
+      const updatedTask = await updateTask(selectedTask.id, updatedTaskData);
+      // Update the task in the tasks array
+      setTasks((prev) => prev.map(t => t.id === selectedTask.id ? updatedTask : t));
+      setIsTaskEditDialogOpen(false);
+      setSelectedTask(null);
+      setError('');
+      
+      // Refresh project data to get updated progress
+      try {
+        const updatedProject = await getProjectById(projectId);
+        setProject(updatedProject);
+      } catch (refreshError) {
+        console.error('Failed to refresh project data:', refreshError);
+        // Continue even if refresh fails
+      }
+    } catch (e) {
+      console.error('Failed to update task:', e);
+      let errorMessage = 'Failed to update task. ';
+      
+      if (e.response?.status === 403) {
+        errorMessage += 'You may not have permission to edit this task.';
+      } else if (e.response?.status === 401) {
+        errorMessage += 'Your session may have expired. Please log in again.';
+      } else if (e.response?.status === 404) {
+        errorMessage += 'Task not found.';
+      } else {
+        errorMessage += 'Please try again.';
+      }
+      
+      alert(errorMessage);
+    }
+  };
+
+  const handleQuickStatusUpdate = async (taskId, newStatus) => {
+    try {
+      // Find the task to get its current data
+      const task = tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      // Update only the status field
+      const updatedTaskData = {
+        ...task,
+        status: newStatus
+      };
+
+      const updatedTask = await updateTask(taskId, updatedTaskData);
+      
+      // Update the task in the tasks array
+      setTasks((prev) => prev.map(t => t.id === taskId ? updatedTask : t));
+      setError('');
+      
+      // Refresh project data to get updated progress
+      try {
+        const updatedProject = await getProjectById(projectId);
+        setProject(updatedProject);
+      } catch (refreshError) {
+        console.error('Failed to refresh project data:', refreshError);
+        // Continue even if refresh fails
+      }
+    } catch (e) {
+      console.error('Failed to update task status:', e);
+      let errorMessage = 'Failed to update task status. ';
+      
+      if (e.response?.status === 403) {
+        errorMessage += 'You may not have permission to edit this task.';
+      } else if (e.response?.status === 401) {
+        errorMessage += 'Your session may have expired. Please log in again.';
+      } else {
+        errorMessage += 'Please try again.';
+      }
+      
+      alert(errorMessage);
     }
   };
 
@@ -342,14 +437,19 @@ const ProjectDetailsPage = () => {
           ) : (
             <div className="space-y-3">
               {tasks.map((task) => (
-                <div key={task.id} className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow">
+                <div 
+                  key={task.id} 
+                  onClick={() => handleTaskClick(task)}
+                  className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow cursor-pointer"
+                >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
                         <h3 className="font-medium text-gray-900">{task.title}</h3>
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${getTaskStatusColor(task.status)}`}>
-                          {task.status}
-                        </span>
+                        <StatusDropdown
+                          currentStatus={task.status}
+                          onStatusChange={(newStatus) => handleQuickStatusUpdate(task.id, newStatus)}
+                        />
                         {task.priority && (
                           <span className={`text-xs font-medium ${getPriorityColor(task.priority)}`}>
                             {task.priority}
@@ -391,6 +491,35 @@ const ProjectDetailsPage = () => {
                 className="bg-black h-3 rounded-full transition-all duration-300"
                 style={{ width: `${project.progressPercentage || 0}%` }}
               ></div>
+            </div>
+            <div className="mt-2 text-xs text-gray-600">
+              {tasks.filter(t => t.status === 'DONE').length} of {tasks.length} tasks completed
+            </div>
+          </div>
+
+          {/* Task Statistics */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="bg-gray-50 rounded-lg p-4">
+              <p className="text-xs text-gray-500 mb-1">Total Tasks</p>
+              <p className="text-2xl font-bold text-gray-900">{tasks.length}</p>
+            </div>
+            <div className="bg-green-50 rounded-lg p-4">
+              <p className="text-xs text-green-600 mb-1">Completed</p>
+              <p className="text-2xl font-bold text-green-700">
+                {tasks.filter(t => t.status === 'DONE').length}
+              </p>
+            </div>
+            <div className="bg-blue-50 rounded-lg p-4">
+              <p className="text-xs text-blue-600 mb-1">In Progress</p>
+              <p className="text-2xl font-bold text-blue-700">
+                {tasks.filter(t => t.status === 'IN_PROGRESS').length}
+              </p>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-4">
+              <p className="text-xs text-gray-500 mb-1">To Do</p>
+              <p className="text-2xl font-bold text-gray-700">
+                {tasks.filter(t => t.status === 'TODO').length}
+              </p>
             </div>
           </div>
 
@@ -436,6 +565,16 @@ const ProjectDetailsPage = () => {
         onClose={() => setIsTaskDialogOpen(false)}
         onSubmit={handleAddTask}
         projectId={projectId}
+      />
+
+      <TaskEditDialog
+        isOpen={isTaskEditDialogOpen}
+        onClose={() => {
+          setIsTaskEditDialogOpen(false);
+          setSelectedTask(null);
+        }}
+        onSubmit={handleEditTask}
+        task={selectedTask}
       />
     </div>
   );

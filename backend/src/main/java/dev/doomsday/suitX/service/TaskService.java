@@ -67,6 +67,9 @@ public class TaskService {
                 project.addTask(savedTask.getId());
                 projectRepository.save(project);
             });
+            
+            // Update project progress after creating task
+            projectService.updateProjectProgress(taskDto.getProjectId());
         }
         
         return convertToDto(savedTask);
@@ -87,6 +90,8 @@ public class TaskService {
         Optional<Task> existingTask = taskRepository.findById(id);
         if (existingTask.isPresent()) {
             Task task = existingTask.get();
+            String projectId = task.getProjectId(); // Store project ID before update
+            
             updateTaskFields(task, taskDto);
             task.setUpdatedAt(LocalDateTime.now());
             
@@ -94,8 +99,18 @@ public class TaskService {
             if ("DONE".equals(taskDto.getStatus()) && task.getCompletedAt() == null) {
                 task.setCompletedAt(LocalDateTime.now());
             }
+            // If status changed from DONE to something else, clear completed date
+            else if (!"DONE".equals(taskDto.getStatus()) && task.getCompletedAt() != null) {
+                task.setCompletedAt(null);
+            }
             
             Task savedTask = taskRepository.save(task);
+            
+            // Update project progress after task status changes
+            if (projectId != null) {
+                projectService.updateProjectProgress(projectId);
+            }
+            
             return convertToDto(savedTask);
         }
         throw new RuntimeException("Task not found with id: " + id);
@@ -103,6 +118,11 @@ public class TaskService {
 
     @Transactional
     public void deleteTask(String id) {
+        // Store project ID before deletion for progress update
+        String projectId = taskRepository.findById(id)
+                .map(Task::getProjectId)
+                .orElse(null);
+        
         // Remove task ID from project's taskIds list
         taskRepository.findById(id).ifPresent(task -> {
             if (task.getProjectId() != null) {
@@ -116,6 +136,11 @@ public class TaskService {
         });
         
         taskRepository.deleteById(id);
+        
+        // Update project progress after deleting task
+        if (projectId != null) {
+            projectService.updateProjectProgress(projectId);
+        }
     }
 
     public boolean isTaskCreator(String taskId, String username) {
