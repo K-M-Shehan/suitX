@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getProjectById, updateProject } from '../services/ProjectService';
-import { getTasksByProject, createTask } from '../services/TaskService';
+import { getTasksByProject, createTask, updateTask } from '../services/TaskService';
 import ProjectEditDialog from '../components/ProjectEditDialog';
 import TaskFormDialog from '../components/TaskFormDialog';
+import TaskEditDialog from '../components/TaskEditDialog';
 
 const ProjectDetailsPage = () => {
   const { projectId } = useParams();
@@ -15,6 +16,8 @@ const ProjectDetailsPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
+  const [isTaskEditDialogOpen, setIsTaskEditDialogOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
 
   useEffect(() => {
     loadProjectDetails();
@@ -82,6 +85,37 @@ const ProjectDetailsPage = () => {
     } catch (e) {
       console.error('Failed to create task:', e);
       alert('Failed to create task. Please try again.');
+    }
+  };
+
+  const handleTaskClick = (task) => {
+    setSelectedTask(task);
+    setIsTaskEditDialogOpen(true);
+  };
+
+  const handleEditTask = async (updatedTaskData) => {
+    try {
+      const updatedTask = await updateTask(selectedTask.id, updatedTaskData);
+      // Update the task in the tasks array
+      setTasks((prev) => prev.map(t => t.id === selectedTask.id ? updatedTask : t));
+      setIsTaskEditDialogOpen(false);
+      setSelectedTask(null);
+      setError('');
+    } catch (e) {
+      console.error('Failed to update task:', e);
+      let errorMessage = 'Failed to update task. ';
+      
+      if (e.response?.status === 403) {
+        errorMessage += 'You may not have permission to edit this task.';
+      } else if (e.response?.status === 401) {
+        errorMessage += 'Your session may have expired. Please log in again.';
+      } else if (e.response?.status === 404) {
+        errorMessage += 'Task not found.';
+      } else {
+        errorMessage += 'Please try again.';
+      }
+      
+      alert(errorMessage);
     }
   };
 
@@ -342,7 +376,11 @@ const ProjectDetailsPage = () => {
           ) : (
             <div className="space-y-3">
               {tasks.map((task) => (
-                <div key={task.id} className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow">
+                <div 
+                  key={task.id} 
+                  onClick={() => handleTaskClick(task)}
+                  className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow cursor-pointer"
+                >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
@@ -436,6 +474,16 @@ const ProjectDetailsPage = () => {
         onClose={() => setIsTaskDialogOpen(false)}
         onSubmit={handleAddTask}
         projectId={projectId}
+      />
+
+      <TaskEditDialog
+        isOpen={isTaskEditDialogOpen}
+        onClose={() => {
+          setIsTaskEditDialogOpen(false);
+          setSelectedTask(null);
+        }}
+        onSubmit={handleEditTask}
+        task={selectedTask}
       />
     </div>
   );

@@ -92,17 +92,28 @@ public class TaskController {
             @RequestBody TaskDto taskDto,
             Authentication authentication) {
         try {
-            String username = authentication != null ? authentication.getName() : null;
+            if (authentication == null) {
+                System.err.println("Update task failed: No authentication provided");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            
+            String username = authentication.getName();
+            System.out.println("User '" + username + "' attempting to update task: " + id);
             
             // Check access before updating
-            if (username != null && !taskService.canAccessTask(id, username)) {
+            if (!taskService.canAccessTask(id, username)) {
+                System.err.println("Update task failed: User '" + username + "' cannot access task: " + id);
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
             
+            System.out.println("Access verified, updating task: " + id);
             TaskDto updatedTask = taskService.updateTask(id, taskDto);
+            System.out.println("Task updated successfully: " + id);
             return ResponseEntity.ok(updatedTask);
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            System.err.println("Error updating task: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
