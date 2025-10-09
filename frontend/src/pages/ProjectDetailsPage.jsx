@@ -5,6 +5,7 @@ import { getTasksByProject, createTask, updateTask } from '../services/TaskServi
 import ProjectEditDialog from '../components/ProjectEditDialog';
 import TaskFormDialog from '../components/TaskFormDialog';
 import TaskEditDialog from '../components/TaskEditDialog';
+import StatusDropdown from '../components/StatusDropdown';
 
 const ProjectDetailsPage = () => {
   const { projectId } = useParams();
@@ -129,6 +130,48 @@ const ProjectDetailsPage = () => {
         errorMessage += 'Your session may have expired. Please log in again.';
       } else if (e.response?.status === 404) {
         errorMessage += 'Task not found.';
+      } else {
+        errorMessage += 'Please try again.';
+      }
+      
+      alert(errorMessage);
+    }
+  };
+
+  const handleQuickStatusUpdate = async (taskId, newStatus) => {
+    try {
+      // Find the task to get its current data
+      const task = tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      // Update only the status field
+      const updatedTaskData = {
+        ...task,
+        status: newStatus
+      };
+
+      const updatedTask = await updateTask(taskId, updatedTaskData);
+      
+      // Update the task in the tasks array
+      setTasks((prev) => prev.map(t => t.id === taskId ? updatedTask : t));
+      setError('');
+      
+      // Refresh project data to get updated progress
+      try {
+        const updatedProject = await getProjectById(projectId);
+        setProject(updatedProject);
+      } catch (refreshError) {
+        console.error('Failed to refresh project data:', refreshError);
+        // Continue even if refresh fails
+      }
+    } catch (e) {
+      console.error('Failed to update task status:', e);
+      let errorMessage = 'Failed to update task status. ';
+      
+      if (e.response?.status === 403) {
+        errorMessage += 'You may not have permission to edit this task.';
+      } else if (e.response?.status === 401) {
+        errorMessage += 'Your session may have expired. Please log in again.';
       } else {
         errorMessage += 'Please try again.';
       }
@@ -403,9 +446,10 @@ const ProjectDetailsPage = () => {
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
                         <h3 className="font-medium text-gray-900">{task.title}</h3>
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${getTaskStatusColor(task.status)}`}>
-                          {task.status}
-                        </span>
+                        <StatusDropdown
+                          currentStatus={task.status}
+                          onStatusChange={(newStatus) => handleQuickStatusUpdate(task.id, newStatus)}
+                        />
                         {task.priority && (
                           <span className={`text-xs font-medium ${getPriorityColor(task.priority)}`}>
                             {task.priority}
