@@ -26,11 +26,31 @@ public class ProjectService {
 
     public List<ProjectDto> getAllProjectsByUser(String username) {
         if (username == null) {
-            return getAllProjects();
+            return List.of(); // Return empty list instead of all projects
         }
+        // Find projects where user is creator OR member
         return projectRepository.findByCreatedBy(username).stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
+    }
+    
+    public List<ProjectDto> getProjectsForUser(String username) {
+        if (username == null) {
+            return List.of();
+        }
+        // Use the optimized query that finds projects where user is owner OR member in one query
+        return projectRepository.findAllAccessibleProjects(username).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+    
+    public boolean canUserAccessProject(String projectId, String username) {
+        if (username == null) {
+            return false;
+        }
+        return projectRepository.findById(projectId)
+                .map(project -> project.isOwner(username) || project.isMember(username))
+                .orElse(false);
     }
 
     public List<ProjectDto> getActiveProjects() {
@@ -41,7 +61,7 @@ public class ProjectService {
 
     public List<ProjectDto> getActiveProjectsByUser(String username) {
         if (username == null) {
-            return getActiveProjects();
+            return List.of(); // Return empty list instead of all active projects
         }
         return projectRepository.findByCreatedByAndStatus(username, "ACTIVE").stream()
                 .map(this::convertToDto)
@@ -50,6 +70,15 @@ public class ProjectService {
 
     public Optional<ProjectDto> getProjectById(String id) {
         return projectRepository.findById(id)
+                .map(this::convertToDto);
+    }
+    
+    public Optional<ProjectDto> getProjectById(String id, String username) {
+        if (username == null) {
+            return Optional.empty();
+        }
+        return projectRepository.findById(id)
+                .filter(project -> project.isOwner(username) || project.isMember(username))
                 .map(this::convertToDto);
     }
 
@@ -104,6 +133,10 @@ public class ProjectService {
         dto.setOwnerId(project.getOwnerId());
         dto.setProjectManager(project.getProjectManager());
         dto.setMemberIds(project.getMemberIds());
+        dto.setTaskIds(project.getTaskIds());
+        dto.setRiskIds(project.getRiskIds());
+        dto.setBudget(project.getBudget());
+        dto.setTags(project.getTags());
         return dto;
     }
 
@@ -122,6 +155,10 @@ public class ProjectService {
         project.setOwnerId(dto.getOwnerId());
         project.setProjectManager(dto.getProjectManager());
         project.setMemberIds(dto.getMemberIds());
+        project.setTaskIds(dto.getTaskIds());
+        project.setRiskIds(dto.getRiskIds());
+        project.setBudget(dto.getBudget());
+        project.setTags(dto.getTags());
         return project;
     }
 
@@ -133,5 +170,10 @@ public class ProjectService {
         if (dto.getStartDate() != null) project.setStartDate(dto.getStartDate());
         if (dto.getEndDate() != null) project.setEndDate(dto.getEndDate());
         if (dto.getProjectManager() != null) project.setProjectManager(dto.getProjectManager());
+        if (dto.getBudget() != null) project.setBudget(dto.getBudget());
+        if (dto.getTags() != null) project.setTags(dto.getTags());
+        if (dto.getTaskIds() != null) project.setTaskIds(dto.getTaskIds());
+        if (dto.getRiskIds() != null) project.setRiskIds(dto.getRiskIds());
+        if (dto.getMemberIds() != null) project.setMemberIds(dto.getMemberIds());
     }
 }

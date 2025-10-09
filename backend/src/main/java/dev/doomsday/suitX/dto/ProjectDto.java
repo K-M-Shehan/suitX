@@ -20,4 +20,8 @@ public class ProjectDto {
     private String ownerId;
     private String projectManager;
     private List<String> memberIds;
+    private List<String> taskIds;
+    private List<String> riskIds;
+    private Double budget;
+    private List<String> tags;
 }

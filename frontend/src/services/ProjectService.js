@@ -82,8 +82,8 @@ export async function getProjectById(id) {
   }
 }
 
-// Create a new project - matches the expected signature in ProjectsPage
-export async function createProject(projectName, description = '') {
+// Create a new project - accepts full project data object
+export async function createProject(projectData) {
   try {
     const token = getToken();
     const headers = {
@@ -94,16 +94,15 @@ export async function createProject(projectName, description = '') {
       headers['Authorization'] = token;
     }
 
-    // Create project data object to match DTO
-    const projectData = {
-      name: projectName,
-      description: description
-    };
+    // Handle both old API (just name) and new API (full object)
+    const requestData = typeof projectData === 'string' 
+      ? { name: projectData, description: '' }
+      : projectData;
 
     const response = await fetch(`${API_BASE_URL}/projects`, {
       method: 'POST',
       headers: headers,
-      body: JSON.stringify(projectData),
+      body: JSON.stringify(requestData),
     });
     
     if (!response.ok) {

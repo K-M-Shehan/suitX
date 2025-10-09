@@ -28,37 +28,47 @@ public class ProjectController {
 
     @GetMapping
     public ResponseEntity<List<ProjectDto>> getAllProjects(Authentication authentication) {
-        String username = authentication != null ? authentication.getName() : null;
-        List<ProjectDto> projects = projectService.getAllProjectsByUser(username);
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String username = authentication.getName();
+        List<ProjectDto> projects = projectService.getProjectsForUser(username);
         return ResponseEntity.ok(projects);
     }
 
     @GetMapping("/active")
     public ResponseEntity<List<ProjectDto>> getActiveProjects(Authentication authentication) {
-        String username = authentication != null ? authentication.getName() : null;
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String username = authentication.getName();
         List<ProjectDto> activeProjects = projectService.getActiveProjectsByUser(username);
         return ResponseEntity.ok(activeProjects);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProjectDto> getProjectById(@PathVariable String id, Authentication authentication) {
-        String username = authentication != null ? authentication.getName() : null;
-        Optional<ProjectDto> project = projectService.getProjectById(id);
-        
-        // Check if user has access to this project
-        if (project.isPresent() && username != null && !project.get().getCreatedBy().equals(username)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+        String username = authentication.getName();
+        
+        // Use the secure method that checks both owner and member access
+        Optional<ProjectDto> project = projectService.getProjectById(id, username);
         
         return project.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElse(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
     }
 
     @PostMapping
     public ResponseEntity<ProjectDto> createProject(@RequestBody ProjectDto projectDto, Authentication authentication) {
         try {
-            String username = authentication != null ? authentication.getName() : "anonymous";
+            if (authentication == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            String username = authentication.getName();
             projectDto.setCreatedBy(username);
+            projectDto.setOwnerId(username); // Set ownerId as well
             ProjectDto createdProject = projectService.createProject(projectDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdProject);
         } catch (Exception e) {
@@ -69,10 +79,13 @@ public class ProjectController {
     @PutMapping("/{id}")
     public ResponseEntity<ProjectDto> updateProject(@PathVariable String id, @RequestBody ProjectDto projectDto, Authentication authentication) {
         try {
-            String username = authentication != null ? authentication.getName() : null;
+            if (authentication == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            String username = authentication.getName();
             
-            // Check ownership before updating
-            if (username != null && !projectService.isProjectOwner(id, username)) {
+            // Check ownership before updating (only owners can update)
+            if (!projectService.isProjectOwner(id, username)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
             
@@ -86,10 +99,13 @@ public class ProjectController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProject(@PathVariable String id, Authentication authentication) {
         try {
-            String username = authentication != null ? authentication.getName() : null;
+            if (authentication == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            String username = authentication.getName();
             
-            // Check ownership before deleting
-            if (username != null && !projectService.isProjectOwner(id, username)) {
+            // Check ownership before deleting (only owners can delete)
+            if (!projectService.isProjectOwner(id, username)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
             
