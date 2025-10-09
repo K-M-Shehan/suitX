@@ -133,7 +133,10 @@ export async function updateProject(id, projectData) {
     });
     
     if (!response.ok) {
-      throw new Error(`Failed to update project with id: ${id}`);
+      const error = new Error(`Failed to update project with id: ${id}`);
+      error.status = response.status;
+      error.response = { status: response.status };
+      throw error;
     }
     return await response.json();
   } catch (error) {

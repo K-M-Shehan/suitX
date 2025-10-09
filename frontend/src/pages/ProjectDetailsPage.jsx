@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getProjectById } from '../services/ProjectService';
-import { getTasksByProject } from '../services/TaskService';
+import { getProjectById, updateProject } from '../services/ProjectService';
+import { getTasksByProject, createTask } from '../services/TaskService';
+import ProjectEditDialog from '../components/ProjectEditDialog';
+import TaskFormDialog from '../components/TaskFormDialog';
 
 const ProjectDetailsPage = () => {
   const { projectId } = useParams();
@@ -11,6 +13,8 @@ const ProjectDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
 
   useEffect(() => {
     loadProjectDetails();
@@ -39,6 +43,45 @@ const ProjectDetailsPage = () => {
       console.error('Failed to load project:', e);
       setError('Failed to load project details. You may not have access to this project.');
       setLoading(false);
+    }
+  };
+
+  const handleEditProject = async (updatedProjectData) => {
+    try {
+      const updatedProject = await updateProject(projectId, updatedProjectData);
+      setProject(updatedProject);
+      setIsEditDialogOpen(false);
+      setError('');
+    } catch (e) {
+      console.error('Failed to update project:', e);
+      let errorMessage = 'Failed to update project. ';
+      
+      // Try to get more specific error information
+      if (e.message) {
+        errorMessage += e.message;
+      } else if (e.response?.status === 403) {
+        errorMessage += 'You may not have permission to edit this project.';
+      } else if (e.response?.status === 401) {
+        errorMessage += 'Your session may have expired. Please log in again.';
+      } else if (e.response?.status === 404) {
+        errorMessage += 'Project not found.';
+      } else {
+        errorMessage += 'Please try again.';
+      }
+      
+      alert(errorMessage);
+    }
+  };
+
+  const handleAddTask = async (taskData) => {
+    try {
+      const newTask = await createTask(taskData);
+      setTasks((prev) => [...prev, newTask]);
+      setIsTaskDialogOpen(false);
+      setError('');
+    } catch (e) {
+      console.error('Failed to create task:', e);
+      alert('Failed to create task. Please try again.');
     }
   };
 
@@ -140,7 +183,7 @@ const ProjectDetailsPage = () => {
           </div>
           
           <button
-            onClick={() => {/* TODO: Open edit modal */}}
+            onClick={() => setIsEditDialogOpen(true)}
             className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
           >
             Edit Project
@@ -284,7 +327,10 @@ const ProjectDetailsPage = () => {
         <div className="space-y-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-gray-900">Tasks ({tasks.length})</h2>
-            <button className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors">
+            <button 
+              onClick={() => setIsTaskDialogOpen(true)}
+              className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+            >
               + Add Task
             </button>
           </div>
@@ -376,6 +422,21 @@ const ProjectDetailsPage = () => {
           </div>
         </div>
       )}
+
+      {/* Dialogs */}
+      <ProjectEditDialog
+        isOpen={isEditDialogOpen}
+        onClose={() => setIsEditDialogOpen(false)}
+        onSubmit={handleEditProject}
+        project={project}
+      />
+
+      <TaskFormDialog
+        isOpen={isTaskDialogOpen}
+        onClose={() => setIsTaskDialogOpen(false)}
+        onSubmit={handleAddTask}
+        projectId={projectId}
+      />
     </div>
   );
 };

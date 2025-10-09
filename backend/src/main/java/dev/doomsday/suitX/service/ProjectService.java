@@ -97,14 +97,25 @@ public class ProjectService {
     }
 
     public ProjectDto updateProject(String id, ProjectDto projectDto) {
+        System.out.println("ProjectService.updateProject called with id: " + id);
         Optional<Project> existingProject = projectRepository.findById(id);
         if (existingProject.isPresent()) {
+            System.out.println("Project found, updating fields...");
             Project project = existingProject.get();
-            updateProjectFields(project, projectDto);
-            project.setUpdatedAt(LocalDateTime.now());
-            Project savedProject = projectRepository.save(project);
-            return convertToDto(savedProject);
+            try {
+                updateProjectFields(project, projectDto);
+                project.setUpdatedAt(LocalDateTime.now());
+                System.out.println("Saving updated project...");
+                Project savedProject = projectRepository.save(project);
+                System.out.println("Project saved successfully");
+                return convertToDto(savedProject);
+            } catch (Exception e) {
+                System.err.println("Error during project update: " + e.getMessage());
+                e.printStackTrace();
+                throw new RuntimeException("Failed to update project: " + e.getMessage(), e);
+            }
         }
+        System.err.println("Project not found with id: " + id);
         throw new RuntimeException("Project not found with id: " + id);
     }
 
@@ -113,8 +124,17 @@ public class ProjectService {
     }
 
     public boolean isProjectOwner(String projectId, String username) {
+        if (username == null) {
+            return false;
+        }
         return projectRepository.findById(projectId)
-                .map(project -> project.getCreatedBy().equals(username))
+                .map(project -> {
+                    // Check ownerId first (primary ownership field), then createdBy as fallback
+                    if (project.getOwnerId() != null && project.getOwnerId().equals(username)) {
+                        return true;
+                    }
+                    return project.getCreatedBy() != null && project.getCreatedBy().equals(username);
+                })
                 .orElse(false);
     }
 

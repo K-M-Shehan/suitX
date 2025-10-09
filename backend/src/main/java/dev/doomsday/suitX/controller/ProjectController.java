@@ -80,19 +80,26 @@ public class ProjectController {
     public ResponseEntity<ProjectDto> updateProject(@PathVariable String id, @RequestBody ProjectDto projectDto, Authentication authentication) {
         try {
             if (authentication == null) {
+                System.err.println("Update project failed: No authentication provided");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
             String username = authentication.getName();
+            System.out.println("User '" + username + "' attempting to update project: " + id);
             
             // Check ownership before updating (only owners can update)
             if (!projectService.isProjectOwner(id, username)) {
+                System.err.println("Update project failed: User '" + username + "' is not owner of project: " + id);
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
             
+            System.out.println("Ownership verified, updating project: " + id);
             ProjectDto updatedProject = projectService.updateProject(id, projectDto);
+            System.out.println("Project updated successfully: " + id);
             return ResponseEntity.ok(updatedProject);
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            System.err.println("Error updating project: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
