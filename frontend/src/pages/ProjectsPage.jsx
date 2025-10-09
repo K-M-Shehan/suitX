@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ProjectCard from '../components/ProjectCard';
 import AddProjectCard from '../components/AddProjectCard';
 import { getAllProjects, createProject as apiCreateProject, deleteProject as apiDeleteProject } from '../services/ProjectService';
+import { createMultipleTasks } from '../services/TaskService';
 
 const ProjectsPage = () => {
   const [projects, setProjects] = useState([]);
@@ -22,10 +23,35 @@ const ProjectsPage = () => {
     return () => { mounted = false; };
   }, []);
 
-  const handleAddProject = async (projectName) => {
+  const handleAddProject = async (projectData) => {
     try {
-      const created = await apiCreateProject(projectName);
+      // Extract tasks from project data
+      const tasks = projectData.tasks || [];
+      delete projectData.tasks; // Remove tasks from project data
+      
+      // Create the project first
+      const created = await apiCreateProject(projectData);
       setProjects((prev) => [...prev, created]);
+      setError(''); // Clear any previous errors
+      
+      // If there are tasks, create them and link to the project
+      if (tasks.length > 0 && created.id) {
+        try {
+          const taskDtos = tasks.map(taskTitle => ({
+            title: taskTitle,
+            description: '',
+            projectId: created.id,
+            status: 'TODO',
+            priority: 'MEDIUM'
+          }));
+          
+          await createMultipleTasks(taskDtos, created.id);
+          console.log(`Successfully created ${tasks.length} tasks for project ${created.id}`);
+        } catch (taskError) {
+          console.error('Failed to create tasks:', taskError);
+          setError('Project created but some tasks failed to create.');
+        }
+      }
     } catch (e) {
       console.error('Failed to create project:', e);
       setError('Failed to create project. Make sure you are logged in.');
