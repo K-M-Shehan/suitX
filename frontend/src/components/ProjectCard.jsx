@@ -6,7 +6,7 @@ const ProjectCard = ({ project, onDelete }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/project/${project.id}`);
+    navigate(`/projects/${project.id}`);
   };
 
   const handleDelete = (e) => {
