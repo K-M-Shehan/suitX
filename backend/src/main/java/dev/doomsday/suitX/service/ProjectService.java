@@ -101,7 +101,9 @@ public class ProjectService {
         dto.setCreatedAt(project.getCreatedAt());
         dto.setUpdatedAt(project.getUpdatedAt());
         dto.setCreatedBy(project.getCreatedBy());
+        dto.setOwnerId(project.getOwnerId());
         dto.setProjectManager(project.getProjectManager());
+        dto.setMemberIds(project.getMemberIds());
         return dto;
     }
 
@@ -117,7 +119,9 @@ public class ProjectService {
         project.setCreatedAt(dto.getCreatedAt());
         project.setUpdatedAt(dto.getUpdatedAt());
         project.setCreatedBy(dto.getCreatedBy());
+        project.setOwnerId(dto.getOwnerId());
         project.setProjectManager(dto.getProjectManager());
+        project.setMemberIds(dto.getMemberIds());
         return project;
     }
 

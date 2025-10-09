@@ -113,6 +113,8 @@ public class RiskService {
         dto.setDescription(risk.getDescription());
         dto.setType(risk.getType());
         dto.setSeverity(risk.getSeverity());
+        dto.setLikelihood(risk.getLikelihood());
+        dto.setRiskScore(risk.getRiskScore());
         dto.setStatus(risk.getStatus());
         dto.setProjectId(risk.getProjectId());
         dto.setAssignedTo(risk.getAssignedTo());
@@ -130,6 +132,7 @@ public class RiskService {
         risk.setDescription(dto.getDescription());
         risk.setType(dto.getType());
         risk.setSeverity(dto.getSeverity());
+        risk.setLikelihood(dto.getLikelihood());
         risk.setStatus(dto.getStatus());
         risk.setProjectId(dto.getProjectId());
         risk.setAssignedTo(dto.getAssignedTo());
@@ -137,6 +140,8 @@ public class RiskService {
         risk.setUpdatedAt(dto.getUpdatedAt());
         risk.setResolvedAt(dto.getResolvedAt());
         risk.setCreatedBy(dto.getCreatedBy());
+        // Calculate risk score based on severity and likelihood
+        risk.calculateRiskScore();
         return risk;
     }
 
@@ -145,8 +150,11 @@ public class RiskService {
         if (dto.getDescription() != null) risk.setDescription(dto.getDescription());
         if (dto.getType() != null) risk.setType(dto.getType());
         if (dto.getSeverity() != null) risk.setSeverity(dto.getSeverity());
+        if (dto.getLikelihood() != null) risk.setLikelihood(dto.getLikelihood());
         if (dto.getStatus() != null) risk.setStatus(dto.getStatus());
         if (dto.getProjectId() != null) risk.setProjectId(dto.getProjectId());
         if (dto.getAssignedTo() != null) risk.setAssignedTo(dto.getAssignedTo());
+        // Recalculate risk score when severity or likelihood changes
+        risk.calculateRiskScore();
     }
 }

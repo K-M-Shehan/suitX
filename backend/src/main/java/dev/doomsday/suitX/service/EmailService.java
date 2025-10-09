@@ -155,27 +155,22 @@ public class EmailService {
                     <h1>SuitX</h1>
                 </div>
                 <div class="content">
-                    <h2>Welcome to SuitX, %s</h2>
-                    <p>Thank you for joining SuitX — Your project's sixth sense.</p>
+                    <h2>Welcome to SuitX, %s!</h2>
+                    <p>Thank you for joining SuitX : Your project's sixth sense.</p>
                     
-                    <p>Your account has been successfully created. You can now start creating and managing projects, tracking progress, and receiving intelligent risk insights in real time.</p>
+                    <p>Your account is ready. Start managing your projects with AI-powered risk insights.</p>
                     
                     <div class="features">
                         <strong>With SuitX, you can:</strong>
                         <ul>
-                            <li>Create and manage multiple projects efficiently</li>
-                            <li>Leverage AI-powered risk detection and analysis</li>
-                            <li>Track tasks and monitor project progress</li>
-                            <li>Receive automated mitigation strategies for potential risks</li>
-                            <li>Access real-time risk dashboards and insights</li>
-                            <li>Stay informed with smart notifications and alerts</li>
+                            <li>AI-powered risk detection</li>
+                            <li>Real-time project tracking</li>
+                            <li>Smart notifications and alerts</li>
                         </ul>
                     </div>
                     
-                    <p>Get started by creating your first project and exploring the SuitX dashboard.</p>
-                    
                     <div class="button-container">
-                        <a href="http://localhost:5173/launchpad" class="cta-button" style="color: #ffffff !important;">Go to Dashboard</a>
+                        <a href="http://localhost:5173/launchpad" class="cta-button" style="color: #ffffff !important;">Get Started</a>
                     </div>
                     
                     <p style="margin-top: 32px; color: #6c757d; font-size: 14px;">
