@@ -11,6 +11,8 @@ public class RiskDto {
     private String description;
     private String type;
     private String severity;
+    private String likelihood;
+    private Double riskScore;
     private String status;
     private String projectId;
     private String assignedTo;

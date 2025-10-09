@@ -19,9 +19,8 @@ const RiskDashboard = () => {
     status: '',
     severity: '',
     type: '',
-    priority: '',
-    probability: '',
-    impact: ''
+    likelihood: '',
+    assignedTo: ''
   });
 
   useEffect(() => {
@@ -83,9 +82,8 @@ const RiskDashboard = () => {
       status: risk.status || '',
       severity: risk.severity || '',
       type: risk.type || '',
-      priority: risk.priority || '',
-      probability: risk.probability || '',
-      impact: risk.impact || ''
+      likelihood: risk.likelihood || '',
+      assignedTo: risk.assignedTo || ''
     });
   };
 
@@ -123,9 +121,8 @@ const RiskDashboard = () => {
       status: '',
       severity: '',
       type: '',
-      priority: '',
-      probability: '',
-      impact: ''
+      likelihood: '',
+      assignedTo: ''
     });
   };
 
@@ -162,24 +159,49 @@ const RiskDashboard = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Open':
+      case 'IDENTIFIED':
         return 'bg-red-100 text-red-800 border-red-200';
-      case 'In Progress':
+      case 'MONITORING':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'Resolved':
+      case 'MITIGATED':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'RESOLVED':
         return 'bg-green-100 text-green-800 border-green-200';
+      case 'ACCEPTED':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'IGNORED':
+        return 'bg-gray-100 text-gray-800 border-gray-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case 'High':
+  const getSeverityColor = (severity) => {
+    switch (severity) {
+      case 'CRITICAL':
         return 'text-red-600 bg-red-50';
-      case 'Medium':
+      case 'HIGH':
         return 'text-orange-600 bg-orange-50';
-      case 'Low':
+      case 'MEDIUM':
+        return 'text-yellow-600 bg-yellow-50';
+      case 'LOW':
+        return 'text-green-600 bg-green-50';
+      default:
+        return 'text-gray-600 bg-gray-50';
+    }
+  };
+
+  const getLikelihoodColor = (likelihood) => {
+    switch (likelihood) {
+      case 'CERTAIN':
+        return 'text-red-600 bg-red-50';
+      case 'LIKELY':
+        return 'text-orange-600 bg-orange-50';
+      case 'POSSIBLE':
+        return 'text-yellow-600 bg-yellow-50';
+      case 'UNLIKELY':
+        return 'text-blue-600 bg-blue-50';
+      case 'RARE':
         return 'text-green-600 bg-green-50';
       default:
         return 'text-gray-600 bg-gray-50';
@@ -199,7 +221,7 @@ const RiskDashboard = () => {
 
         {/* Status Filter */}
         <div className="flex space-x-2">
-          {['All', 'Open', 'In Progress', 'Resolved'].map((status) => (
+          {['All', 'IDENTIFIED', 'MONITORING', 'MITIGATED', 'RESOLVED', 'ACCEPTED'].map((status) => (
             <button
               key={status}
               onClick={() => setSelectedStatus(status)}
@@ -265,27 +287,36 @@ const RiskDashboard = () => {
               <div key={risk.id || index} className="bg-white rounded-lg p-6 shadow-sm border">
                 <div className="flex justify-between items-start mb-3">
                   <h3 className="text-lg font-semibold text-gray-900">{risk.title || 'Untitled Risk'}</h3>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(risk.status)}`}>
-                    {risk.status || 'Unknown'}
-                  </span>
+                  <div className="flex items-center space-x-2">
+                    {risk.riskScore && (
+                      <span className="px-2 py-1 rounded-md text-xs font-bold bg-gray-800 text-white">
+                        Score: {risk.riskScore}
+                      </span>
+                    )}
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(risk.status)}`}>
+                      {risk.status || 'Unknown'}
+                    </span>
+                  </div>
                 </div>
                 
                 <p className="text-gray-600 text-sm mb-4 leading-relaxed">{risk.description || 'No description available'}</p>
                 
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-500">Priority:</span>
-                    <span className={`px-2 py-1 rounded-md text-xs font-medium ${getPriorityColor(risk.priority)}`}>
-                      {risk.priority || 'Unknown'}
+                    <span className="text-gray-500">Severity:</span>
+                    <span className={`px-2 py-1 rounded-md text-xs font-medium ${getSeverityColor(risk.severity)}`}>
+                      {risk.severity || 'Unknown'}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-500">Probability:</span>
-                    <span className="font-medium text-gray-900">{risk.probability || 'N/A'}</span>
+                    <span className="text-gray-500">Likelihood:</span>
+                    <span className={`px-2 py-1 rounded-md text-xs font-medium ${getLikelihoodColor(risk.likelihood)}`}>
+                      {risk.likelihood || 'N/A'}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-500">Impact:</span>
-                    <span className="font-medium text-gray-900">{risk.impact || 'N/A'}</span>
+                    <span className="text-gray-500">Type:</span>
+                    <span className="font-medium text-gray-900">{risk.type || 'N/A'}</span>
                   </div>
                 </div>
 
@@ -391,31 +422,13 @@ const RiskDashboard = () => {
                     onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
+                    <option value="">Select Status</option>
                     <option value="IDENTIFIED">Identified</option>
-                    <option value="ACCEPTED">Accepted</option>
                     <option value="MONITORING">Monitoring</option>
-                    <option value="IGNORED">Ignored</option>
+                    <option value="MITIGATED">Mitigated</option>
                     <option value="RESOLVED">Resolved</option>
-                    <option value="Open">Open</option>
-                    <option value="In Progress">In Progress</option>
-                  </select>
-                </div>
-
-                {/* Priority */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Priority
-                  </label>
-                  <select
-                    value={editForm.priority}
-                    onChange={(e) => setEditForm({ ...editForm, priority: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Select Priority</option>
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
-                    <option value="Critical">Critical</option>
+                    <option value="ACCEPTED">Accepted</option>
+                    <option value="IGNORED">Ignored</option>
                   </select>
                 </div>
 
@@ -449,40 +462,31 @@ const RiskDashboard = () => {
                   >
                     <option value="">Select Type</option>
                     <option value="TECHNICAL">Technical</option>
-                    <option value="OPERATIONAL">Operational</option>
                     <option value="FINANCIAL">Financial</option>
-                    <option value="STRATEGIC">Strategic</option>
-                    <option value="COMPLIANCE">Compliance</option>
-                    <option value="SECURITY">Security</option>
+                    <option value="RESOURCE">Resource</option>
+                    <option value="SCOPE">Scope</option>
+                    <option value="SCHEDULE">Schedule</option>
+                    <option value="QUALITY">Quality</option>
                   </select>
                 </div>
 
-                {/* Probability */}
+                {/* Likelihood */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Probability
+                    Likelihood
                   </label>
-                  <input
-                    type="text"
-                    value={editForm.probability}
-                    onChange={(e) => setEditForm({ ...editForm, probability: e.target.value })}
-                    placeholder="e.g., 30%, Low, Medium, High"
+                  <select
+                    value={editForm.likelihood}
+                    onChange={(e) => setEditForm({ ...editForm, likelihood: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                {/* Impact */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Impact
-                  </label>
-                  <input
-                    type="text"
-                    value={editForm.impact}
-                    onChange={(e) => setEditForm({ ...editForm, impact: e.target.value })}
-                    placeholder="e.g., High, Medium, Low"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                  >
+                    <option value="">Select Likelihood</option>
+                    <option value="RARE">Rare</option>
+                    <option value="UNLIKELY">Unlikely</option>
+                    <option value="POSSIBLE">Possible</option>
+                    <option value="LIKELY">Likely</option>
+                    <option value="CERTAIN">Certain</option>
+                  </select>
                 </div>
               </div>
 
