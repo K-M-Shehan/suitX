@@ -78,11 +78,18 @@ class RiskService {
 
   async updateRisk(id, riskData) {
     try {
+      const token = getToken();
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = token;
+      }
+
       const response = await fetch(`${API_BASE_URL}/risks/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: JSON.stringify(riskData),
       });
       if (!response.ok) {

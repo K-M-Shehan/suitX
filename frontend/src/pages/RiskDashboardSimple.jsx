@@ -12,6 +12,17 @@ const RiskDashboard = () => {
   const [activeProjects, setActiveProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [editingRisk, setEditingRisk] = useState(null);
+  const [editForm, setEditForm] = useState({
+    title: '',
+    description: '',
+    status: '',
+    severity: '',
+    type: '',
+    priority: '',
+    probability: '',
+    impact: ''
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -63,6 +74,83 @@ const RiskDashboard = () => {
   const filteredRisks = selectedStatus === 'All' 
     ? risks 
     : risks.filter(risk => risk.status?.toUpperCase() === selectedStatus.toUpperCase());
+
+  const handleEditRisk = (risk) => {
+    setEditingRisk(risk);
+    setEditForm({
+      title: risk.title || '',
+      description: risk.description || '',
+      status: risk.status || '',
+      severity: risk.severity || '',
+      type: risk.type || '',
+      priority: risk.priority || '',
+      probability: risk.probability || '',
+      impact: risk.impact || ''
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      await RiskService.updateRisk(editingRisk.id, editForm);
+      // Refresh risks data
+      const risksData = await RiskService.getAllRisks();
+      setRisks(Array.isArray(risksData) ? risksData : []);
+      
+      // Refresh summary
+      try {
+        const summary = await RiskService.getRiskSummary();
+        setRiskSummary({
+          totalProjects: summary.totalProjects || 0,
+          totalRisks: summary.totalRisks || 0
+        });
+      } catch (err) {
+        console.warn('Risk summary not available:', err.message);
+      }
+      
+      // Close modal
+      setEditingRisk(null);
+    } catch (error) {
+      console.error('Error updating risk:', error);
+      alert('Failed to update risk. Please try again.');
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingRisk(null);
+    setEditForm({
+      title: '',
+      description: '',
+      status: '',
+      severity: '',
+      type: '',
+      priority: '',
+      probability: '',
+      impact: ''
+    });
+  };
+
+  const handleResolveRisk = async (riskId) => {
+    try {
+      await RiskService.resolveRisk(riskId);
+      // Refresh risks data
+      const risksData = await RiskService.getAllRisks();
+      setRisks(Array.isArray(risksData) ? risksData : []);
+      
+      // Refresh summary
+      try {
+        const summary = await RiskService.getRiskSummary();
+        setRiskSummary({
+          totalProjects: summary.totalProjects || 0,
+          totalRisks: summary.totalRisks || 0
+        });
+      } catch (err) {
+        console.warn('Risk summary not available:', err.message);
+      }
+    } catch (error) {
+      console.error('Error resolving risk:', error);
+      alert('Failed to resolve risk. Please try again.');
+    }
+  };
 
   if (loading) {
     return (
@@ -202,14 +290,18 @@ const RiskDashboard = () => {
                 </div>
 
                 <div className="flex space-x-2">
-                  <button className="px-3 py-1 text-blue-600 hover:bg-blue-50 rounded-md text-sm font-medium transition-colors">
+                  <button 
+                    onClick={() => handleEditRisk(risk)}
+                    className="px-3 py-1 text-blue-600 hover:bg-blue-50 rounded-md text-sm font-medium transition-colors"
+                  >
                     Edit
                   </button>
-                  <button className="px-3 py-1 text-green-600 hover:bg-green-50 rounded-md text-sm font-medium transition-colors">
-                    Resolve
-                  </button>
-                  <button className="px-3 py-1 text-red-600 hover:bg-red-50 rounded-md text-sm font-medium transition-colors">
-                    Delete
+                  <button 
+                    onClick={() => handleResolveRisk(risk.id)}
+                    className="px-3 py-1 text-green-600 hover:bg-green-50 rounded-md text-sm font-medium transition-colors"
+                    disabled={risk.status === 'RESOLVED' || risk.status === 'Resolved'}
+                  >
+                    {(risk.status === 'RESOLVED' || risk.status === 'Resolved') ? 'Resolved' : 'Resolve'}
                   </button>
                 </div>
               </div>
@@ -254,6 +346,165 @@ const RiskDashboard = () => {
           </div>
         )}
       </div>
+
+      {/* Edit Risk Modal */}
+      {editingRisk && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-6">Edit Risk</h2>
+              
+              <div className="space-y-4">
+                {/* Title */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.title}
+                    onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Description
+                  </label>
+                  <textarea
+                    value={editForm.description}
+                    onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Status */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Status
+                  </label>
+                  <select
+                    value={editForm.status}
+                    onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="IDENTIFIED">Identified</option>
+                    <option value="ACCEPTED">Accepted</option>
+                    <option value="MONITORING">Monitoring</option>
+                    <option value="IGNORED">Ignored</option>
+                    <option value="RESOLVED">Resolved</option>
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                  </select>
+                </div>
+
+                {/* Priority */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Priority
+                  </label>
+                  <select
+                    value={editForm.priority}
+                    onChange={(e) => setEditForm({ ...editForm, priority: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select Priority</option>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                    <option value="Critical">Critical</option>
+                  </select>
+                </div>
+
+                {/* Severity */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Severity
+                  </label>
+                  <select
+                    value={editForm.severity}
+                    onChange={(e) => setEditForm({ ...editForm, severity: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select Severity</option>
+                    <option value="LOW">Low</option>
+                    <option value="MEDIUM">Medium</option>
+                    <option value="HIGH">High</option>
+                    <option value="CRITICAL">Critical</option>
+                  </select>
+                </div>
+
+                {/* Type */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Type
+                  </label>
+                  <select
+                    value={editForm.type}
+                    onChange={(e) => setEditForm({ ...editForm, type: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select Type</option>
+                    <option value="TECHNICAL">Technical</option>
+                    <option value="OPERATIONAL">Operational</option>
+                    <option value="FINANCIAL">Financial</option>
+                    <option value="STRATEGIC">Strategic</option>
+                    <option value="COMPLIANCE">Compliance</option>
+                    <option value="SECURITY">Security</option>
+                  </select>
+                </div>
+
+                {/* Probability */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Probability
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.probability}
+                    onChange={(e) => setEditForm({ ...editForm, probability: e.target.value })}
+                    placeholder="e.g., 30%, Low, Medium, High"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Impact */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Impact
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.impact}
+                    onChange={(e) => setEditForm({ ...editForm, impact: e.target.value })}
+                    placeholder="e.g., High, Medium, Low"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              {/* Modal Actions */}
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  onClick={handleCancelEdit}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveEdit}
+                  className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-md font-medium transition-colors"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
