@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 
 import dev.doomsday.suitX.dto.ProjectDto;
 import dev.doomsday.suitX.model.Project;
+import dev.doomsday.suitX.model.Task;
 import dev.doomsday.suitX.repository.ProjectRepository;
+import dev.doomsday.suitX.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -17,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
+    private final TaskRepository taskRepository;
 
     public List<ProjectDto> getAllProjects() {
         return projectRepository.findAll().stream()
@@ -195,5 +198,40 @@ public class ProjectService {
         if (dto.getTaskIds() != null) project.setTaskIds(dto.getTaskIds());
         if (dto.getRiskIds() != null) project.setRiskIds(dto.getRiskIds());
         if (dto.getMemberIds() != null) project.setMemberIds(dto.getMemberIds());
+    }
+    
+    /**
+     * Calculate and update project progress based on completed tasks
+     * Progress = (Number of DONE tasks / Total tasks) * 100
+     */
+    public void updateProjectProgress(String projectId) {
+        Optional<Project> projectOpt = projectRepository.findById(projectId);
+        if (projectOpt.isEmpty()) {
+            System.err.println("Cannot update progress: Project not found with id: " + projectId);
+            return;
+        }
+        
+        Project project = projectOpt.get();
+        List<Task> tasks = taskRepository.findByProjectId(projectId);
+        
+        if (tasks.isEmpty()) {
+            // No tasks = 0% progress
+            project.setProgressPercentage(0.0);
+            System.out.println("Project " + projectId + " has no tasks, progress set to 0%");
+        } else {
+            long completedTasks = tasks.stream()
+                    .filter(task -> "DONE".equals(task.getStatus()))
+                    .count();
+            
+            double progress = (double) completedTasks / tasks.size() * 100.0;
+            project.setProgressPercentage(Math.round(progress * 100.0) / 100.0); // Round to 2 decimal places
+            
+            System.out.println("Project " + projectId + " progress updated: " + 
+                    completedTasks + "/" + tasks.size() + " tasks completed = " + 
+                    project.getProgressPercentage() + "%");
+        }
+        
+        project.setUpdatedAt(LocalDateTime.now());
+        projectRepository.save(project);
     }
 }

@@ -82,6 +82,15 @@ const ProjectDetailsPage = () => {
       setTasks((prev) => [...prev, newTask]);
       setIsTaskDialogOpen(false);
       setError('');
+      
+      // Refresh project data to get updated progress
+      try {
+        const updatedProject = await getProjectById(projectId);
+        setProject(updatedProject);
+      } catch (refreshError) {
+        console.error('Failed to refresh project data:', refreshError);
+        // Continue even if refresh fails
+      }
     } catch (e) {
       console.error('Failed to create task:', e);
       alert('Failed to create task. Please try again.');
@@ -101,6 +110,15 @@ const ProjectDetailsPage = () => {
       setIsTaskEditDialogOpen(false);
       setSelectedTask(null);
       setError('');
+      
+      // Refresh project data to get updated progress
+      try {
+        const updatedProject = await getProjectById(projectId);
+        setProject(updatedProject);
+      } catch (refreshError) {
+        console.error('Failed to refresh project data:', refreshError);
+        // Continue even if refresh fails
+      }
     } catch (e) {
       console.error('Failed to update task:', e);
       let errorMessage = 'Failed to update task. ';
@@ -429,6 +447,35 @@ const ProjectDetailsPage = () => {
                 className="bg-black h-3 rounded-full transition-all duration-300"
                 style={{ width: `${project.progressPercentage || 0}%` }}
               ></div>
+            </div>
+            <div className="mt-2 text-xs text-gray-600">
+              {tasks.filter(t => t.status === 'DONE').length} of {tasks.length} tasks completed
+            </div>
+          </div>
+
+          {/* Task Statistics */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="bg-gray-50 rounded-lg p-4">
+              <p className="text-xs text-gray-500 mb-1">Total Tasks</p>
+              <p className="text-2xl font-bold text-gray-900">{tasks.length}</p>
+            </div>
+            <div className="bg-green-50 rounded-lg p-4">
+              <p className="text-xs text-green-600 mb-1">Completed</p>
+              <p className="text-2xl font-bold text-green-700">
+                {tasks.filter(t => t.status === 'DONE').length}
+              </p>
+            </div>
+            <div className="bg-blue-50 rounded-lg p-4">
+              <p className="text-xs text-blue-600 mb-1">In Progress</p>
+              <p className="text-2xl font-bold text-blue-700">
+                {tasks.filter(t => t.status === 'IN_PROGRESS').length}
+              </p>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-4">
+              <p className="text-xs text-gray-500 mb-1">To Do</p>
+              <p className="text-2xl font-bold text-gray-700">
+                {tasks.filter(t => t.status === 'TODO').length}
+              </p>
             </div>
           </div>
 
