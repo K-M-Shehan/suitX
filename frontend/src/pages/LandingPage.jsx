@@ -2,6 +2,10 @@ import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import tuxImage from "../assets/tux w bow.png";
+import connectImage from "../assets/landing/connect.jpg";
+import analyseImage from "../assets/landing/analyse.jpg";
+import solutionsImage from "../assets/landing/solutions.jpg";
+import trackImage from "../assets/landing/track.jpg";
 import { useScrollAnimation } from "../hooks/useScrollAnimation";
 
 function LandingPage() {
@@ -138,7 +142,7 @@ function LandingPage() {
         }`}
       >
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Connect Your Project Data */}
             <div 
               className={`bg-white text-black p-6 rounded-lg transition-all duration-1000 ease-out delay-200 ${
@@ -147,9 +151,15 @@ function LandingPage() {
                   : 'opacity-0 transform translate-y-10'
               }`}
             >
-              <div className="h-32 bg-gradient-to-br from-orange-300 to-orange-500 rounded mb-4"></div>
-              <h3 className="font-bold mb-2">Connect Your Project Data</h3>
-              <p className="text-sm text-gray-600">Import or input project information</p>
+              <div className="h-72 rounded mb-4 overflow-hidden">
+                <img 
+                  src={connectImage} 
+                  alt="Connect Your Project Data" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <h3 className="text-xl font-bold mb-3">Connect Your Project Data</h3>
+              <p className="text-base text-gray-600">Import or input project information</p>
             </div>
 
             {/* AI Analysis */}
@@ -160,18 +170,15 @@ function LandingPage() {
                   : 'opacity-0 transform translate-y-10'
               }`}
             >
-              <div className="h-32 bg-gradient-to-br from-blue-400 to-blue-600 rounded mb-4 flex items-center justify-center">
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="w-4 h-4 bg-yellow-400 rounded-full"></div>
-                  <div className="w-4 h-4 bg-yellow-400 rounded-full"></div>
-                  <div className="w-4 h-4 bg-yellow-400 rounded-full"></div>
-                  <div className="w-4 h-4 bg-yellow-400 rounded-full"></div>
-                  <div className="w-4 h-4 bg-yellow-400 rounded-full"></div>
-                  <div className="w-4 h-4 bg-yellow-400 rounded-full"></div>
-                </div>
+              <div className="h-72 rounded mb-4 overflow-hidden">
+                <img 
+                  src={analyseImage} 
+                  alt="AI Analysis" 
+                  className="w-full h-full object-cover"
+                />
               </div>
-              <h3 className="font-bold mb-2">AI Analysis</h3>
-              <p className="text-sm text-gray-600">Our system analyzes risks in real-time</p>
+              <h3 className="text-xl font-bold mb-3">AI Analysis</h3>
+              <p className="text-base text-gray-600">Our system analyzes risks in real-time</p>
             </div>
 
             {/* Get Solutions */}
@@ -182,9 +189,15 @@ function LandingPage() {
                   : 'opacity-0 transform translate-y-10'
               }`}
             >
-              <div className="h-32 bg-gradient-to-br from-teal-400 to-teal-600 rounded mb-4"></div>
-              <h3 className="font-bold mb-2">Get Solutions</h3>
-              <p className="text-sm text-gray-600">Receive actionable mitigation strategies</p>
+              <div className="h-72 rounded mb-4 overflow-hidden">
+                <img 
+                  src={solutionsImage} 
+                  alt="Get Solutions" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <h3 className="text-xl font-bold mb-3">Get Solutions</h3>
+              <p className="text-base text-gray-600">Receive actionable mitigation strategies</p>
             </div>
 
             {/* Track Progress */}
@@ -195,9 +208,15 @@ function LandingPage() {
                   : 'opacity-0 transform translate-y-10'
               }`}
             >
-              <div className="h-32 bg-gradient-to-br from-teal-400 to-teal-600 rounded mb-4"></div>
-              <h3 className="font-bold mb-2">Track Progress</h3>
-              <p className="text-sm text-gray-600">Monitor improvements and prevent future risks</p>
+              <div className="h-72 rounded mb-4 overflow-hidden">
+                <img 
+                  src={trackImage} 
+                  alt="Track Progress" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <h3 className="text-xl font-bold mb-3">Track Progress</h3>
+              <p className="text-base text-gray-600">Monitor improvements and prevent future risks</p>
             </div>
           </div>
         </div>
