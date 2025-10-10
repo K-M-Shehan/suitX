@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import RiskService from '../services/RiskService';
 import { getAllProjects } from '../services/ProjectService';
 
 const RiskDashboard = () => {
+  const navigate = useNavigate();
   const [selectedStatus, setSelectedStatus] = useState('All');
   const [riskSummary, setRiskSummary] = useState({
     totalProjects: 0,
@@ -85,6 +87,10 @@ const RiskDashboard = () => {
       likelihood: risk.likelihood || '',
       assignedTo: risk.assignedTo || ''
     });
+  };
+
+  const handleRiskClick = (riskId) => {
+    navigate(`/risks/${riskId}`);
   };
 
   const handleSaveEdit = async () => {
@@ -284,7 +290,11 @@ const RiskDashboard = () => {
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {filteredRisks.map((risk, index) => (
-              <div key={risk.id || index} className="bg-white rounded-lg p-6 shadow-sm border">
+              <div 
+                key={risk.id || index} 
+                className="bg-white rounded-lg p-6 shadow-sm border hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => handleRiskClick(risk.id)}
+              >
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
@@ -338,13 +348,19 @@ const RiskDashboard = () => {
 
                 <div className="flex space-x-2">
                   <button 
-                    onClick={() => handleEditRisk(risk)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditRisk(risk);
+                    }}
                     className="px-3 py-1 text-blue-600 hover:bg-blue-50 rounded-md text-sm font-medium transition-colors"
                   >
                     Edit
                   </button>
                   <button 
-                    onClick={() => handleResolveRisk(risk.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleResolveRisk(risk.id);
+                    }}
                     className="px-3 py-1 text-green-600 hover:bg-green-50 rounded-md text-sm font-medium transition-colors"
                     disabled={risk.status === 'RESOLVED' || risk.status === 'Resolved'}
                   >
