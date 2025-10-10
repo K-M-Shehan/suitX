@@ -1,16 +1,17 @@
 package dev.doomsday.suitX.model;
 
-import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
-import org.springframework.data.mongodb.core.index.CompoundIndexes;
-import org.springframework.data.mongodb.core.mapping.Document;
-
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import lombok.Data;
 
 /**
  * Notification entity for user notifications
@@ -64,7 +65,9 @@ public class Notification {
     private LocalDateTime readAt;
     
     // TTL index - notifications expire after 90 days (auto-deleted by MongoDB)
-    @Indexed(expireAfterSeconds = 7776000) // 90 days in seconds
+    // Note: TTL indexes should be created manually or via configuration
+    // db.notifications.createIndex({ "expiresAt": 1 }, { expireAfterSeconds: 0 })
+    @Indexed
     private LocalDateTime expiresAt;
     
     // Helper methods

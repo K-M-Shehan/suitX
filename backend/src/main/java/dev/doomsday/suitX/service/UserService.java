@@ -1,14 +1,15 @@
 package dev.doomsday.suitX.service;
 
-import dev.doomsday.suitX.model.User;
-import dev.doomsday.suitX.repository.UserRepository;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import dev.doomsday.suitX.model.User;
+import dev.doomsday.suitX.repository.UserRepository;
 
 @Service
 public class UserService {
@@ -85,6 +86,51 @@ public class UserService {
     
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
+    }
+    
+    public Optional<User> findById(String id) {
+        return userRepository.findById(id);
+    }
+    
+    /**
+     * Update user profile (excluding password and authentication fields)
+     */
+    public User updateUserProfile(String username, User updatedUser) {
+        User existingUser = findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        
+        // Update allowed fields
+        if (updatedUser.getFirstName() != null) {
+            existingUser.setFirstName(updatedUser.getFirstName());
+        }
+        if (updatedUser.getLastName() != null) {
+            existingUser.setLastName(updatedUser.getLastName());
+        }
+        if (updatedUser.getBio() != null) {
+            existingUser.setBio(updatedUser.getBio());
+        }
+        if (updatedUser.getPhone() != null) {
+            existingUser.setPhone(updatedUser.getPhone());
+        }
+        if (updatedUser.getDepartment() != null) {
+            existingUser.setDepartment(updatedUser.getDepartment());
+        }
+        if (updatedUser.getAvatar() != null) {
+            existingUser.setAvatar(updatedUser.getAvatar());
+        }
+        
+        // Email update with validation
+        if (updatedUser.getEmail() != null && !updatedUser.getEmail().equals(existingUser.getEmail())) {
+            if (!isValidEmail(updatedUser.getEmail())) {
+                throw new IllegalArgumentException("Invalid email format");
+            }
+            if (userRepository.findByEmail(updatedUser.getEmail()).isPresent()) {
+                throw new IllegalArgumentException("Email already exists");
+            }
+            existingUser.setEmail(updatedUser.getEmail());
+        }
+        
+        return userRepository.save(existingUser);
     }
     
     /**
