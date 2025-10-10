@@ -134,7 +134,7 @@ public class GeminiAIService {
                 "temperature", 0.7,
                 "topK", 40,
                 "topP", 0.95,
-                "maxOutputTokens", 8192
+                "maxOutputTokens", 16384
             ),
             "safetySettings", List.of(
                 Map.of("category", "HARM_CATEGORY_HARASSMENT", "threshold", "BLOCK_MEDIUM_AND_ABOVE"),
@@ -172,12 +172,19 @@ public class GeminiAIService {
         try {
             // Clean the response (remove any markdown formatting)
             String cleanJson = aiResponse.trim();
+            
+            // Remove markdown code fences
             if (cleanJson.startsWith("```json")) {
                 cleanJson = cleanJson.substring(7);
+            } else if (cleanJson.startsWith("```")) {
+                cleanJson = cleanJson.substring(3);
             }
+            
             if (cleanJson.endsWith("```")) {
                 cleanJson = cleanJson.substring(0, cleanJson.length() - 3);
             }
+            
+            cleanJson = cleanJson.trim();
 
             JsonNode jsonNode = objectMapper.readTree(cleanJson);
             

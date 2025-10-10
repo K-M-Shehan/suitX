@@ -25,8 +25,8 @@ export async function analyzeProjectRisks(analysisRequest) {
     });
     
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      const errorData = await response.json().catch(() => ({ message: response.statusText }));
+      throw new Error(errorData.message || errorData.error || `HTTP ${response.status}: ${response.statusText}`);
     }
     
     return await response.json();
