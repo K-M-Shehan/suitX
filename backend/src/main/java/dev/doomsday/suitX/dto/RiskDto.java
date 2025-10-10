@@ -15,7 +15,9 @@ public class RiskDto {
     private Double riskScore;
     private String status;
     private String projectId;
+    private String projectName; // Added for display in dashboard
     private String assignedTo;
+    private Boolean aiGenerated; // Added to show AI-generated risks
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime resolvedAt;

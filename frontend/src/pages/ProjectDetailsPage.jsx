@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getProjectById, updateProject } from '../services/ProjectService';
+import { getProjectById, updateProject, analyzeProjectRisks } from '../services/ProjectService';
 import { getTasksByProject, createTask, updateTask } from '../services/TaskService';
 import ProjectEditDialog from '../components/ProjectEditDialog';
 import TaskFormDialog from '../components/TaskFormDialog';
@@ -19,6 +19,7 @@ const ProjectDetailsPage = () => {
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
   const [isTaskEditDialogOpen, setIsTaskEditDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
+  const [analyzingRisks, setAnalyzingRisks] = useState(false);
 
   useEffect(() => {
     loadProjectDetails();
@@ -135,6 +136,24 @@ const ProjectDetailsPage = () => {
       }
       
       alert(errorMessage);
+    }
+  };
+
+  const handleAnalyzeRisks = async () => {
+    try {
+      setAnalyzingRisks(true);
+      setError('');
+      
+      const risks = await analyzeProjectRisks(projectId);
+      
+      // Show success message
+      alert(`Successfully generated ${risks.length} risks for this project! View them in the Risk Dashboard.`);
+      
+      setAnalyzingRisks(false);
+    } catch (e) {
+      console.error('Failed to analyze project risks:', e);
+      setError('Failed to analyze project risks. Please try again.');
+      setAnalyzingRisks(false);
     }
   };
 
@@ -277,12 +296,25 @@ const ProjectDetailsPage = () => {
             </div>
           </div>
           
-          <button
-            onClick={() => setIsEditDialogOpen(true)}
-            className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            Edit Project
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleAnalyzeRisks}
+              disabled={analyzingRisks}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                analyzingRisks 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-purple-600 hover:bg-purple-700'
+              } text-white`}
+            >
+              {analyzingRisks ? 'Analyzing...' : '🤖 Analyze Risks'}
+            </button>
+            <button
+              onClick={() => setIsEditDialogOpen(true)}
+              className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Edit Project
+            </button>
+          </div>
         </div>
       </div>
 

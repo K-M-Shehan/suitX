@@ -3,6 +3,7 @@ package dev.doomsday.suitX.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.doomsday.suitX.dto.*;
+import dev.doomsday.suitX.model.Project;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -32,6 +33,9 @@ public class GeminiAIService {
         this.objectMapper = objectMapper;
     }
 
+    /**
+     * Analyze risks from a form request (manual analysis)
+     */
     public AIAnalysisResponse analyzeProjectRisks(AIAnalysisRequest request) {
         try {
             String prompt = buildRiskAnalysisPrompt(request);
@@ -40,6 +44,83 @@ public class GeminiAIService {
         } catch (Exception e) {
             return createErrorResponse(request, e.getMessage());
         }
+    }
+
+    /**
+     * Analyze risks from an existing project (automatic analysis)
+     */
+    public AIAnalysisResponse analyzeExistingProject(Project project) {
+        try {
+            String prompt = buildProjectRiskAnalysisPrompt(project);
+            String geminiResponse = callGeminiAPI(prompt);
+            AIAnalysisResponse response = parseAIResponse(geminiResponse, null);
+            return response;
+        } catch (Exception e) {
+            return createErrorResponse(null, e.getMessage());
+        }
+    }
+
+    private String buildProjectRiskAnalysisPrompt(Project project) {
+        StringBuilder prompt = new StringBuilder("""
+            You are an expert project management consultant and risk analyst. Analyze the following project and provide a comprehensive risk assessment with mitigation strategies.
+
+            PROJECT DETAILS:
+            """);
+        
+        prompt.append("- Name: ").append(project.getName()).append("\n");
+        prompt.append("- Description: ").append(project.getDescription()).append("\n");
+        if (project.getStartDate() != null) {
+            prompt.append("- Start Date: ").append(project.getStartDate()).append("\n");
+        }
+        if (project.getEndDate() != null) {
+            prompt.append("- End Date: ").append(project.getEndDate()).append("\n");
+        }
+        prompt.append("- Status: ").append(project.getStatus()).append("\n");
+        
+        if (project.getTags() != null && !project.getTags().isEmpty()) {
+            prompt.append("- Tags: ").append(String.join(", ", project.getTags())).append("\n");
+        }
+        
+        prompt.append("\n").append("""
+            ANALYSIS REQUIREMENTS:
+            1. Identify 5-8 potential risks across different categories (Technical, Resource, Schedule, Financial, Scope, Quality)
+            2. For each risk, provide:
+               - A clear title
+               - Detailed description of the risk
+               - Category classification
+               - Priority level (HIGH/MEDIUM/LOW)
+               - Probability of occurrence (0-100)
+               - Confidence score (0.0-1.0) indicating your confidence in this assessment
+            3. Provide 3-5 mitigation strategies for each risk
+            4. Each mitigation should include implementation effort (LOW/MEDIUM/HIGH)
+
+            RESPONSE FORMAT (JSON):
+            {
+              "identifiedRisks": [
+                {
+                  "riskId": "R1",
+                  "title": "Risk title",
+                  "description": "Detailed description",
+                  "category": "TECHNICAL|RESOURCE|SCHEDULE|FINANCIAL|SCOPE|QUALITY",
+                  "priority": "HIGH|MEDIUM|LOW",
+                  "probability": 75,
+                  "confidenceScore": 0.85
+                }
+              ],
+              "suggestedMitigations": [
+                {
+                  "mitigationId": "M1",
+                  "riskId": "R1",
+                  "description": "Mitigation description",
+                  "implementationEffort": "LOW|MEDIUM|HIGH"
+                }
+              ]
+            }
+
+            Provide ONLY the JSON response, no additional text.
+            """);
+        
+        return prompt.toString();
     }
 
     private String buildRiskAnalysisPrompt(AIAnalysisRequest request) {
@@ -190,7 +271,7 @@ public class GeminiAIService {
             
             AIAnalysisResponse response = new AIAnalysisResponse();
             response.setAnalysisId(UUID.randomUUID().toString());
-            response.setProjectName(request.getProjectName());
+            response.setProjectName(request != null ? request.getProjectName() : "Auto-analyzed Project");
             response.setAnalysisTimestamp(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
             response.setStatus("SUCCESS");
             response.setConfidenceScore(0.85);
@@ -234,7 +315,7 @@ public class GeminiAIService {
     private AIAnalysisResponse createErrorResponse(AIAnalysisRequest request, String errorMessage) {
         AIAnalysisResponse response = new AIAnalysisResponse();
         response.setAnalysisId(UUID.randomUUID().toString());
-        response.setProjectName(request.getProjectName());
+        response.setProjectName(request != null ? request.getProjectName() : "Unknown Project");
         response.setAnalysisTimestamp(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         response.setStatus("ERROR");
         response.setConfidenceScore(0.0);

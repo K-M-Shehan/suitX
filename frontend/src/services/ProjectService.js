@@ -167,3 +167,33 @@ export async function deleteProject(id) {
     throw error;
   }
 }
+
+// Analyze project risks with AI
+export async function analyzeProjectRisks(projectId) {
+  try {
+    const token = getToken();
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (token) {
+      headers['Authorization'] = token;
+    }
+
+    const response = await fetch(`${API_BASE_URL}/projects/${projectId}/analyze-risks`, {
+      method: 'POST',
+      headers: headers,
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Risk analysis failed:', errorText);
+      throw new Error(`Failed to analyze project risks: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error analyzing project risks:', error);
+    throw error;
+  }
+}
