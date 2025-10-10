@@ -46,6 +46,9 @@ public class User {
     // Projects where user is a member
     private List<String> memberProjects = new ArrayList<>();
     
+    // User settings
+    private UserSettings settings = new UserSettings();
+    
     // Status tracking
     @Indexed
     private Boolean isActive = true;
