@@ -191,6 +191,33 @@ class RiskService {
     }
   }
 
+  async acceptRisk(id) {
+    try {
+      const token = getToken();
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = token;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/risks/${id}/accept`, {
+        method: 'PATCH',
+        headers: headers,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to accept risk with id: ${id}. Status: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error accepting risk:', error);
+      throw error;
+    }
+  }
+
   async getRisksByProject(projectId) {
     try {
       const token = getToken();

@@ -100,6 +100,18 @@ public class RiskService {
         throw new RuntimeException("Risk not found with id: " + id);
     }
 
+    public RiskDto acceptRisk(String id) {
+        Optional<Risk> existingRisk = riskRepository.findById(id);
+        if (existingRisk.isPresent()) {
+            Risk risk = existingRisk.get();
+            risk.setStatus("ACCEPTED");
+            risk.setUpdatedAt(LocalDateTime.now());
+            Risk savedRisk = riskRepository.save(risk);
+            return convertToDto(savedRisk);
+        }
+        throw new RuntimeException("Risk not found with id: " + id);
+    }
+
     /**
      * Analyze a project and automatically generate risks
      */
