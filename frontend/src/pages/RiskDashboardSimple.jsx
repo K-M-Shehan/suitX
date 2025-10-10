@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import RiskService from '../services/RiskService';
 import { getAllProjects } from '../services/ProjectService';
 
 const RiskDashboard = () => {
+  const navigate = useNavigate();
   const [selectedStatus, setSelectedStatus] = useState('All');
   const [riskSummary, setRiskSummary] = useState({
     totalProjects: 0,
@@ -85,6 +87,10 @@ const RiskDashboard = () => {
       likelihood: risk.likelihood || '',
       assignedTo: risk.assignedTo || ''
     });
+  };
+
+  const handleRiskClick = (riskId) => {
+    navigate(`/risks/${riskId}`);
   };
 
   const handleSaveEdit = async () => {
@@ -221,7 +227,7 @@ const RiskDashboard = () => {
 
         {/* Status Filter */}
         <div className="flex space-x-2">
-          {['All', 'IDENTIFIED', 'MONITORING', 'MITIGATED', 'RESOLVED', 'ACCEPTED'].map((status) => (
+          {['All', 'Identified', 'Monitoring', 'Mitigated', 'Resolved', 'Accepted'].map((status) => (
             <button
               key={status}
               onClick={() => setSelectedStatus(status)}
@@ -284,9 +290,29 @@ const RiskDashboard = () => {
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {filteredRisks.map((risk, index) => (
-              <div key={risk.id || index} className="bg-white rounded-lg p-6 shadow-sm border">
+              <div 
+                key={risk.id || index} 
+                className="bg-white rounded-lg p-6 shadow-sm border hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => handleRiskClick(risk.id)}
+              >
                 <div className="flex justify-between items-start mb-3">
-                  <h3 className="text-lg font-semibold text-gray-900">{risk.title || 'Untitled Risk'}</h3>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="text-lg font-semibold text-gray-900">{risk.title || 'Untitled Risk'}</h3>
+                      {risk.aiGenerated && (
+                        <span className="px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800 border border-purple-300">
+                          AI
+                        </span>
+                      )}
+                    </div>
+                    {risk.projectName && (
+                      <div className="flex items-center gap-1 mb-2">
+                        <span className="px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 border border-blue-300">
+                          📁 {risk.projectName}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                   <div className="flex items-center space-x-2">
                     {risk.riskScore && (
                       <span className="px-2 py-1 rounded-md text-xs font-bold bg-gray-800 text-white">
@@ -322,13 +348,19 @@ const RiskDashboard = () => {
 
                 <div className="flex space-x-2">
                   <button 
-                    onClick={() => handleEditRisk(risk)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditRisk(risk);
+                    }}
                     className="px-3 py-1 text-blue-600 hover:bg-blue-50 rounded-md text-sm font-medium transition-colors"
                   >
                     Edit
                   </button>
                   <button 
-                    onClick={() => handleResolveRisk(risk.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleResolveRisk(risk.id);
+                    }}
                     className="px-3 py-1 text-green-600 hover:bg-green-50 rounded-md text-sm font-medium transition-colors"
                     disabled={risk.status === 'RESOLVED' || risk.status === 'Resolved'}
                   >

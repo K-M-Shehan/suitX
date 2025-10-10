@@ -1,15 +1,20 @@
 package dev.doomsday.suitX.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import dev.doomsday.suitX.dto.AIAnalysisResponse;
+import dev.doomsday.suitX.dto.AIRiskAssessment;
+import dev.doomsday.suitX.dto.AIMitigationStrategy;
 import dev.doomsday.suitX.dto.RiskDto;
 import dev.doomsday.suitX.dto.RiskSummaryDto;
 import dev.doomsday.suitX.model.Risk;
+import dev.doomsday.suitX.model.Project;
 import dev.doomsday.suitX.repository.ProjectRepository;
 import dev.doomsday.suitX.repository.RiskRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +25,7 @@ public class RiskService {
 
     private final RiskRepository riskRepository;
     private final ProjectRepository projectRepository;
+    private final GeminiAIService geminiAIService;
 
     public List<RiskDto> getAllRisks() {
         return riskRepository.findAll().stream()
@@ -94,16 +100,174 @@ public class RiskService {
         throw new RuntimeException("Risk not found with id: " + id);
     }
 
-    public RiskSummaryDto getRiskSummary() {
+    /**
+     * Analyze a project and automatically generate risks
+     */
+    public List<RiskDto> analyzeAndGenerateRisks(String projectId, String userId) {
+        // Get project
+        Optional<Project> projectOpt = projectRepository.findById(projectId);
+        if (projectOpt.isEmpty()) {
+            throw new RuntimeException("Project not found with id: " + projectId);
+        }
+        
+        Project project = projectOpt.get();
+        
+        // Use AI to analyze the project
+        AIAnalysisResponse aiResponse = geminiAIService.analyzeExistingProject(project);
+        
+        // Save the AI-generated risks
+        List<Risk> savedRisks = saveAIGeneratedRisks(
+            projectId, 
+            userId, 
+            aiResponse.getIdentifiedRisks(), 
+            aiResponse.getSuggestedMitigations()
+        );
+        
+        // Convert to DTOs and return
+        return savedRisks.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    public RiskSummaryDto getRiskSummary(String username) {
         RiskSummaryDto summary = new RiskSummaryDto();
-        summary.setTotalRisks(riskRepository.count());
-        summary.setTotalProjects(projectRepository.count());
-        summary.setActiveRisks(riskRepository.countByStatus("ACTIVE"));
-        summary.setResolvedRisks(riskRepository.countByStatus("RESOLVED"));
-        summary.setHighSeverityRisks(riskRepository.countBySeverity("HIGH"));
-        summary.setMediumSeverityRisks(riskRepository.countBySeverity("MEDIUM"));
-        summary.setLowSeverityRisks(riskRepository.countBySeverity("LOW"));
+        
+        // Get all projects for the user
+        List<Project> userProjects = projectRepository.findByCreatedBy(username);
+        List<String> userProjectIds = userProjects.stream()
+                .map(Project::getId)
+                .collect(Collectors.toList());
+        
+        // Get all risks for user's projects
+        List<Risk> userRisks = riskRepository.findAll().stream()
+                .filter(risk -> risk.getProjectId() != null && userProjectIds.contains(risk.getProjectId()))
+                .collect(Collectors.toList());
+        
+        // Count totals
+        summary.setTotalProjects((long) userProjects.size());
+        summary.setTotalRisks((long) userRisks.size());
+        
+        // Count by status
+        summary.setActiveRisks(userRisks.stream()
+                .filter(risk -> "ACTIVE".equalsIgnoreCase(risk.getStatus()))
+                .count());
+        summary.setResolvedRisks(userRisks.stream()
+                .filter(risk -> "RESOLVED".equalsIgnoreCase(risk.getStatus()))
+                .count());
+        
+        // Count by severity
+        summary.setHighSeverityRisks(userRisks.stream()
+                .filter(risk -> "HIGH".equalsIgnoreCase(risk.getSeverity()))
+                .count());
+        summary.setMediumSeverityRisks(userRisks.stream()
+                .filter(risk -> "MEDIUM".equalsIgnoreCase(risk.getSeverity()))
+                .count());
+        summary.setLowSeverityRisks(userRisks.stream()
+                .filter(risk -> "LOW".equalsIgnoreCase(risk.getSeverity()))
+                .count());
+        
         return summary;
+    }
+
+    /**
+     * Save AI-generated risks for a project
+     */
+    public List<Risk> saveAIGeneratedRisks(String projectId, String userId, List<AIRiskAssessment> aiRisks, List<AIMitigationStrategy> aiMitigations) {
+        List<Risk> savedRisks = new ArrayList<>();
+        
+        // Get project to validate it exists
+        Optional<Project> project = projectRepository.findById(projectId);
+        if (project.isEmpty()) {
+            throw new RuntimeException("Project not found with id: " + projectId);
+        }
+        
+        for (AIRiskAssessment aiRisk : aiRisks) {
+            Risk risk = new Risk();
+            risk.setTitle(aiRisk.getTitle());
+            risk.setDescription(aiRisk.getDescription());
+            risk.setProjectId(projectId);
+            risk.setCreatedBy(userId);
+            
+            // Map AI categories to Risk types
+            risk.setType(mapCategory(aiRisk.getCategory()));
+            risk.setSeverity(aiRisk.getPriority() != null ? aiRisk.getPriority() : "MEDIUM");
+            risk.setLikelihood(mapProbabilityToLikelihood(aiRisk.getProbability()));
+            
+            // AI-specific fields
+            risk.setAiGenerated(true);
+            risk.setAiConfidence(aiRisk.getConfidenceScore() != null ? aiRisk.getConfidenceScore() * 100 : null);
+            
+            // Status and timeline
+            risk.setStatus("IDENTIFIED");
+            risk.setIdentifiedDate(LocalDateTime.now());
+            
+            // Calculate risk score
+            risk.calculateRiskScore();
+            
+            // Add mitigation suggestions from AI
+            if (aiMitigations != null) {
+                for (AIMitigationStrategy aiMit : aiMitigations) {
+                    if (aiMit.getRiskId() != null && aiMit.getRiskId().equals(aiRisk.getRiskId())) {
+                        risk.addMitigationSuggestion(
+                            aiMit.getDescription(),
+                            true, // AI-generated
+                            aiMit.getImplementationEffort()
+                        );
+                    }
+                }
+            }
+            
+            // Add history entry
+            risk.addHistoryEntry(
+                "RISK_CREATED",
+                userId,
+                null,
+                "IDENTIFIED",
+                "Risk identified by AI analysis"
+            );
+            
+            Risk savedRisk = riskRepository.save(risk);
+            
+            // Update project with risk reference
+            Project proj = project.get();
+            proj.addRisk(savedRisk.getId());
+            projectRepository.save(proj);
+            
+            savedRisks.add(savedRisk);
+        }
+        
+        return savedRisks;
+    }
+
+    /**
+     * Map AI category to Risk type
+     */
+    private String mapCategory(String category) {
+        if (category == null) return "TECHNICAL";
+        return switch (category.toUpperCase()) {
+            case "TECHNICAL" -> "TECHNICAL";
+            case "RESOURCE" -> "RESOURCE";
+            case "TIMELINE" -> "SCHEDULE";
+            case "SCHEDULE" -> "SCHEDULE";
+            case "BUDGET" -> "FINANCIAL";
+            case "FINANCIAL" -> "FINANCIAL";
+            case "SCOPE" -> "SCOPE";
+            case "QUALITY" -> "QUALITY";
+            case "EXTERNAL" -> "SCOPE";
+            default -> "TECHNICAL";
+        };
+    }
+
+    /**
+     * Map probability (0-100) to likelihood
+     */
+    private String mapProbabilityToLikelihood(Double probability) {
+        if (probability == null) return "POSSIBLE";
+        if (probability >= 80) return "CERTAIN";
+        if (probability >= 60) return "LIKELY";
+        if (probability >= 40) return "POSSIBLE";
+        if (probability >= 20) return "UNLIKELY";
+        return "RARE";
     }
 
     private RiskDto convertToDto(Risk risk) {
@@ -122,6 +286,14 @@ public class RiskService {
         dto.setUpdatedAt(risk.getUpdatedAt());
         dto.setResolvedAt(risk.getResolvedAt());
         dto.setCreatedBy(risk.getCreatedBy());
+        dto.setAiGenerated(risk.getAiGenerated());
+        
+        // Fetch project name if projectId exists
+        if (risk.getProjectId() != null) {
+            projectRepository.findById(risk.getProjectId())
+                .ifPresent(project -> dto.setProjectName(project.getName()));
+        }
+        
         return dto;
     }
 

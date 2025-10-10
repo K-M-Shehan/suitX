@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import dev.doomsday.suitX.dto.ProjectDto;
+import dev.doomsday.suitX.dto.RiskDto;
 import dev.doomsday.suitX.service.ProjectService;
+import dev.doomsday.suitX.service.RiskService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -25,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class ProjectController {
 
     private final ProjectService projectService;
+    private final RiskService riskService;
 
     @GetMapping
     public ResponseEntity<List<ProjectDto>> getAllProjects(Authentication authentication) {
@@ -120,6 +123,29 @@ public class ProjectController {
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/{id}/analyze-risks")
+    public ResponseEntity<List<RiskDto>> analyzeProjectRisks(@PathVariable String id, Authentication authentication) {
+        try {
+            if (authentication == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            String username = authentication.getName();
+            
+            // Check if user has access to the project
+            Optional<ProjectDto> project = projectService.getProjectById(id, username);
+            if (project.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+            
+            // Analyze and generate risks
+            List<RiskDto> risks = riskService.analyzeAndGenerateRisks(id, username);
+            return ResponseEntity.ok(risks);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

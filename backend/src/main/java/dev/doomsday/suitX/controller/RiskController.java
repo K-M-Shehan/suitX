@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -103,8 +104,12 @@ public class RiskController {
     }
 
     @GetMapping("/summary")
-    public ResponseEntity<RiskSummaryDto> getRiskSummary() {
-        RiskSummaryDto summary = riskService.getRiskSummary();
+    public ResponseEntity<RiskSummaryDto> getRiskSummary(Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String username = authentication.getName();
+        RiskSummaryDto summary = riskService.getRiskSummary(username);
         return ResponseEntity.ok(summary);
     }
 }

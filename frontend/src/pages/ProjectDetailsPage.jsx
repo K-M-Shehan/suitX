@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getProjectById, updateProject } from '../services/ProjectService';
+import { getProjectById, updateProject, analyzeProjectRisks } from '../services/ProjectService';
 import { getTasksByProject, createTask, updateTask } from '../services/TaskService';
+import RiskService from '../services/RiskService';
 import ProjectEditDialog from '../components/ProjectEditDialog';
 import TaskFormDialog from '../components/TaskFormDialog';
 import TaskEditDialog from '../components/TaskEditDialog';
@@ -12,6 +13,7 @@ const ProjectDetailsPage = () => {
   const navigate = useNavigate();
   const [project, setProject] = useState(null);
   const [tasks, setTasks] = useState([]);
+  const [risks, setRisks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
@@ -19,6 +21,9 @@ const ProjectDetailsPage = () => {
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
   const [isTaskEditDialogOpen, setIsTaskEditDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
+  const [analyzingRisks, setAnalyzingRisks] = useState(false);
+  const [selectedRisk, setSelectedRisk] = useState(null);
+  const [isRiskDetailOpen, setIsRiskDetailOpen] = useState(false);
 
   useEffect(() => {
     loadProjectDetails();
@@ -40,6 +45,15 @@ const ProjectDetailsPage = () => {
       } catch (taskError) {
         console.error('Failed to load tasks:', taskError);
         // Continue even if tasks fail to load
+      }
+      
+      // Fetch project risks
+      try {
+        const risksData = await RiskService.getRisksByProject(projectId);
+        setRisks(risksData);
+      } catch (riskError) {
+        console.error('Failed to load risks:', riskError);
+        // Continue even if risks fail to load
       }
       
       setLoading(false);
@@ -138,6 +152,41 @@ const ProjectDetailsPage = () => {
     }
   };
 
+  const handleAnalyzeRisks = async () => {
+    try {
+      setAnalyzingRisks(true);
+      setError('');
+      
+      const risks = await analyzeProjectRisks(projectId);
+      
+      // Reload risks to show the new ones
+      const updatedRisks = await RiskService.getRisksByProject(projectId);
+      setRisks(updatedRisks);
+      
+      // Show success message
+      alert(`Successfully generated ${risks.length} risks for this project! Check the Risks tab.`);
+      
+      // Switch to risks tab
+      setActiveTab('risks');
+      
+      setAnalyzingRisks(false);
+    } catch (e) {
+      console.error('Failed to analyze project risks:', e);
+      setError('Failed to analyze project risks. Please try again.');
+      setAnalyzingRisks(false);
+    }
+  };
+
+  const handleViewRiskDetails = (risk) => {
+    setSelectedRisk(risk);
+    setIsRiskDetailOpen(true);
+  };
+
+  const handleCloseRiskDetail = () => {
+    setIsRiskDetailOpen(false);
+    setSelectedRisk(null);
+  };
+
   const handleQuickStatusUpdate = async (taskId, newStatus) => {
     try {
       // Find the task to get its current data
@@ -220,6 +269,26 @@ const ProjectDetailsPage = () => {
     });
   };
 
+  const getSeverityColor = (severity) => {
+    const colors = {
+      'HIGH': 'bg-red-100 text-red-800 border-red-300',
+      'MEDIUM': 'bg-yellow-100 text-yellow-800 border-yellow-300',
+      'LOW': 'bg-green-100 text-green-800 border-green-300',
+    };
+    return colors[severity] || 'bg-gray-100 text-gray-800 border-gray-300';
+  };
+
+  const getLikelihoodColor = (likelihood) => {
+    const colors = {
+      'CERTAIN': 'bg-red-100 text-red-800 border-red-300',
+      'LIKELY': 'bg-orange-100 text-orange-800 border-orange-300',
+      'POSSIBLE': 'bg-yellow-100 text-yellow-800 border-yellow-300',
+      'UNLIKELY': 'bg-blue-100 text-blue-800 border-blue-300',
+      'RARE': 'bg-green-100 text-green-800 border-green-300',
+    };
+    return colors[likelihood] || 'bg-gray-100 text-gray-800 border-gray-300';
+  };
+
   if (loading) {
     return (
       <div className="flex-1 p-8 bg-gray-50 flex items-center justify-center">
@@ -277,19 +346,32 @@ const ProjectDetailsPage = () => {
             </div>
           </div>
           
-          <button
-            onClick={() => setIsEditDialogOpen(true)}
-            className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            Edit Project
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleAnalyzeRisks}
+              disabled={analyzingRisks}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                analyzingRisks 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-purple-600 hover:bg-purple-700'
+              } text-white`}
+            >
+              {analyzingRisks ? 'Analyzing...' : '🤖 Analyze Risks'}
+            </button>
+            <button
+              onClick={() => setIsEditDialogOpen(true)}
+              className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Edit Project
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Tabs */}
       <div className="border-b border-gray-200 mb-6">
         <nav className="-mb-px flex space-x-8">
-          {['overview', 'tasks', 'timeline'].map((tab) => (
+          {['overview', 'tasks', 'risks', 'timeline'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -300,6 +382,11 @@ const ProjectDetailsPage = () => {
               }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              {tab === 'risks' && risks.length > 0 && (
+                <span className="ml-2 px-2 py-0.5 bg-red-100 text-red-800 text-xs rounded-full">
+                  {risks.length}
+                </span>
+              )}
             </button>
           ))}
         </nav>
@@ -552,6 +639,99 @@ const ProjectDetailsPage = () => {
         </div>
       )}
 
+      {/* Risks Tab */}
+      {activeTab === 'risks' && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">
+              Project Risks
+              {risks.length > 0 && (
+                <span className="ml-3 text-sm font-normal text-gray-500">
+                  ({risks.length} {risks.length === 1 ? 'risk' : 'risks'} identified)
+                </span>
+              )}
+            </h2>
+          </div>
+
+          {risks.length === 0 ? (
+            <div className="bg-white rounded-lg shadow p-12 text-center">
+              <div className="text-gray-400 mb-4">
+                <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Risks Identified</h3>
+              <p className="text-gray-500 mb-4">
+                This project doesn't have any identified risks yet.
+              </p>
+              <p className="text-sm text-gray-400">
+                Use the "🤖 Analyze Risks" button above to automatically identify potential risks using AI.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {risks.map((risk) => (
+                <div
+                  key={risk.id}
+                  className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow cursor-pointer border border-gray-200"
+                  onClick={() => handleViewRiskDetails(risk)}
+                >
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {risk.title || 'Untitled Risk'}
+                        </h3>
+                        {risk.aiGenerated && (
+                          <span className="px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800 border border-purple-300">
+                            AI
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end space-y-1">
+                      {risk.riskScore && (
+                        <span className="px-2 py-1 rounded-md text-xs font-bold bg-gray-800 text-white">
+                          Score: {risk.riskScore}
+                        </span>
+                      )}
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(risk.status)}`}>
+                        {risk.status || 'Unknown'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                    {risk.description || 'No description available'}
+                  </p>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500">Severity:</span>
+                      <span className={`px-2 py-1 rounded-md text-xs font-medium ${getSeverityColor(risk.severity)}`}>
+                        {risk.severity || 'Unknown'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500">Likelihood:</span>
+                      <span className={`px-2 py-1 rounded-md text-xs font-medium ${getLikelihoodColor(risk.likelihood)}`}>
+                        {risk.likelihood || 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 pt-3 border-t border-gray-100">
+                    <p className="text-xs text-gray-500">
+                      Click to view more details →
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Dialogs */}
       <ProjectEditDialog
         isOpen={isEditDialogOpen}
@@ -576,6 +756,127 @@ const ProjectDetailsPage = () => {
         onSubmit={handleEditTask}
         task={selectedTask}
       />
+
+      {/* Risk Detail Modal */}
+      {isRiskDetailOpen && selectedRisk && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <h2 className="text-2xl font-bold text-gray-900">{selectedRisk.title}</h2>
+                {selectedRisk.aiGenerated && (
+                  <span className="px-3 py-1 rounded-md text-sm font-medium bg-purple-100 text-purple-800 border border-purple-300">
+                    🤖 AI Generated
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={handleCloseRiskDetail}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Status and Score */}
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-gray-500">Status:</span>
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(selectedRisk.status)}`}>
+                    {selectedRisk.status}
+                  </span>
+                </div>
+                {selectedRisk.riskScore && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-500">Risk Score:</span>
+                    <span className="px-3 py-1 rounded-md text-sm font-bold bg-gray-800 text-white">
+                      {selectedRisk.riskScore}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Description */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Description</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  {selectedRisk.description || 'No description available'}
+                </p>
+              </div>
+
+              {/* Risk Metrics */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <p className="text-sm font-medium text-gray-500 mb-2">Type</p>
+                  <p className="text-lg font-semibold text-gray-900">{selectedRisk.type || 'N/A'}</p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <p className="text-sm font-medium text-gray-500 mb-2">Severity</p>
+                  <span className={`inline-block px-3 py-1 rounded-md text-sm font-medium ${getSeverityColor(selectedRisk.severity)}`}>
+                    {selectedRisk.severity || 'Unknown'}
+                  </span>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <p className="text-sm font-medium text-gray-500 mb-2">Likelihood</p>
+                  <span className={`inline-block px-3 py-1 rounded-md text-sm font-medium ${getLikelihoodColor(selectedRisk.likelihood)}`}>
+                    {selectedRisk.likelihood || 'N/A'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Timestamps */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                {selectedRisk.createdAt && (
+                  <div>
+                    <span className="font-medium text-gray-500">Created:</span>
+                    <span className="ml-2 text-gray-700">{formatDate(selectedRisk.createdAt)}</span>
+                  </div>
+                )}
+                {selectedRisk.updatedAt && (
+                  <div>
+                    <span className="font-medium text-gray-500">Last Updated:</span>
+                    <span className="ml-2 text-gray-700">{formatDate(selectedRisk.updatedAt)}</span>
+                  </div>
+                )}
+                {selectedRisk.resolvedAt && (
+                  <div>
+                    <span className="font-medium text-gray-500">Resolved:</span>
+                    <span className="ml-2 text-gray-700">{formatDate(selectedRisk.resolvedAt)}</span>
+                  </div>
+                )}
+                {selectedRisk.assignedTo && (
+                  <div>
+                    <span className="font-medium text-gray-500">Assigned To:</span>
+                    <span className="ml-2 text-gray-700">{selectedRisk.assignedTo}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4 border-t border-gray-200">
+                <button
+                  onClick={handleCloseRiskDetail}
+                  className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    handleCloseRiskDetail();
+                    navigate(`/risks/${selectedRisk.id}`);
+                  }}
+                  className="flex-1 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
+                >
+                  View Full Details
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

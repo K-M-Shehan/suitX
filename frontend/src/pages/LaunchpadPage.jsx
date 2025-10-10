@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ProjectCard from "../components/ProjectCard";
 import AddProjectCard from "../components/AddProjectCard";
 import { getAllProjects, createProject as apiCreateProject, deleteProject as apiDeleteProject } from "../services/ProjectService";
 import RiskService from "../services/RiskService";
 
 function LaunchpadPage() {
+  const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
   const [risks, setRisks] = useState([]);
   const [error, setError] = useState('');
@@ -170,7 +171,11 @@ function LaunchpadPage() {
             </div>
           ) : (
             risks.map((risk) => (
-              <div key={risk.id} className={`${getSeverityColor(risk.severity)} rounded-lg p-6`}>
+              <div 
+                key={risk.id} 
+                className={`${getSeverityColor(risk.severity)} rounded-lg p-6 cursor-pointer hover:shadow-md transition-shadow`}
+                onClick={() => navigate(`/risks/${risk.id}`)}
+              >
                 {/* Risk Header */}
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="text-lg font-semibold text-gray-900 flex-1">{risk.title}</h3>
@@ -210,13 +215,19 @@ function LaunchpadPage() {
                 {/* Action Buttons */}
                 <div className="flex space-x-3">
                   <button 
-                    onClick={() => handleResolveRisk(risk.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleResolveRisk(risk.id);
+                    }}
                     className="text-purple-600 hover:text-purple-700 font-medium text-sm transition-colors"
                   >
                     Resolve
                   </button>
                   <button 
-                    onClick={() => handleIgnoreRisk(risk.id, risk.title)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleIgnoreRisk(risk.id, risk.title);
+                    }}
                     className="text-gray-500 hover:text-gray-600 font-medium text-sm transition-colors"
                   >
                     Ignore
