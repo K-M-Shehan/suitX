@@ -46,7 +46,18 @@ class RiskService {
 
   async getRiskById(id) {
     try {
-      const response = await fetch(`${API_BASE_URL}/risks/${id}`);
+      const token = getToken();
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = token;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/risks/${id}`, {
+        headers: headers,
+      });
       if (!response.ok) {
         throw new Error(`Failed to fetch risk with id: ${id}`);
       }

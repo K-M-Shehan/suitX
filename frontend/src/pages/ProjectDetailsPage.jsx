@@ -866,11 +866,11 @@ const ProjectDetailsPage = () => {
                 <button
                   onClick={() => {
                     handleCloseRiskDetail();
-                    navigate('/dashboard/risks');
+                    navigate(`/risks/${selectedRisk.id}`);
                   }}
                   className="flex-1 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
                 >
-                  View in Risk Dashboard
+                  View Full Details
                 </button>
               </div>
             </div>
