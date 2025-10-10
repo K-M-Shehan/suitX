@@ -103,6 +103,16 @@ public class RiskController {
         }
     }
 
+    @PatchMapping("/{id}/accept")
+    public ResponseEntity<RiskDto> acceptRisk(@PathVariable String id) {
+        try {
+            RiskDto acceptedRisk = riskService.acceptRisk(id);
+            return ResponseEntity.ok(acceptedRisk);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @GetMapping("/summary")
     public ResponseEntity<RiskSummaryDto> getRiskSummary(Authentication authentication) {
         if (authentication == null) {

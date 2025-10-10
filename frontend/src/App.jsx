@@ -14,6 +14,7 @@ import SettingsPage from "./pages/SettingsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import RiskDashboard from "./pages/RiskDashboardSimple";
 import MitigationPage from "./pages/MitigationPageSimple";
+import RiskHistoryPage from "./pages/RiskHistoryPage";
 import ProjectDetailsPage from "./pages/ProjectDetailsPage";
 import RiskDetailPage from "./pages/RiskDetailPage";
 import ApiTest from "./components/ApiTest";
@@ -114,7 +115,7 @@ function App() {
       } />
       <Route path="/history" element={
         <DashboardLayout>
-          <div style={{ padding: '20px' }}>History - Coming Soon</div>
+          <RiskHistoryPage />
         </DashboardLayout>
       } />
       <Route path="/test" element={<ApiTest />} />
