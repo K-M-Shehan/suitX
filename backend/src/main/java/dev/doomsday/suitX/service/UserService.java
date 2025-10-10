@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import dev.doomsday.suitX.model.User;
+import dev.doomsday.suitX.model.UserSettings;
 import dev.doomsday.suitX.repository.UserRepository;
 
 @Service
@@ -131,6 +132,26 @@ public class UserService {
         }
         
         return userRepository.save(existingUser);
+    }
+    
+    /**
+     * Update user settings
+     */
+    public UserSettings updateUserSettings(String username, UserSettings updatedSettings) {
+        User existingUser = findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        
+        existingUser.setSettings(updatedSettings);
+        userRepository.save(existingUser);
+        
+        return existingUser.getSettings();
+    }
+    
+    /**
+     * Save user (used by SettingsController)
+     */
+    public User save(User user) {
+        return userRepository.save(user);
     }
     
     /**
