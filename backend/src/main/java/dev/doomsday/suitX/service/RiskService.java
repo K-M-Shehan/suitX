@@ -129,15 +129,43 @@ public class RiskService {
                 .collect(Collectors.toList());
     }
 
-    public RiskSummaryDto getRiskSummary() {
+    public RiskSummaryDto getRiskSummary(String username) {
         RiskSummaryDto summary = new RiskSummaryDto();
-        summary.setTotalRisks(riskRepository.count());
-        summary.setTotalProjects(projectRepository.count());
-        summary.setActiveRisks(riskRepository.countByStatus("ACTIVE"));
-        summary.setResolvedRisks(riskRepository.countByStatus("RESOLVED"));
-        summary.setHighSeverityRisks(riskRepository.countBySeverity("HIGH"));
-        summary.setMediumSeverityRisks(riskRepository.countBySeverity("MEDIUM"));
-        summary.setLowSeverityRisks(riskRepository.countBySeverity("LOW"));
+        
+        // Get all projects for the user
+        List<Project> userProjects = projectRepository.findByCreatedBy(username);
+        List<String> userProjectIds = userProjects.stream()
+                .map(Project::getId)
+                .collect(Collectors.toList());
+        
+        // Get all risks for user's projects
+        List<Risk> userRisks = riskRepository.findAll().stream()
+                .filter(risk -> risk.getProjectId() != null && userProjectIds.contains(risk.getProjectId()))
+                .collect(Collectors.toList());
+        
+        // Count totals
+        summary.setTotalProjects((long) userProjects.size());
+        summary.setTotalRisks((long) userRisks.size());
+        
+        // Count by status
+        summary.setActiveRisks(userRisks.stream()
+                .filter(risk -> "ACTIVE".equalsIgnoreCase(risk.getStatus()))
+                .count());
+        summary.setResolvedRisks(userRisks.stream()
+                .filter(risk -> "RESOLVED".equalsIgnoreCase(risk.getStatus()))
+                .count());
+        
+        // Count by severity
+        summary.setHighSeverityRisks(userRisks.stream()
+                .filter(risk -> "HIGH".equalsIgnoreCase(risk.getSeverity()))
+                .count());
+        summary.setMediumSeverityRisks(userRisks.stream()
+                .filter(risk -> "MEDIUM".equalsIgnoreCase(risk.getSeverity()))
+                .count());
+        summary.setLowSeverityRisks(userRisks.stream()
+                .filter(risk -> "LOW".equalsIgnoreCase(risk.getSeverity()))
+                .count());
+        
         return summary;
     }
 

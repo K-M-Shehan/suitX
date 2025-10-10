@@ -221,7 +221,7 @@ const RiskDashboard = () => {
 
         {/* Status Filter */}
         <div className="flex space-x-2">
-          {['All', 'IDENTIFIED', 'MONITORING', 'MITIGATED', 'RESOLVED', 'ACCEPTED'].map((status) => (
+          {['All', 'Identified', 'Monitoring', 'Mitigated', 'Resolved', 'Accepted'].map((status) => (
             <button
               key={status}
               onClick={() => setSelectedStatus(status)}
