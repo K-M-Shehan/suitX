@@ -180,6 +180,54 @@ class RiskService {
     }
   }
 
+  async getRisksByProject(projectId) {
+    try {
+      const token = getToken();
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = token;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/risks/project/${projectId}`, {
+        headers: headers,
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch risks for project: ${projectId}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching risks by project:', error);
+      throw error;
+    }
+  }
+
+  async getRisksByProject(projectId) {
+    try {
+      const token = getToken();
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = token;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/risks/project/${projectId}`, {
+        headers: headers,
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch risks for project: ${projectId}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching risks by project:', error);
+      throw error;
+    }
+  }
+
   async getRiskSummary() {
     try {
       const response = await fetch(`${API_BASE_URL}/risks/summary`);
