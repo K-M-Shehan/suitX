@@ -1,33 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import InvitationsPanel from '../components/InvitationsPanel';
 
 function NotificationsPage() {
-  const [notifications, setNotifications] = useState([
-    // Mock notifications - replace with actual API call
-    {
-      id: 1,
-      title: 'New Risk Detected',
-      message: 'A critical risk has been detected in Project Alpha',
-      timestamp: new Date(Date.now() - 3600000).toISOString(),
-      read: false,
-      type: 'risk'
-    },
-    {
-      id: 2,
-      title: 'Project Update',
-      message: 'Project Beta has been successfully updated',
-      timestamp: new Date(Date.now() - 7200000).toISOString(),
-      read: false,
-      type: 'info'
-    },
-    {
-      id: 3,
-      title: 'Mitigation Applied',
-      message: 'Mitigation strategy has been applied to scope creep risk',
-      timestamp: new Date(Date.now() - 86400000).toISOString(),
-      read: true,
-      type: 'success'
-    }
-  ]);
+  const [notifications, setNotifications] = useState([]);
 
   const [filter, setFilter] = useState('all'); // 'all', 'unread', 'read'
 
@@ -108,6 +83,11 @@ function NotificationsPage() {
             Mark all as read
           </button>
         )}
+      </div>
+
+      {/* Project Invitations Section */}
+      <div className="mb-8">
+        <InvitationsPanel />
       </div>
 
       {/* Filter tabs */}

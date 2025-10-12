@@ -10,8 +10,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import dev.doomsday.suitX.dto.TaskDto;
 import dev.doomsday.suitX.model.Task;
+import dev.doomsday.suitX.model.User;
+import dev.doomsday.suitX.model.Project;
+import dev.doomsday.suitX.model.Notification;
 import dev.doomsday.suitX.repository.TaskRepository;
 import dev.doomsday.suitX.repository.ProjectRepository;
+import dev.doomsday.suitX.repository.UserRepository;
+import dev.doomsday.suitX.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -21,6 +26,9 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final ProjectRepository projectRepository;
     private final ProjectService projectService;
+    private final UserRepository userRepository;
+    private final NotificationRepository notificationRepository;
+    private final EmailService emailService;
 
     public List<TaskDto> getAllTasks() {
         return taskRepository.findAll().stream()
@@ -66,6 +74,11 @@ public class TaskService {
         
         Task savedTask = taskRepository.save(task);
         
+        // Send notification and email if task is assigned
+        if (savedTask.getAssignedTo() != null) {
+            sendTaskAssignmentNotification(savedTask);
+        }
+        
         // Add task ID to project's taskIds list
         if (taskDto.getProjectId() != null) {
             projectRepository.findById(taskDto.getProjectId()).ifPresent(project -> {
@@ -96,6 +109,7 @@ public class TaskService {
         if (existingTask.isPresent()) {
             Task task = existingTask.get();
             String projectId = task.getProjectId(); // Store project ID before update
+            String previousAssignee = task.getAssignedTo(); // Store previous assignee
             
             // Validate assignedTo user has access to project if being assigned/changed
             if (taskDto.getAssignedTo() != null && projectId != null && 
@@ -116,6 +130,12 @@ public class TaskService {
             }
             
             Task savedTask = taskRepository.save(task);
+            
+            // Send notification if assignee changed
+            if (savedTask.getAssignedTo() != null && 
+                !savedTask.getAssignedTo().equals(previousAssignee)) {
+                sendTaskAssignmentNotification(savedTask);
+            }
             
             // Update project progress after task status changes
             if (projectId != null) {
@@ -239,6 +259,71 @@ public class TaskService {
         if (!projectService.canUserAccessProject(projectId, userId)) {
             throw new IllegalArgumentException(
                 "User must be project owner or member to be assigned tasks");
+        }
+    }
+    
+    /**
+     * Send notification and email when task is assigned to a user
+     */
+    private void sendTaskAssignmentNotification(Task task) {
+        try {
+            // Get assigned user
+            Optional<User> userOpt = userRepository.findById(task.getAssignedTo());
+            if (userOpt.isEmpty()) {
+                return;
+            }
+            User user = userOpt.get();
+            
+            // Get project details
+            Optional<Project> projectOpt = projectRepository.findById(task.getProjectId());
+            if (projectOpt.isEmpty()) {
+                return;
+            }
+            Project project = projectOpt.get();
+            
+            // Create notification
+            Notification notification = new Notification();
+            notification.setUserId(user.getId());
+            notification.setType("TASK_ASSIGNED");
+            notification.setTitle("New Task Assigned");
+            notification.setMessage(String.format(
+                "You have been assigned to task '%s' in project '%s'",
+                task.getTitle(),
+                project.getName()
+            ));
+            notification.setRelatedEntityId(task.getId());
+            notification.setRelatedEntityType("TASK");
+            notification.setIsRead(false);
+            notification.setCreatedAt(LocalDateTime.now());
+            notification.setExpiresAt(LocalDateTime.now().plusDays(30));
+            
+            notificationRepository.save(notification);
+            
+            // Send email
+            String subject = "New Task Assigned: " + task.getTitle();
+            String body = String.format(
+                "Hello %s,\n\n" +
+                "You have been assigned to a new task:\n\n" +
+                "Task: %s\n" +
+                "Project: %s\n" +
+                "Priority: %s\n" +
+                "Due Date: %s\n\n" +
+                "%s\n\n" +
+                "Please log in to SuitX to view the details and get started.\n\n" +
+                "Best regards,\n" +
+                "SuitX Team",
+                user.getUsername(),
+                task.getTitle(),
+                project.getName(),
+                task.getPriority(),
+                task.getDueDate() != null ? task.getDueDate().toString() : "Not set",
+                task.getDescription() != null ? "Description: " + task.getDescription() : ""
+            );
+            
+            emailService.sendEmail(user.getEmail(), subject, body);
+        } catch (Exception e) {
+            // Log error but don't fail the task creation/update
+            System.err.println("Failed to send task assignment notification: " + e.getMessage());
         }
     }
 }

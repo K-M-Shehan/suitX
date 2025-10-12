@@ -32,13 +32,13 @@ public interface ProjectRepository extends MongoRepository<Project, String> {
     @Query("{ 'memberIds': ?0, 'status': ?1 }")
     List<Project> findByMemberAndStatus(String userId, String status);
     
-    // Find all projects accessible to a user (as owner or member)
-    @Query("{ $or: [ { 'ownerId': ?0 }, { 'memberIds': ?0 } ] }")
-    List<Project> findAllAccessibleProjects(String userId);
+    // Find all projects accessible to a user (as owner by username or member by userId)
+    @Query("{ $or: [ { 'createdBy': ?0 }, { 'memberIds': ?1 } ] }")
+    List<Project> findAllAccessibleProjects(String username, String userId);
     
     // Find active projects accessible to a user
-    @Query("{ $or: [ { 'ownerId': ?0 }, { 'memberIds': ?0 } ], 'status': 'ACTIVE' }")
-    List<Project> findActiveProjectsForUser(String userId);
+    @Query("{ $or: [ { 'createdBy': ?0 }, { 'memberIds': ?1 } ], 'status': 'ACTIVE' }")
+    List<Project> findActiveProjectsForUser(String username, String userId);
     
     // Find projects by creator (legacy support)
     List<Project> findByCreatedBy(String createdBy);
