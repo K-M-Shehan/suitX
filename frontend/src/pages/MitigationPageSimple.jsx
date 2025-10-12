@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MitigationService from '../services/MitigationService';
-import { getAllProjects } from '../services/ProjectService';
+import { getAllProjects, getProjectById } from '../services/ProjectService';
 import AIAssistant from '../components/AIAssistant';
 
 const MitigationPage = () => {
@@ -17,6 +17,7 @@ const MitigationPage = () => {
   const [error, setError] = useState(null);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
   const [editingMitigation, setEditingMitigation] = useState(null);
+  const [teamMembers, setTeamMembers] = useState([]);
   const [editForm, setEditForm] = useState({
     title: '',
     description: '',
@@ -135,36 +136,118 @@ const MitigationPage = () => {
     }
   };
 
-  const handleEditMitigation = (mitigation) => {
+  const handleEditMitigation = async (mitigation) => {
     setEditingMitigation(mitigation);
     setEditForm({
       title: mitigation.title || '',
       description: mitigation.description || '',
       status: mitigation.status || '',
       priority: mitigation.priority || '',
-      assignee: mitigation.assigneeUsername || mitigation.assignee || '',
+      assignee: mitigation.assignee || '',
       dueDate: mitigation.dueDate ? mitigation.dueDate.split('T')[0] : '',
       estimatedCost: mitigation.estimatedCost || '',
       effectiveness: mitigation.effectiveness || 'NOT_ASSESSED'
     });
+
+    // Fetch project team members if projectId exists
+    if (mitigation.projectId) {
+      try {
+        const projectData = await getProjectById(mitigation.projectId);
+        if (projectData) {
+          const token = localStorage.getItem('token');
+          const allMemberIds = [];
+          
+          // Add owner if exists
+          if (projectData.ownerId) {
+            allMemberIds.push(projectData.ownerId);
+          }
+          
+          // Add project manager if exists and different from owner
+          if (projectData.projectManager && projectData.projectManager !== projectData.ownerId) {
+            allMemberIds.push(projectData.projectManager);
+          }
+          
+          // Add all other members
+          if (projectData.memberIds && projectData.memberIds.length > 0) {
+            projectData.memberIds.forEach(id => {
+              if (!allMemberIds.includes(id)) {
+                allMemberIds.push(id);
+              }
+            });
+          }
+          
+          if (allMemberIds.length > 0) {
+            // Fetch user details for each member ID using the correct endpoint
+            const memberDetailsPromises = allMemberIds.map(async (userId) => {
+              try {
+                const response = await fetch(`http://localhost:8080/api/user/${userId}`, {
+                  headers: {
+                    'Authorization': token ? `Bearer ${token}` : '',
+                    'Content-Type': 'application/json'
+                  }
+                });
+                if (response.ok) {
+                  return await response.json();
+                }
+                return null;
+              } catch (error) {
+                console.error(`Error fetching user ${userId}:`, error);
+                return null;
+              }
+            });
+            
+            const members = await Promise.all(memberDetailsPromises);
+            const validMembers = members.filter(m => m !== null);
+            setTeamMembers(validMembers);
+          } else {
+            setTeamMembers([]);
+          }
+        } else {
+          setTeamMembers([]);
+        }
+      } catch (error) {
+        console.error('Error fetching project team members:', error);
+        setTeamMembers([]);
+      }
+    } else {
+      setTeamMembers([]);
+    }
   };
 
   const handleSaveEdit = async () => {
     try {
-      await MitigationService.updateMitigation(editingMitigation.id, editForm);
+      // Prepare the update data with proper field mapping
+      const updateData = {
+        title: editForm.title,
+        description: editForm.description,
+        status: editForm.status,
+        priority: editForm.priority,
+        assignee: editForm.assignee,
+        dueDate: editForm.dueDate ? new Date(editForm.dueDate).toISOString() : null,
+        estimatedCost: editForm.estimatedCost ? parseFloat(editForm.estimatedCost) : null,
+        effectiveness: editForm.effectiveness
+      };
+
+      await MitigationService.updateMitigation(editingMitigation.id, updateData);
+      
       // Refresh mitigations data
       const updatedMitigations = await MitigationService.getAllMitigations();
       setMitigations(Array.isArray(updatedMitigations) ? updatedMitigations : []);
       
       // Refresh summary
-      const summary = await MitigationService.getMitigationSummary();
-      setMitigationSummary({
-        totalMitigations: summary.totalMitigations || 0,
-        activeMitigations: summary.activeMitigations || 0
-      });
+      try {
+        const summary = await MitigationService.getMitigationSummary();
+        setMitigationSummary({
+          totalMitigations: summary.totalMitigations || 0,
+          activeMitigations: summary.activeMitigations || 0
+        });
+      } catch (err) {
+        console.warn('Could not refresh summary:', err);
+      }
       
       // Close modal
       setEditingMitigation(null);
+      setTeamMembers([]);
     } catch (error) {
       console.error('Error updating mitigation:', error);
       alert('Failed to update mitigation. Please try again.');
@@ -173,6 +256,7 @@ const MitigationPage = () => {
 
   const handleCancelEdit = () => {
     setEditingMitigation(null);
+    setTeamMembers([]);
     setEditForm({
       title: '',
       description: '',
@@ -621,13 +705,32 @@ const MitigationPage = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Assignee
                   </label>
-                  <input
-                    type="text"
-                    value={editForm.assignee}
-                    onChange={(e) => setEditForm({ ...editForm, assignee: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter assignee username"
-                  />
+                  {teamMembers && teamMembers.length > 0 ? (
+                    <select
+                      value={editForm.assignee}
+                      onChange={(e) => setEditForm({ ...editForm, assignee: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Select Team Member</option>
+                      {teamMembers.map((member, index) => (
+                        <option key={member.id || index} value={member.id}>
+                          {member.name || member.username || member.email}
+                          {member.email && member.name ? ` (${member.email})` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      value={editForm.assignee}
+                      onChange={(e) => setEditForm({ ...editForm, assignee: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter assignee user ID"
+                    />
+                  )}
+                  {editingMitigation?.projectId && teamMembers && teamMembers.length === 0 && (
+                    <p className="mt-1 text-sm text-gray-500">No team members found for this project. You can manually enter a user ID.</p>
+                  )}
                 </div>
 
                 {/* Due Date */}

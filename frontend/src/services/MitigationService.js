@@ -91,11 +91,18 @@ class MitigationService {
 
   async updateMitigation(id, mitigationData) {
     try {
+      const token = getToken();
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = token;
+      }
+
       const response = await fetch(`${API_BASE_URL}/mitigations/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: JSON.stringify(mitigationData),
       });
       if (!response.ok) {
