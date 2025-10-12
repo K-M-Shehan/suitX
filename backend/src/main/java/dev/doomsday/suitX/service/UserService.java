@@ -155,6 +155,13 @@ public class UserService {
     }
     
     /**
+     * Update last login timestamp
+     */
+    public void updateLastLogin(User user) {
+        userRepository.save(user);
+    }
+    
+    /**
      * Validates email format using a comprehensive regex pattern
      * Matches RFC 5322 standard email addresses
      */

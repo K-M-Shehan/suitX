@@ -1,5 +1,6 @@
 package dev.doomsday.suitX.controller;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
@@ -44,6 +45,10 @@ public class AuthController {
         return userService.findByUsername(request.getUsername())
                 .filter(u -> passwordEncoder.matches(request.getPassword(), u.getPassword()))
                 .map(u -> {
+                    // Update last login timestamp
+                    u.setLastLogin(LocalDateTime.now());
+                    userService.updateLastLogin(u);
+                    
                     String token = jwtUtil.generateToken(u.getUsername());
                     return ResponseEntity.ok(Map.of("token", token));
                 })
