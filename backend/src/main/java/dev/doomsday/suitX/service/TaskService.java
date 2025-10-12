@@ -256,7 +256,14 @@ public class TaskService {
      * Only project owner and members can be assigned tasks
      */
     private void validateTaskAssignment(String projectId, String userId) {
-        if (!projectService.canUserAccessProject(projectId, userId)) {
+        // Convert userId to username for access check
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isEmpty()) {
+            throw new IllegalArgumentException("User not found with id: " + userId);
+        }
+        
+        String username = userOpt.get().getUsername();
+        if (!projectService.canUserAccessProject(projectId, username)) {
             throw new IllegalArgumentException(
                 "User must be project owner or member to be assigned tasks");
         }
