@@ -287,9 +287,6 @@ const RiskDashboard = () => {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-900">Risk Analysis</h2>
-            <button className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors text-sm font-medium">
-              + Add New Risk
-            </button>
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -379,9 +376,6 @@ const RiskDashboard = () => {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-900">Risk Analysis</h2>
-            <button className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors text-sm font-medium">
-              + Add New Risk
-            </button>
           </div>
           <div className="bg-white rounded-lg p-8 shadow-sm border text-center">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No Risks Found</h3>

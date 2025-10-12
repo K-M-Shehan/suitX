@@ -420,9 +420,6 @@ const MitigationPage = () => {
               </svg>
               <span>AI Assistant</span>
             </button>
-            <button className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors text-sm font-medium">
-              + Add New Mitigation
-            </button>
           </div>
         </div>
         
