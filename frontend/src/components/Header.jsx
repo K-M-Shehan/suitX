@@ -3,11 +3,32 @@ import { Link, useNavigate } from 'react-router-dom';
 import notificationIcon from '../assets/header/notifications.png';
 import settingsIcon from '../assets/header/settings-cog.png';
 import profileIcon from '../assets/header/profile.png';
+import NotificationService from '../services/NotificationService';
 
 const Header = ({ isLanding = false }) => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
+
+  // Fetch unread notification count
+  useEffect(() => {
+    if (!isLanding) {
+      fetchUnreadCount();
+      // Poll for new notifications every 30 seconds
+      const interval = setInterval(fetchUnreadCount, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [isLanding]);
+
+  const fetchUnreadCount = async () => {
+    try {
+      const count = await NotificationService.getUnreadCount();
+      setUnreadCount(count);
+    } catch (error) {
+      console.error('Error fetching unread count:', error);
+    }
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -77,8 +98,12 @@ const Header = ({ isLanding = false }) => {
         {/* Notification icon with badge */}
         <Link to="/notifications" className="relative p-2 hover:bg-gray-800 rounded transition-colors">
           <img src={notificationIcon} alt="Notifications" className="w-5 h-5" />
-          {/* Unread badge - you can replace this with actual unread count from backend */}
-          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+          {/* Unread badge - only show when there are unread notifications */}
+          {unreadCount > 0 && (
+            <span className="absolute top-1 right-1 min-w-[16px] h-4 bg-red-500 rounded-full flex items-center justify-center text-[10px] font-semibold px-1">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
         </Link>
 
         {/* Settings icon */}
