@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import ProjectCard from "../components/ProjectCard";
 import AddProjectCard from "../components/AddProjectCard";
+import InvitationsPanel from "../components/InvitationsPanel";
 import { getAllProjects, createProject as apiCreateProject, deleteProject as apiDeleteProject } from "../services/ProjectService";
 import RiskService from "../services/RiskService";
 
@@ -120,6 +121,11 @@ function LaunchpadPage() {
       {error && (
         <div className="mb-4 p-3 rounded bg-red-100 text-red-700">{error}</div>
       )}
+      
+      {/* Invitations Section */}
+      <section className="mb-8">
+        <InvitationsPanel />
+      </section>
       
       {/* Projects Section */}
       <section className="mb-8">

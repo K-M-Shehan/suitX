@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { searchUsers, addMemberToProject, removeMemberFromProject, getProjectMembers } from '../services/ProjectService';
+import { searchUsers, removeMemberFromProject, getProjectMembers } from '../services/ProjectService';
+import { inviteUserToProject } from '../services/InvitationService';
 import { getCurrentUser } from '../services/AuthService';
 
 export default function MemberManagement({ projectId, project }) {
@@ -11,6 +12,7 @@ export default function MemberManagement({ projectId, project }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [invitationMessage, setInvitationMessage] = useState('');
 
   useEffect(() => {
     loadCurrentUser();
@@ -93,14 +95,14 @@ export default function MemberManagement({ projectId, project }) {
       setError(null);
       setSuccess(null);
       
-      await addMemberToProject(projectId, userId);
-      setSuccess('Member added successfully');
+      await inviteUserToProject(projectId, userId, invitationMessage);
+      setSuccess('Invitation sent successfully! The user will receive an email.');
       setSearchTerm('');
       setSearchResults([]);
-      await loadMembers();
+      setInvitationMessage('');
     } catch (err) {
-      console.error('Error adding member:', err);
-      setError(err.message || 'Failed to add member');
+      console.error('Error sending invitation:', err);
+      setError(err.message || 'Failed to send invitation');
     }
   };
 
@@ -145,14 +147,22 @@ export default function MemberManagement({ projectId, project }) {
       {isOwner && (
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Add Team Member
+            Invite Team Member
           </label>
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
             placeholder="Search by username or email..."
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
+          />
+          
+          <textarea
+            value={invitationMessage}
+            onChange={(e) => setInvitationMessage(e.target.value)}
+            placeholder="Optional message for the invitation..."
+            rows={2}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
           />
           
           {/* Search Results */}
@@ -174,7 +184,7 @@ export default function MemberManagement({ projectId, project }) {
                         onClick={() => handleAddMember(user.id)}
                         className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
                       >
-                        Add
+                        Invite
                       </button>
                     </div>
                   ))}
