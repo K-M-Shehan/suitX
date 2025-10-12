@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 import dev.doomsday.suitX.dto.MitigationDto;
 import dev.doomsday.suitX.dto.MitigationSummaryDto;
 import dev.doomsday.suitX.model.Mitigation;
+import dev.doomsday.suitX.model.Project;
 import dev.doomsday.suitX.repository.MitigationRepository;
+import dev.doomsday.suitX.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -19,9 +21,31 @@ import lombok.RequiredArgsConstructor;
 public class MitigationService {
 
     private final MitigationRepository mitigationRepository;
+    private final ProjectRepository projectRepository;
+    private final dev.doomsday.suitX.repository.UserRepository userRepository;
+    private final dev.doomsday.suitX.repository.RiskRepository riskRepository;
+    private final ProjectService projectService;
 
     public List<MitigationDto> getAllMitigations() {
         return mitigationRepository.findAll().stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get mitigations only for projects the current user has access to
+     * @param username Username of the current user
+     * @return List of mitigations from user's accessible projects
+     */
+    public List<MitigationDto> getMitigationsForUser(String username) {
+        // Get all projects the user has access to
+        List<String> accessibleProjectIds = projectService.getProjectsForUser(username).stream()
+                .map(project -> project.getId())
+                .collect(Collectors.toList());
+        
+        // Get mitigations only for accessible projects
+        return mitigationRepository.findAll().stream()
+                .filter(mitigation -> accessibleProjectIds.contains(mitigation.getProjectId()))
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
@@ -147,13 +171,42 @@ public class MitigationService {
         dto.setPriority(mitigation.getPriority());
         dto.setAssignee(mitigation.getAssignee());
         dto.setDueDate(mitigation.getDueDate());
-        dto.setRelatedRisk(mitigation.getRelatedRiskId());
+        dto.setStartDate(mitigation.getStartDate());
+        dto.setRelatedRiskId(mitigation.getRelatedRiskId());
         dto.setProjectId(mitigation.getProjectId());
         dto.setCreatedAt(mitigation.getCreatedAt());
         dto.setUpdatedAt(mitigation.getUpdatedAt());
         dto.setCompletedAt(mitigation.getCompletedAt());
         dto.setCreatedBy(mitigation.getCreatedBy());
         dto.setProgressPercentage(mitigation.getProgressPercentage());
+        dto.setEstimatedCost(mitigation.getEstimatedCost());
+        dto.setActualCost(mitigation.getActualCost());
+        dto.setAiGenerated(mitigation.getAiGenerated());
+        dto.setEffectiveness(mitigation.getEffectiveness());
+        
+        // Populate username fields if available
+        if (mitigation.getAssignee() != null) {
+            userRepository.findById(mitigation.getAssignee())
+                .ifPresent(user -> dto.setAssigneeUsername(user.getUsername()));
+        }
+        
+        if (mitigation.getCreatedBy() != null) {
+            userRepository.findById(mitigation.getCreatedBy())
+                .ifPresent(user -> dto.setCreatedByUsername(user.getUsername()));
+        }
+        
+        // Populate project name if available
+        if (mitigation.getProjectId() != null) {
+            projectRepository.findById(mitigation.getProjectId())
+                .ifPresent(project -> dto.setProjectName(project.getName()));
+        }
+        
+        // Populate related risk title if available
+        if (mitigation.getRelatedRiskId() != null) {
+            riskRepository.findById(mitigation.getRelatedRiskId())
+                .ifPresent(risk -> dto.setRelatedRisk(risk.getTitle()));
+        }
+        
         return dto;
     }
 

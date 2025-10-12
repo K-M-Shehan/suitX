@@ -691,7 +691,7 @@ const ProjectDetailsPage = () => {
                 This project doesn't have any identified risks yet.
               </p>
               <p className="text-sm text-gray-400">
-                Use the "🤖 Analyze Risks" button above to automatically identify potential risks using AI.
+                Use the "Analyze Risks" button above to automatically identify potential risks using AI.
               </p>
             </div>
           ) : (

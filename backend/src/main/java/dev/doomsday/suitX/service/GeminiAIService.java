@@ -92,7 +92,10 @@ public class GeminiAIService {
                - Probability of occurrence (0-100)
                - Confidence score (0.0-1.0) indicating your confidence in this assessment
             3. Provide 3-5 mitigation strategies for each risk
-            4. Each mitigation should include implementation effort (LOW/MEDIUM/HIGH)
+            4. Each mitigation should include:
+               - A short, actionable title (e.g., 'Implement automated testing', 'Hire senior developer')
+               - Detailed description
+               - Implementation effort (LOW/MEDIUM/HIGH)
 
             RESPONSE FORMAT (JSON):
             {
@@ -111,7 +114,8 @@ public class GeminiAIService {
                 {
                   "mitigationId": "M1",
                   "riskId": "R1",
-                  "description": "Mitigation description",
+                  "title": "Short, actionable title (30-60 chars)",
+                  "description": "Detailed mitigation description",
                   "implementationEffort": "LOW|MEDIUM|HIGH"
                 }
               ]
@@ -160,7 +164,7 @@ public class GeminiAIService {
                     {
                         "mitigationId": "MIT_001",
                         "riskId": "RISK_001", 
-                        "title": "Mitigation strategy title",
+                        "title": "Short, actionable title (e.g., 'Implement automated backups', 'Conduct weekly code reviews', 'Hire senior developer')",
                         "description": "Detailed mitigation description",
                         "type": "PREVENTIVE|DETECTIVE|CORRECTIVE|CONTINGENT",
                         "implementationEffort": "LOW|MEDIUM|HIGH",
@@ -186,7 +190,7 @@ public class GeminiAIService {
 
             Focus on:
             1. Identify 5-10 most relevant risks for this specific project
-            2. Provide actionable mitigation strategies 
+            2. Provide actionable mitigation strategies with SHORT, CLEAR titles (e.g., 'Implement CI/CD pipeline', 'Hire DevOps engineer', 'Establish code review process')
             3. Consider the project context (timeline, budget, team size, technology)
             4. Be specific and practical in recommendations
             5. Assign realistic probability and impact scores

@@ -175,18 +175,6 @@ This document describes the MongoDB NoSQL schema design for the SuitX project ma
   "identifiedDate": "timestamp",
   "aiGenerated": "boolean",
   "aiConfidence": "number (0-100)",
-  "mitigationSuggestions": [
-    {
-      "suggestionId": "string",
-      "suggestionText": "string",
-      "aiGenerated": "boolean",
-      "priority": "string (LOW, MEDIUM, HIGH)",
-      "estimatedCost": "number",
-      "estimatedEffort": "string",
-      "createdAt": "timestamp",
-      "status": "string (SUGGESTED, APPROVED, IMPLEMENTED, REJECTED)"
-    }
-  ],
   "history": [
     {
       "timestamp": "timestamp",
@@ -198,7 +186,7 @@ This document describes the MongoDB NoSQL schema design for the SuitX project ma
     }
   ],
   "relatedTaskIds": ["taskId1", "taskId2"],
-  "relatedMitigationIds": ["mitigationId1"],
+  "relatedMitigationIds": ["mitigationId1", "mitigationId2"],
   "tags": ["tag1", "tag2"],
   "createdAt": "timestamp",
   "updatedAt": "timestamp",
@@ -215,9 +203,10 @@ This document describes the MongoDB NoSQL schema design for the SuitX project ma
 - `aiGenerated`: for AI-generated risk queries
 
 **Design Notes:**
-- AI suggestions are embedded (one-to-many, limited count)
 - History is embedded for audit trail
 - Risk score can be calculated on save
+- Mitigation strategies are stored as separate entities in the Mitigations collection
+- `relatedMitigationIds` array contains references to Mitigation entities for this risk
 
 ---
 

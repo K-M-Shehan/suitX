@@ -1,9 +1,26 @@
 const API_BASE_URL = 'http://localhost:8080/api';
 
+// Get JWT token from localStorage
+const getToken = () => {
+  const token = localStorage.getItem('token');
+  return token ? `Bearer ${token}` : null;
+};
+
 class MitigationService {
   async getAllMitigations() {
     try {
-      const response = await fetch(`${API_BASE_URL}/mitigations`);
+      const token = getToken();
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = token;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/mitigations/user`, {
+        headers: headers,
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch mitigations');
       }
