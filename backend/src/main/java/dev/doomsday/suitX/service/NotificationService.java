@@ -128,4 +128,31 @@ public class NotificationService {
         }
         return userOpt.get().getId();
     }
+    
+    /**
+     * Create a new notification for a user
+     * @param userId User ID to notify
+     * @param type Notification type (e.g., "TASK_ASSIGNED", "MITIGATION_ASSIGNED")
+     * @param title Notification title
+     * @param message Notification message
+     * @param relatedEntityId ID of related entity (task, mitigation, etc.)
+     * @param relatedEntityType Type of related entity
+     * @return Created notification
+     */
+    public Notification createNotification(String userId, String type, String title, 
+                                          String message, String relatedEntityId, 
+                                          String relatedEntityType) {
+        Notification notification = new Notification();
+        notification.setUserId(userId);
+        notification.setType(type);
+        notification.setTitle(title);
+        notification.setMessage(message);
+        notification.setRelatedEntityId(relatedEntityId);
+        notification.setRelatedEntityType(relatedEntityType);
+        notification.setIsRead(false);
+        notification.setCreatedAt(java.time.LocalDateTime.now());
+        notification.setExpiresAt(java.time.LocalDateTime.now().plusDays(30));
+        
+        return notificationRepository.save(notification);
+    }
 }

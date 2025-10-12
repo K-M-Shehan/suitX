@@ -630,4 +630,257 @@ public class EmailService {
                 expiryDate
             );
     }
+
+    /**
+     * Send mitigation assignment email to a user
+     */
+    public void sendMitigationAssignmentEmail(String toEmail, String username, String mitigationTitle, 
+                                             String projectName, String priority, String dueDate, String description) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            
+            helper.setFrom(fromEmail);
+            helper.setTo(toEmail);
+            helper.setSubject("New Mitigation Assigned: " + mitigationTitle);
+            
+            String htmlContent = buildMitigationAssignmentEmailContent(username, mitigationTitle, projectName, 
+                                                                       priority, dueDate, description);
+            helper.setText(htmlContent, true);
+            
+            mailSender.send(message);
+            logger.info("Mitigation assignment email sent successfully to: {}", toEmail);
+            
+        } catch (MessagingException e) {
+            logger.error("Failed to send mitigation assignment email to: {}", toEmail, e);
+        }
+    }
+
+    /**
+     * Build HTML content for mitigation assignment email
+     */
+    private String buildMitigationAssignmentEmailContent(String username, String mitigationTitle, 
+                                                        String projectName, String priority, 
+                                                        String dueDate, String description) {
+        // Ensure no null values
+        username = username != null ? username : "User";
+        mitigationTitle = mitigationTitle != null ? mitigationTitle : "Untitled Mitigation";
+        projectName = projectName != null ? projectName : "Unknown Project";
+        priority = priority != null ? priority : "MEDIUM";
+        dueDate = dueDate != null && !dueDate.isEmpty() ? dueDate : "Not set";
+        description = description != null ? description : "";
+        
+        System.out.println("DEBUG - Building email content:");
+        System.out.println("  Username: " + username);
+        System.out.println("  Title: " + mitigationTitle);
+        System.out.println("  Project: " + projectName);
+        System.out.println("  Priority: " + priority);
+        System.out.println("  DueDate: " + dueDate);
+        
+        // Escape special characters in user-provided content to prevent HTML/formatting issues
+        description = description.replace("\"", "&quot;").replace("'", "&#39;");
+        mitigationTitle = mitigationTitle.replace("\"", "&quot;").replace("'", "&#39;");
+        projectName = projectName.replace("\"", "&quot;").replace("'", "&#39;");
+        
+        String priorityColor = switch (priority.toUpperCase()) {
+            case "CRITICAL" -> "#dc2626";
+            case "HIGH" -> "#dc2626";
+            case "MEDIUM" -> "#f59e0b";
+            case "LOW" -> "#10b981";
+            default -> "#6b7280";
+        };
+        
+        System.out.println("  Priority Color: " + priorityColor);
+        
+        try {
+            String content = """
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Mitigation Assignment</title>
+                <style>
+                    body {
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                        line-height: 1.6;
+                        color: #333;
+                        margin: 0;
+                        padding: 0;
+                        background-color: #f5f5f5;
+                    }
+                    .container {
+                        max-width: 600px;
+                        margin: 0 auto;
+                        background-color: #ffffff;
+                    }
+                    .header {
+                        background: #000000;
+                        padding: 32px 30px;
+                        text-align: center;
+                    }
+                    .header h1 {
+                        margin: 0;
+                        color: #ffffff;
+                        font-size: 28px;
+                        font-weight: 700;
+                    }
+                    .content {
+                        padding: 40px 30px;
+                    }
+                    .content h2 {
+                        color: #000000;
+                        font-size: 24px;
+                        margin-top: 0;
+                        margin-bottom: 20px;
+                    }
+                    .content p {
+                        margin: 16px 0;
+                        color: #555;
+                    }
+                    .mitigation-details {
+                        background-color: #f8f9fa;
+                        border-left: 4px solid #000000;
+                        padding: 24px;
+                        margin: 24px 0;
+                        border-radius: 4px;
+                    }
+                    .mitigation-details h3 {
+                        margin-top: 0;
+                        color: #000000;
+                        font-size: 20px;
+                    }
+                    .detail-row {
+                        display: flex;
+                        justify-content: space-between;
+                        padding: 12px 0;
+                        border-bottom: 1px solid #e9ecef;
+                    }
+                    .detail-row:last-child {
+                        border-bottom: none;
+                    }
+                    .detail-label {
+                        font-weight: 600;
+                        color: #495057;
+                    }
+                    .detail-value {
+                        color: #212529;
+                    }
+                    .priority-badge {
+                        display: inline-block;
+                        padding: 4px 12px;
+                        border-radius: 12px;
+                        font-weight: 600;
+                        font-size: 13px;
+                        color: #ffffff;
+                        background-color: %s;
+                    }
+                    .description {
+                        background-color: #ffffff;
+                        padding: 16px;
+                        margin-top: 16px;
+                        border-radius: 4px;
+                        border: 1px solid #dee2e6;
+                    }
+                    .button-container {
+                        text-align: center;
+                        margin: 32px 0;
+                    }
+                    .cta-button {
+                        display: inline-block;
+                        padding: 14px 32px;
+                        background-color: #000000;
+                        color: #ffffff;
+                        text-decoration: none;
+                        border-radius: 6px;
+                        font-weight: 600;
+                        font-size: 16px;
+                        transition: background-color 0.3s ease;
+                    }
+                    .cta-button:hover {
+                        background-color: #333333;
+                    }
+                    .footer {
+                        background-color: #f8f9fa;
+                        padding: 24px 30px;
+                        text-align: center;
+                        font-size: 14px;
+                        color: #6c757d;
+                    }
+                    .footer a {
+                        color: #000000;
+                        text-decoration: none;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>SuitX</h1>
+                    </div>
+                    <div class="content">
+                        <h2>New Mitigation Assigned</h2>
+                        <p>Hello %s,</p>
+                        
+                        <p>You have been assigned to a new mitigation strategy. Here are the details:</p>
+                        
+                        <div class="mitigation-details">
+                            <h3>🛡️ %s</h3>
+                            
+                            <div class="detail-row">
+                                <span class="detail-label">Project:</span>
+                                <span class="detail-value">%s</span>
+                            </div>
+                            
+                            <div class="detail-row">
+                                <span class="detail-label">Priority:</span>
+                                <span class="priority-badge">%s</span>
+                            </div>
+                            
+                            <div class="detail-row">
+                                <span class="detail-label">Due Date:</span>
+                                <span class="detail-value">%s</span>
+                            </div>
+                            
+                            %s
+                        </div>
+                        
+                        <div class="button-container">
+                            <a href="http://localhost:5173/mitigations" class="cta-button" style="color: #ffffff !important;">View Mitigation</a>
+                        </div>
+                        
+                        <p style="margin-top: 32px; color: #6c757d; font-size: 14px;">
+                            Log in to SuitX to view full details, update progress, and track the effectiveness of this mitigation strategy.
+                        </p>
+                    </div>
+                    <div class="footer">
+                        <p>© 2025 SuitX. All rights reserved.</p>
+                        <p>You received this email because you are a member of this project.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """;
+            
+            System.out.println("DEBUG - About to format email with 7 parameters");
+            String formattedContent = String.format(content,
+                priorityColor,
+                username,
+                mitigationTitle,
+                projectName,
+                priority,
+                dueDate,
+                !description.isEmpty() 
+                    ? "<div class=\"description\"><strong>Description:</strong><br>" + description + "</div>"
+                    : ""
+            );
+            
+            System.out.println("DEBUG - Email content generated successfully");
+            return formattedContent;
+        } catch (Exception e) {
+            System.err.println("ERROR - Failed to format email template: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }
 }

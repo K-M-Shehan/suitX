@@ -12,6 +12,7 @@ import dev.doomsday.suitX.dto.MitigationDto;
 import dev.doomsday.suitX.dto.MitigationSummaryDto;
 import dev.doomsday.suitX.model.Mitigation;
 import dev.doomsday.suitX.model.Project;
+import dev.doomsday.suitX.model.User;
 import dev.doomsday.suitX.repository.MitigationRepository;
 import dev.doomsday.suitX.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,8 @@ public class MitigationService {
     private final dev.doomsday.suitX.repository.UserRepository userRepository;
     private final dev.doomsday.suitX.repository.RiskRepository riskRepository;
     private final ProjectService projectService;
+    private final NotificationService notificationService;
+    private final EmailService emailService;
 
     public List<MitigationDto> getAllMitigations() {
         return mitigationRepository.findAll().stream()
@@ -86,6 +89,12 @@ public class MitigationService {
         mitigation.setStatus("PLANNED"); // Default status
         mitigation.setProgressPercentage(0.0); // Default progress
         Mitigation savedMitigation = mitigationRepository.save(mitigation);
+        
+        // Send notification and email if mitigation is assigned
+        if (savedMitigation.getAssignee() != null) {
+            sendMitigationAssignmentNotification(savedMitigation);
+        }
+        
         return convertToDto(savedMitigation);
     }
 
@@ -93,9 +102,18 @@ public class MitigationService {
         Optional<Mitigation> existingMitigation = mitigationRepository.findById(id);
         if (existingMitigation.isPresent()) {
             Mitigation mitigation = existingMitigation.get();
+            String previousAssignee = mitigation.getAssignee(); // Store previous assignee
+            
             updateMitigationFields(mitigation, mitigationDto);
             mitigation.setUpdatedAt(LocalDateTime.now());
             Mitigation savedMitigation = mitigationRepository.save(mitigation);
+            
+            // Send notification if assignee changed
+            if (savedMitigation.getAssignee() != null && 
+                !savedMitigation.getAssignee().equals(previousAssignee)) {
+                sendMitigationAssignmentNotification(savedMitigation);
+            }
+            
             return convertToDto(savedMitigation);
         }
         throw new RuntimeException("Mitigation not found with id: " + id);
@@ -239,5 +257,81 @@ public class MitigationService {
         if (dto.getRelatedRisk() != null) mitigation.setRelatedRiskId(dto.getRelatedRisk());
         if (dto.getProjectId() != null) mitigation.setProjectId(dto.getProjectId());
         if (dto.getProgressPercentage() != null) mitigation.setProgressPercentage(dto.getProgressPercentage());
+    }
+
+    /**
+     * Send notification and email when a mitigation is assigned to a user
+     */
+    private void sendMitigationAssignmentNotification(Mitigation mitigation) {
+        try {
+            // Get assigned user
+            Optional<User> userOpt = userRepository.findById(mitigation.getAssignee());
+            if (userOpt.isEmpty()) {
+                System.err.println("User not found for mitigation assignment: " + mitigation.getAssignee());
+                return;
+            }
+            User user = userOpt.get();
+            
+            // Get project details
+            Optional<Project> projectOpt = mitigation.getProjectId() != null 
+                ? projectRepository.findById(mitigation.getProjectId()) 
+                : Optional.empty();
+            Project project = projectOpt.orElse(null);
+            
+            // Create notification using NotificationService
+            String message = String.format(
+                "You have been assigned to mitigation '%s'%s",
+                mitigation.getTitle(),
+                project != null ? " in project '" + project.getName() + "'" : ""
+            );
+            
+            notificationService.createNotification(
+                user.getId(),
+                "MITIGATION_ASSIGNED",
+                "New Mitigation Assigned",
+                message,
+                mitigation.getId(),
+                "MITIGATION"
+            );
+            
+            // Send email with professional HTML template
+            // Format the due date properly (same as task assignment)
+            String formattedDueDate = null;
+            if (mitigation.getDueDate() != null) {
+                formattedDueDate = mitigation.getDueDate().toString();
+            }
+            
+            // Prepare email parameters with null safety
+            String emailAddress = user.getEmail();
+            String username = user.getUsername() != null ? user.getUsername() : user.getEmail();
+            String title = mitigation.getTitle() != null ? mitigation.getTitle() : "Untitled Mitigation";
+            String projectName = project != null ? project.getName() : "Independent Mitigation";
+            String priority = mitigation.getPriority() != null ? mitigation.getPriority() : "MEDIUM";
+            String dueDate = formattedDueDate;
+            String description = mitigation.getDescription() != null ? mitigation.getDescription() : "";
+            
+            System.out.println("DEBUG - Sending mitigation email with parameters:");
+            System.out.println("  Email: " + emailAddress);
+            System.out.println("  Username: " + username);
+            System.out.println("  Title: " + title);
+            System.out.println("  Project: " + projectName);
+            System.out.println("  Priority: " + priority);
+            System.out.println("  DueDate: " + dueDate);
+            System.out.println("  Description: " + (description.length() > 50 ? description.substring(0, 50) + "..." : description));
+            
+            emailService.sendMitigationAssignmentEmail(
+                emailAddress,
+                username,
+                title,
+                projectName,
+                priority,
+                dueDate,
+                description
+            );
+        } catch (Exception e) {
+            // Log error but don't fail the mitigation update
+            System.err.println("Failed to send mitigation assignment notification: " + e.getMessage());
+            e.printStackTrace(); // Print full stack trace for debugging
+        }
     }
 }
