@@ -34,6 +34,7 @@ const RiskDashboard = () => {
         // Try to fetch risk summary
         try {
           const summary = await RiskService.getRiskSummary();
+          console.log('Risk Summary Response:', summary);
           setRiskSummary({
             totalProjects: summary.totalProjects || 0,
             totalRisks: summary.totalRisks || 0

@@ -16,6 +16,7 @@ import dev.doomsday.suitX.dto.RiskSummaryDto;
 import dev.doomsday.suitX.model.Risk;
 import dev.doomsday.suitX.model.Project;
 import dev.doomsday.suitX.model.Mitigation;
+import dev.doomsday.suitX.model.User;
 import dev.doomsday.suitX.repository.ProjectRepository;
 import dev.doomsday.suitX.repository.RiskRepository;
 import dev.doomsday.suitX.repository.UserRepository;
@@ -168,8 +169,17 @@ public class RiskService {
     public RiskSummaryDto getRiskSummary(String username) {
         RiskSummaryDto summary = new RiskSummaryDto();
         
-        // Get all projects for the user
-        List<Project> userProjects = projectRepository.findByCreatedBy(username);
+        // Get user by username to get userId
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        String userId = user.getId();
+        
+        // Get all projects where user has access (owner or member)
+        List<Project> allProjects = projectRepository.findAll();
+        List<Project> userProjects = allProjects.stream()
+                .filter(project -> project.hasAccess(userId))
+                .collect(Collectors.toList());
+        
         List<String> userProjectIds = userProjects.stream()
                 .map(Project::getId)
                 .collect(Collectors.toList());
