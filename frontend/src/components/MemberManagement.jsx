@@ -300,9 +300,6 @@ export default function MemberManagement({ projectId, project }) {
                       </svg>
                     </div>
                     <div className="text-sm text-gray-500">{member.email}</div>
-                    {member.role && (
-                      <div className="text-xs text-gray-400">{member.role}</div>
-                    )}
                   </div>
                 </div>
                 
