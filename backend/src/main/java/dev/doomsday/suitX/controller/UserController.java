@@ -1,6 +1,8 @@
 package dev.doomsday.suitX.controller;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import dev.doomsday.suitX.model.User;
@@ -88,6 +91,50 @@ public class UserController {
                     .orElse(ResponseEntity.status(404).body(Map.of("error", "User not found")));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", "Failed to fetch user: " + e.getMessage()));
+        }
+    }
+    
+    /**
+     * Get user by username (for fetching project owner details)
+     */
+    @GetMapping("/username/{username}")
+    public ResponseEntity<?> getUserByUsername(@PathVariable String username) {
+        try {
+            return userService.findByUsername(username)
+                    .map(user -> {
+                        // Don't send password to frontend
+                        user.setPassword(null);
+                        return ResponseEntity.ok((Object) user);
+                    })
+                    .orElse(ResponseEntity.status(404).body(Map.of("error", "User not found")));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to fetch user: " + e.getMessage()));
+        }
+    }
+    
+    /**
+     * Search users by username or email (for adding project members)
+     */
+    @GetMapping("/search")
+    public ResponseEntity<?> searchUsers(@RequestParam String q, Authentication authentication) {
+        try {
+            if (authentication == null || authentication.getPrincipal() == null) {
+                return ResponseEntity.status(401).body(Map.of("error", "Not authenticated"));
+            }
+            
+            List<User> users = userService.searchUsers(q);
+            
+            // Remove password from results
+            List<User> sanitizedUsers = users.stream()
+                    .map(user -> {
+                        user.setPassword(null);
+                        return user;
+                    })
+                    .collect(Collectors.toList());
+            
+            return ResponseEntity.ok(sanitizedUsers);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to search users: " + e.getMessage()));
         }
     }
 }

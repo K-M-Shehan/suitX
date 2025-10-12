@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { getProjectMembers } from '../services/ProjectService';
 
-const TaskEditDialog = ({ isOpen, onClose, onSubmit, task }) => {
+const TaskEditDialog = ({ isOpen, onClose, onSubmit, task, project }) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -13,6 +14,74 @@ const TaskEditDialog = ({ isOpen, onClose, onSubmit, task }) => {
     actualHours: '',
     tags: '',
   });
+  
+  const [memberDetails, setMemberDetails] = useState([]);
+
+  // Load project members when dialog opens
+  useEffect(() => {
+    if (isOpen && task?.projectId) {
+      loadProjectMembers();
+    }
+  }, [isOpen, task?.projectId]);
+
+  const loadProjectMembers = async () => {
+    try {
+      if (!task?.projectId) return;
+      
+      // Get member IDs
+      const memberIds = await getProjectMembers(task.projectId);
+      
+      // Fetch full user details for each member
+      const details = await Promise.all(
+        memberIds.map(async (userId) => {
+          try {
+            const response = await fetch(`http://localhost:8080/api/user/${userId}`, {
+              headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+              },
+            });
+            if (response.ok) {
+              return await response.json();
+            }
+            return null;
+          } catch (err) {
+            console.error(`Error fetching user ${userId}:`, err);
+            return null;
+          }
+        })
+      );
+      
+      const validMembers = details.filter(d => d !== null);
+      
+      // Also add the project owner if not already in members
+      if (project?.createdBy) {
+        const ownerAlreadyIncluded = validMembers.some(m => m.username === project.createdBy);
+        if (!ownerAlreadyIncluded) {
+          try {
+            const response = await fetch(`http://localhost:8080/api/user/search?q=${project.createdBy}`, {
+              headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+              },
+            });
+            if (response.ok) {
+              const users = await response.json();
+              const owner = users.find(u => u.username === project.createdBy);
+              if (owner) {
+                validMembers.unshift(owner); // Add owner at the beginning
+              }
+            }
+          } catch (err) {
+            console.error('Error fetching owner:', err);
+          }
+        }
+      }
+      
+      setMemberDetails(validMembers);
+    } catch (err) {
+      console.error('Error loading project members:', err);
+      // Don't throw error, just log it
+    }
+  };
 
   // Populate form when task changes
   useEffect(() => {
@@ -176,14 +245,21 @@ const TaskEditDialog = ({ isOpen, onClose, onSubmit, task }) => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Assigned To
               </label>
-              <input
-                type="text"
+              <select
                 name="assignedTo"
                 value={formData.assignedTo}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                placeholder="Enter username"
-              />
+              >
+                <option value="">Unassigned</option>
+                {memberDetails.map((member) => (
+                  <option key={member.id} value={member.id}>
+                    {member.firstName && member.lastName
+                      ? `${member.firstName} ${member.lastName} (${member.username})`
+                      : member.username}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Date Range */}

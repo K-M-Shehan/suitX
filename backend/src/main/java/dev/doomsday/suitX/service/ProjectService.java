@@ -10,8 +10,10 @@ import org.springframework.stereotype.Service;
 import dev.doomsday.suitX.dto.ProjectDto;
 import dev.doomsday.suitX.model.Project;
 import dev.doomsday.suitX.model.Task;
+import dev.doomsday.suitX.model.User;
 import dev.doomsday.suitX.repository.ProjectRepository;
 import dev.doomsday.suitX.repository.TaskRepository;
+import dev.doomsday.suitX.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -20,6 +22,8 @@ public class ProjectService {
 
     private final ProjectRepository projectRepository;
     private final TaskRepository taskRepository;
+    private final UserService userService;
+    private final UserRepository userRepository;
 
     public List<ProjectDto> getAllProjects() {
         return projectRepository.findAll().stream()
@@ -41,8 +45,16 @@ public class ProjectService {
         if (username == null) {
             return List.of();
         }
+        
+        // Get user ID for member lookup
+        Optional<User> userOpt = userRepository.findByUsername(username);
+        if (userOpt.isEmpty()) {
+            return List.of();
+        }
+        String userId = userOpt.get().getId();
+        
         // Use the optimized query that finds projects where user is owner OR member in one query
-        return projectRepository.findAllAccessibleProjects(username).stream()
+        return projectRepository.findAllAccessibleProjects(username, userId).stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
@@ -51,8 +63,16 @@ public class ProjectService {
         if (username == null) {
             return false;
         }
+        
+        // Get user ID for member lookup
+        Optional<User> userOpt = userRepository.findByUsername(username);
+        if (userOpt.isEmpty()) {
+            return false;
+        }
+        String userId = userOpt.get().getId();
+        
         return projectRepository.findById(projectId)
-                .map(project -> project.isOwner(username) || project.isMember(username))
+                .map(project -> project.isOwner(username) || project.isMember(userId))
                 .orElse(false);
     }
 
@@ -66,7 +86,15 @@ public class ProjectService {
         if (username == null) {
             return List.of(); // Return empty list instead of all active projects
         }
-        return projectRepository.findByCreatedByAndStatus(username, "ACTIVE").stream()
+        
+        // Get user ID for member lookup
+        Optional<User> userOpt = userRepository.findByUsername(username);
+        if (userOpt.isEmpty()) {
+            return List.of();
+        }
+        String userId = userOpt.get().getId();
+        
+        return projectRepository.findActiveProjectsForUser(username, userId).stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
@@ -80,8 +108,35 @@ public class ProjectService {
         if (username == null) {
             return Optional.empty();
         }
+        
+        // Get user ID for access checks
+        Optional<User> userOpt = userRepository.findByUsername(username);
+        if (userOpt.isEmpty()) {
+            return Optional.empty();
+        }
+        String userId = userOpt.get().getId();
+        
         return projectRepository.findById(id)
-                .filter(project -> project.isOwner(username) || project.isMember(username))
+                .filter(project -> {
+                    // Check if user is owner (by userId)
+                    if (project.isOwner(userId)) {
+                        return true;
+                    }
+                    // Check if user is member (by userId)
+                    if (project.isMember(userId)) {
+                        return true;
+                    }
+                    // Backward compatibility: check createdBy field (username)
+                    // This handles old projects where ownerId might contain username instead of userId
+                    if (project.getCreatedBy() != null && project.getCreatedBy().equals(username)) {
+                        return true;
+                    }
+                    // Backward compatibility: check if ownerId contains username (old bug)
+                    if (project.getOwnerId() != null && project.getOwnerId().equals(username)) {
+                        return true;
+                    }
+                    return false;
+                })
                 .map(this::convertToDto);
     }
 
@@ -130,12 +185,21 @@ public class ProjectService {
         if (username == null) {
             return false;
         }
+        
+        // Get user ID for ownership check
+        Optional<User> userOpt = userRepository.findByUsername(username);
+        if (userOpt.isEmpty()) {
+            return false;
+        }
+        String userId = userOpt.get().getId();
+        
         return projectRepository.findById(projectId)
                 .map(project -> {
-                    // Check ownerId first (primary ownership field), then createdBy as fallback
-                    if (project.getOwnerId() != null && project.getOwnerId().equals(username)) {
+                    // Check ownerId (primary ownership field using user ID)
+                    if (project.getOwnerId() != null && project.getOwnerId().equals(userId)) {
                         return true;
                     }
+                    // Fallback: check createdBy (username) for legacy projects
                     return project.getCreatedBy() != null && project.getCreatedBy().equals(username);
                 })
                 .orElse(false);
@@ -233,5 +297,91 @@ public class ProjectService {
         
         project.setUpdatedAt(LocalDateTime.now());
         projectRepository.save(project);
+    }
+    
+    /**
+     * Add a member to a project
+     * Only project owner can add members
+     */
+    public ProjectDto addMemberToProject(String projectId, String memberUserId, String requestingUsername) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found with id: " + projectId));
+        
+        // Get requesting user's ID for ownership check
+        Optional<User> requestingUserOpt = userRepository.findByUsername(requestingUsername);
+        if (requestingUserOpt.isEmpty()) {
+            throw new RuntimeException("Requesting user not found");
+        }
+        String requestingUserId = requestingUserOpt.get().getId();
+        
+        // Check if requesting user is the owner (by userId) or createdBy (by username)
+        boolean isOwner = project.isOwner(requestingUserId) || 
+                         (project.getCreatedBy() != null && project.getCreatedBy().equals(requestingUsername));
+        
+        if (!isOwner) {
+            throw new RuntimeException("Only project owner can add members");
+        }
+        
+        // Add member if not already added
+        if (!project.isMember(memberUserId) && !project.isOwner(memberUserId)) {
+            project.addMember(memberUserId);
+            project.setUpdatedAt(LocalDateTime.now());
+            Project savedProject = projectRepository.save(project);
+            
+            // Sync user's memberProjects list
+            userService.addMemberProject(memberUserId, projectId);
+            
+            return convertToDto(savedProject);
+        }
+        
+        // Already a member or owner
+        return convertToDto(project);
+    }
+    
+    /**
+     * Remove a member from a project
+     * Only project owner can remove members
+     */
+    public ProjectDto removeMemberFromProject(String projectId, String memberUserId, String requestingUsername) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found with id: " + projectId));
+        
+        // Get requesting user's ID for ownership check
+        Optional<User> requestingUserOpt = userRepository.findByUsername(requestingUsername);
+        if (requestingUserOpt.isEmpty()) {
+            throw new RuntimeException("Requesting user not found");
+        }
+        String requestingUserId = requestingUserOpt.get().getId();
+        
+        // Check if requesting user is the owner (by userId) or createdBy (by username)
+        boolean isOwner = project.isOwner(requestingUserId) || 
+                         (project.getCreatedBy() != null && project.getCreatedBy().equals(requestingUsername));
+        
+        if (!isOwner) {
+            throw new RuntimeException("Only project owner can remove members");
+        }
+        
+        // Cannot remove the owner
+        if (project.isOwner(memberUserId)) {
+            throw new RuntimeException("Cannot remove project owner from members");
+        }
+        
+        project.removeMember(memberUserId);
+        project.setUpdatedAt(LocalDateTime.now());
+        Project savedProject = projectRepository.save(project);
+        
+        // Sync user's memberProjects list
+        userService.removeMemberProject(memberUserId, projectId);
+        
+        return convertToDto(savedProject);
+    }
+    
+    /**
+     * Get all members of a project (excluding owner)
+     */
+    public List<String> getProjectMembers(String projectId) {
+        return projectRepository.findById(projectId)
+                .map(Project::getMemberIds)
+                .orElse(List.of());
     }
 }

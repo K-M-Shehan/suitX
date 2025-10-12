@@ -7,6 +7,7 @@ import ProjectEditDialog from '../components/ProjectEditDialog';
 import TaskFormDialog from '../components/TaskFormDialog';
 import TaskEditDialog from '../components/TaskEditDialog';
 import StatusDropdown from '../components/StatusDropdown';
+import MemberManagement from '../components/MemberManagement';
 
 const ProjectDetailsPage = () => {
   const { projectId } = useParams();
@@ -371,7 +372,7 @@ const ProjectDetailsPage = () => {
       {/* Tabs */}
       <div className="border-b border-gray-200 mb-6">
         <nav className="-mb-px flex space-x-8">
-          {['overview', 'tasks', 'risks', 'timeline'].map((tab) => (
+          {['overview', 'tasks', 'team', 'risks', 'timeline'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -385,6 +386,11 @@ const ProjectDetailsPage = () => {
               {tab === 'risks' && risks.length > 0 && (
                 <span className="ml-2 px-2 py-0.5 bg-red-100 text-red-800 text-xs rounded-full">
                   {risks.length}
+                </span>
+              )}
+              {tab === 'team' && (
+                <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">
+                  {(project?.memberIds?.length || 0) + 1}
                 </span>
               )}
             </button>
@@ -466,17 +472,17 @@ const ProjectDetailsPage = () => {
           )}
 
           {/* Members */}
-          {project.memberIds && project.memberIds.length > 0 && (
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-3">Team Members</h2>
-              <div className="space-y-2">
-                <p className="text-sm text-gray-600">
-                  {project.memberIds.length} member{project.memberIds.length !== 1 ? 's' : ''}
-                </p>
-                {/* TODO: Display actual user names when user service is available */}
-              </div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-3">Team Members</h2>
+            <div className="space-y-2">
+              <p className="text-sm text-gray-600">
+                {(project?.memberIds?.length || 0) + 1} member{(project?.memberIds?.length || 0) + 1 !== 1 ? 's' : ''}
+              </p>
+              <p className="text-xs text-gray-500">
+                Click on the Team tab to view and manage members
+              </p>
             </div>
-          )}
+          </div>
 
           {/* Metadata */}
           <div className="bg-white rounded-lg shadow p-6">
@@ -639,6 +645,26 @@ const ProjectDetailsPage = () => {
         </div>
       )}
 
+      {/* Team Tab */}
+      {activeTab === 'team' && (
+        <div className="space-y-6">
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">
+              Team Management
+              <span className="ml-3 text-sm font-normal text-gray-500">
+                ({(project?.memberIds?.length || 0) + 1} {(project?.memberIds?.length || 0) + 1 === 1 ? 'member' : 'members'})
+              </span>
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Manage project team members and send invitations to collaborate
+            </p>
+          </div>
+
+          {/* Member Management Component */}
+          <MemberManagement projectId={projectId} project={project} />
+        </div>
+      )}
+
       {/* Risks Tab */}
       {activeTab === 'risks' && (
         <div className="space-y-6">
@@ -745,6 +771,7 @@ const ProjectDetailsPage = () => {
         onClose={() => setIsTaskDialogOpen(false)}
         onSubmit={handleAddTask}
         projectId={projectId}
+        project={project}
       />
 
       <TaskEditDialog
@@ -755,6 +782,7 @@ const ProjectDetailsPage = () => {
         }}
         onSubmit={handleEditTask}
         task={selectedTask}
+        project={project}
       />
 
       {/* Risk Detail Modal */}

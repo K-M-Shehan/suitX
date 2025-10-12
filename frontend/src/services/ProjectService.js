@@ -197,3 +197,115 @@ export async function analyzeProjectRisks(projectId) {
     throw error;
   }
 }
+
+// Add a member to a project
+export async function addMemberToProject(projectId, userId) {
+  try {
+    const token = getToken();
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (token) {
+      headers['Authorization'] = token;
+    }
+
+    const response = await fetch(`${API_BASE_URL}/projects/${projectId}/members/${userId}`, {
+      method: 'POST',
+      headers: headers,
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to add member: ${errorText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error adding member to project:', error);
+    throw error;
+  }
+}
+
+// Remove a member from a project
+export async function removeMemberFromProject(projectId, userId) {
+  try {
+    const token = getToken();
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (token) {
+      headers['Authorization'] = token;
+    }
+
+    const response = await fetch(`${API_BASE_URL}/projects/${projectId}/members/${userId}`, {
+      method: 'DELETE',
+      headers: headers,
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to remove member: ${errorText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error removing member from project:', error);
+    throw error;
+  }
+}
+
+// Get all members of a project
+export async function getProjectMembers(projectId) {
+  try {
+    const token = getToken();
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (token) {
+      headers['Authorization'] = token;
+    }
+
+    const response = await fetch(`${API_BASE_URL}/projects/${projectId}/members`, {
+      headers: headers,
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch project members');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching project members:', error);
+    throw error;
+  }
+}
+
+// Search users for adding as members
+export async function searchUsers(searchTerm) {
+  try {
+    const token = getToken();
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (token) {
+      headers['Authorization'] = token;
+    }
+
+    const response = await fetch(`${API_BASE_URL}/user/search?q=${encodeURIComponent(searchTerm)}`, {
+      headers: headers,
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to search users');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error searching users:', error);
+    throw error;
+  }
+}
