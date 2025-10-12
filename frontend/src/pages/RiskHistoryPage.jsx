@@ -28,8 +28,8 @@ export default function RiskHistoryPage() {
       setLoading(true);
       setError("");
       
-      // Fetch all risks
-      const allRisks = await RiskService.getAllRisks();
+      // Fetch all risks for the current user
+      const allRisks = await RiskService.getRisksForUser();
       
       // Filter only historical statuses (RESOLVED, ACCEPTED, IGNORED)
       const historicalRisks = allRisks.filter(risk => 
