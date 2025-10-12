@@ -35,7 +35,7 @@ public class User {
     private String lastName;
     private String role = "MEMBER"; // OWNER, MEMBER, ADMIN
     private String bio;
-    private String avatar; // URL to avatar image
+    private String avatar; // Base64 encoded image data or URL
     private String phone;
     private String department;
     
