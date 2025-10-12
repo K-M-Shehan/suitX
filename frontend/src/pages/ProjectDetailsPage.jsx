@@ -372,7 +372,7 @@ const ProjectDetailsPage = () => {
       {/* Tabs */}
       <div className="border-b border-gray-200 mb-6">
         <nav className="-mb-px flex space-x-8">
-          {['overview', 'tasks', 'risks', 'timeline'].map((tab) => (
+          {['overview', 'tasks', 'team', 'risks', 'timeline'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -388,6 +388,11 @@ const ProjectDetailsPage = () => {
                   {risks.length}
                 </span>
               )}
+              {tab === 'team' && project?.memberIds && project.memberIds.length > 0 && (
+                <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">
+                  {project.memberIds.length}
+                </span>
+              )}
             </button>
           ))}
         </nav>
@@ -396,9 +401,6 @@ const ProjectDetailsPage = () => {
       {/* Tab Content */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
-          {/* Member Management */}
-          <MemberManagement projectId={projectId} project={project} />
-
           {/* Description */}
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-3">Description</h2>
@@ -640,6 +642,28 @@ const ProjectDetailsPage = () => {
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Team Tab */}
+      {activeTab === 'team' && (
+        <div className="space-y-6">
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">
+              Team Management
+              {project?.memberIds && project.memberIds.length > 0 && (
+                <span className="ml-3 text-sm font-normal text-gray-500">
+                  ({project.memberIds.length} {project.memberIds.length === 1 ? 'member' : 'members'})
+                </span>
+              )}
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Manage project team members and send invitations to collaborate
+            </p>
+          </div>
+
+          {/* Member Management Component */}
+          <MemberManagement projectId={projectId} project={project} />
         </div>
       )}
 
