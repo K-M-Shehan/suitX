@@ -406,6 +406,45 @@ const MitigationPage = () => {
         </div>
       </div>
 
+      {/* Quick Stats Section */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Stats</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-gray-200 rounded-lg p-6">
+            <div className="text-center">
+              <h3 className="text-sm font-medium text-gray-700 mb-1">Critical/High Priority</h3>
+              <div className="text-3xl font-bold text-red-600">
+                {mitigations.filter(m => m.priority === 'HIGH' || m.priority === 'CRITICAL').length}
+              </div>
+            </div>
+          </div>
+          <div className="bg-gray-200 rounded-lg p-6">
+            <div className="text-center">
+              <h3 className="text-sm font-medium text-gray-700 mb-1">Medium Priority</h3>
+              <div className="text-3xl font-bold text-orange-600">
+                {mitigations.filter(m => m.priority === 'MEDIUM').length}
+              </div>
+            </div>
+          </div>
+          <div className="bg-gray-200 rounded-lg p-6">
+            <div className="text-center">
+              <h3 className="text-sm font-medium text-gray-700 mb-1">Completed</h3>
+              <div className="text-3xl font-bold text-green-600">
+                {mitigations.filter(m => m.status === 'COMPLETED').length}
+              </div>
+            </div>
+          </div>
+          <div className="bg-gray-200 rounded-lg p-6">
+            <div className="text-center">
+              <h3 className="text-sm font-medium text-gray-700 mb-1">AI Generated</h3>
+              <div className="text-3xl font-bold text-purple-600">
+                {mitigations.filter(m => m.aiGenerated === true).length}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Mitigations Section */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-6">
@@ -565,45 +604,6 @@ const MitigationPage = () => {
             <p className="text-gray-600">No mitigations available for the selected status. Add some mitigations to get started!</p>
           </div>
         )}
-      </div>
-
-      {/* Quick Stats Section */}
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Stats</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-gray-200 rounded-lg p-6">
-            <div className="text-center">
-              <h3 className="text-sm font-medium text-gray-700 mb-1">Critical/High Priority</h3>
-              <div className="text-3xl font-bold text-red-600">
-                {mitigations.filter(m => m.priority === 'HIGH' || m.priority === 'CRITICAL').length}
-              </div>
-            </div>
-          </div>
-          <div className="bg-gray-200 rounded-lg p-6">
-            <div className="text-center">
-              <h3 className="text-sm font-medium text-gray-700 mb-1">Medium Priority</h3>
-              <div className="text-3xl font-bold text-orange-600">
-                {mitigations.filter(m => m.priority === 'MEDIUM').length}
-              </div>
-            </div>
-          </div>
-          <div className="bg-gray-200 rounded-lg p-6">
-            <div className="text-center">
-              <h3 className="text-sm font-medium text-gray-700 mb-1">Completed</h3>
-              <div className="text-3xl font-bold text-green-600">
-                {mitigations.filter(m => m.status === 'COMPLETED').length}
-              </div>
-            </div>
-          </div>
-          <div className="bg-gray-200 rounded-lg p-6">
-            <div className="text-center">
-              <h3 className="text-sm font-medium text-gray-700 mb-1">AI Generated</h3>
-              <div className="text-3xl font-bold text-purple-600">
-                {mitigations.filter(m => m.aiGenerated === true).length}
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* AI Assistant Modal */}
