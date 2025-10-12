@@ -276,7 +276,10 @@ const MitigationPage = () => {
   if (loading) {
     return (
       <div className="flex-1 p-8 bg-gray-50 flex items-center justify-center">
-        <div className="text-lg text-gray-600">Loading mitigation data...</div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading mitigation data...</p>
+        </div>
       </div>
     );
   }
