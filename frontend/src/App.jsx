@@ -18,6 +18,7 @@ import MitigationPage from "./pages/MitigationPageSimple";
 import RiskHistoryPage from "./pages/RiskHistoryPage";
 import ProjectDetailsPage from "./pages/ProjectDetailsPage";
 import RiskDetailPage from "./pages/RiskDetailPage";
+import MitigationDetailPage from "./pages/MitigationDetailPage";
 import ApiTest from "./components/ApiTest";
 
 function App() {
@@ -117,6 +118,11 @@ function App() {
       <Route path="/mitigations" element={
         <DashboardLayout>
           <MitigationPage />
+        </DashboardLayout>
+      } />
+      <Route path="/mitigations/:id" element={
+        <DashboardLayout>
+          <MitigationDetailPage />
         </DashboardLayout>
       } />
       <Route path="/history" element={

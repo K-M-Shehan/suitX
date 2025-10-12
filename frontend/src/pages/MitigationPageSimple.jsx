@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import MitigationService from '../services/MitigationService';
 import { getAllProjects } from '../services/ProjectService';
 import AIAssistant from '../components/AIAssistant';
 
 const MitigationPage = () => {
+  const navigate = useNavigate();
   const [selectedStatus, setSelectedStatus] = useState('All');
   const [mitigationSummary, setMitigationSummary] = useState({
     totalMitigations: 0,
@@ -14,6 +16,17 @@ const MitigationPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
+  const [editingMitigation, setEditingMitigation] = useState(null);
+  const [editForm, setEditForm] = useState({
+    title: '',
+    description: '',
+    status: '',
+    priority: '',
+    assignee: '',
+    dueDate: '',
+    estimatedCost: '',
+    effectiveness: ''
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -120,6 +133,60 @@ const MitigationPage = () => {
       // Show success message or integrate with your mitigation creation flow
       alert(`AI generated ${aiResults.suggestedMitigations.length} mitigation strategies!`);
     }
+  };
+
+  const handleEditMitigation = (mitigation) => {
+    setEditingMitigation(mitigation);
+    setEditForm({
+      title: mitigation.title || '',
+      description: mitigation.description || '',
+      status: mitigation.status || '',
+      priority: mitigation.priority || '',
+      assignee: mitigation.assigneeUsername || mitigation.assignee || '',
+      dueDate: mitigation.dueDate ? mitigation.dueDate.split('T')[0] : '',
+      estimatedCost: mitigation.estimatedCost || '',
+      effectiveness: mitigation.effectiveness || 'NOT_ASSESSED'
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      await MitigationService.updateMitigation(editingMitigation.id, editForm);
+      // Refresh mitigations data
+      const updatedMitigations = await MitigationService.getAllMitigations();
+      setMitigations(Array.isArray(updatedMitigations) ? updatedMitigations : []);
+      
+      // Refresh summary
+      const summary = await MitigationService.getMitigationSummary();
+      setMitigationSummary({
+        totalMitigations: summary.totalMitigations || 0,
+        activeMitigations: summary.activeMitigations || 0
+      });
+      
+      // Close modal
+      setEditingMitigation(null);
+    } catch (error) {
+      console.error('Error updating mitigation:', error);
+      alert('Failed to update mitigation. Please try again.');
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMitigation(null);
+    setEditForm({
+      title: '',
+      description: '',
+      status: '',
+      priority: '',
+      assignee: '',
+      dueDate: '',
+      estimatedCost: '',
+      effectiveness: ''
+    });
+  };
+
+  const handleMitigationClick = (mitigationId) => {
+    navigate(`/mitigations/${mitigationId}`);
   };
 
   if (loading) {
@@ -275,7 +342,11 @@ const MitigationPage = () => {
         {filteredMitigations.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {filteredMitigations.map((mitigation, index) => (
-              <div key={mitigation.id || index} className={`rounded-lg p-6 shadow-sm border ${getCardBackgroundColor(index)}`}>
+              <div 
+                key={mitigation.id || index} 
+                className={`rounded-lg p-6 shadow-sm border ${getCardBackgroundColor(index)} hover:shadow-md transition-shadow cursor-pointer`}
+                onClick={() => handleMitigationClick(mitigation.id)}
+              >
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
@@ -372,18 +443,30 @@ const MitigationPage = () => {
                 </div>
 
                 <div className="flex space-x-2">
-                  <button className="px-3 py-1 text-blue-600 hover:bg-white hover:bg-opacity-50 rounded-md text-sm font-medium transition-colors">
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditMitigation(mitigation);
+                    }}
+                    className="px-3 py-1 text-blue-600 hover:bg-white hover:bg-opacity-50 rounded-md text-sm font-medium transition-colors"
+                  >
                     Edit
                   </button>
                   <button 
-                    onClick={() => handleMarkComplete(mitigation.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleMarkComplete(mitigation.id);
+                    }}
                     className="px-3 py-1 text-green-600 hover:bg-white hover:bg-opacity-50 rounded-md text-sm font-medium transition-colors"
                     disabled={mitigation.status === 'COMPLETED'}
                   >
                     {mitigation.status === 'COMPLETED' ? 'Completed' : 'Mark Complete'}
                   </button>
                   <button 
-                    onClick={() => handleDeleteMitigation(mitigation.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteMitigation(mitigation.id);
+                    }}
                     className="px-3 py-1 text-red-600 hover:bg-white hover:bg-opacity-50 rounded-md text-sm font-medium transition-colors"
                   >
                     Delete
@@ -445,6 +528,155 @@ const MitigationPage = () => {
         onClose={() => setShowAIAssistant(false)}
         onResultsGenerated={handleAIResults}
       />
+
+      {/* Edit Mitigation Modal */}
+      {editingMitigation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-6">Edit Mitigation</h2>
+              
+              <div className="space-y-4">
+                {/* Title */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.title}
+                    onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Description
+                  </label>
+                  <textarea
+                    value={editForm.description}
+                    onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Status */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Status
+                  </label>
+                  <select
+                    value={editForm.status}
+                    onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select Status</option>
+                    <option value="PLANNED">Planned</option>
+                    <option value="IN_PROGRESS">In Progress</option>
+                    <option value="COMPLETED">Completed</option>
+                    <option value="CANCELLED">Cancelled</option>
+                  </select>
+                </div>
+
+                {/* Priority */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Priority
+                  </label>
+                  <select
+                    value={editForm.priority}
+                    onChange={(e) => setEditForm({ ...editForm, priority: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select Priority</option>
+                    <option value="LOW">Low</option>
+                    <option value="MEDIUM">Medium</option>
+                    <option value="HIGH">High</option>
+                    <option value="CRITICAL">Critical</option>
+                  </select>
+                </div>
+
+                {/* Effectiveness */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Effectiveness
+                  </label>
+                  <select
+                    value={editForm.effectiveness}
+                    onChange={(e) => setEditForm({ ...editForm, effectiveness: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="NOT_ASSESSED">Not Assessed</option>
+                    <option value="LOW">Low</option>
+                    <option value="MEDIUM">Medium</option>
+                    <option value="HIGH">High</option>
+                  </select>
+                </div>
+
+                {/* Assignee */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Assignee
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.assignee}
+                    onChange={(e) => setEditForm({ ...editForm, assignee: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter assignee username"
+                  />
+                </div>
+
+                {/* Due Date */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Due Date
+                  </label>
+                  <input
+                    type="date"
+                    value={editForm.dueDate}
+                    onChange={(e) => setEditForm({ ...editForm, dueDate: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Estimated Cost */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Estimated Cost
+                  </label>
+                  <input
+                    type="number"
+                    value={editForm.estimatedCost}
+                    onChange={(e) => setEditForm({ ...editForm, estimatedCost: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter amount"
+                  />
+                </div>
+              </div>
+
+              {/* Modal Actions */}
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  onClick={handleCancelEdit}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveEdit}
+                  className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-md font-medium transition-colors"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
