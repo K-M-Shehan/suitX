@@ -185,23 +185,13 @@ public class ProjectInvitationService {
      * Send invitation email
      */
     private void sendInvitationEmail(ProjectInvitation invitation, Project project, User user) {
-        String subject = "You've been invited to join " + project.getName();
-        
-        String body = String.format(
-            "Hello %s,\n\n" +
-            "%s has invited you to join the project '%s'.\n\n" +
-            "%s\n\n" +
-            "Please log in to SuitX to accept or decline this invitation.\n" +
-            "This invitation will expire on %s.\n\n" +
-            "Best regards,\n" +
-            "SuitX Team",
+        emailService.sendProjectInvitationEmail(
+            user.getEmail(),
             user.getUsername(),
-            invitation.getInvitedBy(),
             project.getName(),
-            invitation.getMessage() != null ? "Message: " + invitation.getMessage() : "",
-            invitation.getExpiresAt().toLocalDate()
+            invitation.getInvitedBy(),
+            invitation.getMessage(),
+            invitation.getExpiresAt().toLocalDate().toString()
         );
-        
-        emailService.sendEmail(user.getEmail(), subject, body);
     }
 }

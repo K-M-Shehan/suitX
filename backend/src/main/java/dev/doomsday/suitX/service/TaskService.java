@@ -306,28 +306,16 @@ public class TaskService {
             
             notificationRepository.save(notification);
             
-            // Send email
-            String subject = "New Task Assigned: " + task.getTitle();
-            String body = String.format(
-                "Hello %s,\n\n" +
-                "You have been assigned to a new task:\n\n" +
-                "Task: %s\n" +
-                "Project: %s\n" +
-                "Priority: %s\n" +
-                "Due Date: %s\n\n" +
-                "%s\n\n" +
-                "Please log in to SuitX to view the details and get started.\n\n" +
-                "Best regards,\n" +
-                "SuitX Team",
+            // Send email with professional HTML template
+            emailService.sendTaskAssignmentEmail(
+                user.getEmail(),
                 user.getUsername(),
                 task.getTitle(),
                 project.getName(),
                 task.getPriority(),
-                task.getDueDate() != null ? task.getDueDate().toString() : "Not set",
-                task.getDescription() != null ? "Description: " + task.getDescription() : ""
+                task.getDueDate() != null ? task.getDueDate().toString() : null,
+                task.getDescription()
             );
-            
-            emailService.sendEmail(user.getEmail(), subject, body);
         } catch (Exception e) {
             // Log error but don't fail the task creation/update
             System.err.println("Failed to send task assignment notification: " + e.getMessage());
