@@ -14,6 +14,18 @@ const MitigationDetailPage = () => {
   const [error, setError] = useState(null);
   const [isEditingProgress, setIsEditingProgress] = useState(false);
   const [progressValue, setProgressValue] = useState(0);
+  const [isEditingMitigation, setIsEditingMitigation] = useState(false);
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [editForm, setEditForm] = useState({
+    title: '',
+    description: '',
+    status: '',
+    priority: '',
+    assignee: '',
+    dueDate: '',
+    estimatedCost: '',
+    effectiveness: ''
+  });
 
   useEffect(() => {
     const fetchMitigationDetails = async () => {
@@ -55,6 +67,129 @@ const MitigationDetailPage = () => {
 
     fetchMitigationDetails();
   }, [id]);
+
+  const handleEditMitigation = async () => {
+    setEditForm({
+      title: mitigation.title || '',
+      description: mitigation.description || '',
+      status: mitigation.status || '',
+      priority: mitigation.priority || '',
+      assignee: mitigation.assignee || '',
+      dueDate: mitigation.dueDate ? mitigation.dueDate.split('T')[0] : '',
+      estimatedCost: mitigation.estimatedCost || '',
+      effectiveness: mitigation.effectiveness || 'NOT_ASSESSED'
+    });
+
+    // Fetch project team members if projectId exists
+    if (mitigation.projectId) {
+      try {
+        const projectData = await getProjectById(mitigation.projectId);
+        if (projectData) {
+          const token = localStorage.getItem('token');
+          const allMemberIds = [];
+          
+          // Add owner if exists
+          if (projectData.ownerId) {
+            allMemberIds.push(projectData.ownerId);
+          }
+          
+          // Add project manager if exists and different from owner
+          if (projectData.projectManager && projectData.projectManager !== projectData.ownerId) {
+            allMemberIds.push(projectData.projectManager);
+          }
+          
+          // Add all other members
+          if (projectData.memberIds && projectData.memberIds.length > 0) {
+            projectData.memberIds.forEach(id => {
+              if (!allMemberIds.includes(id)) {
+                allMemberIds.push(id);
+              }
+            });
+          }
+          
+          if (allMemberIds.length > 0) {
+            // Fetch user details for each member ID
+            const memberDetailsPromises = allMemberIds.map(async (userId) => {
+              try {
+                const response = await fetch(`http://localhost:8080/api/user/${userId}`, {
+                  headers: {
+                    'Authorization': token ? `Bearer ${token}` : '',
+                    'Content-Type': 'application/json'
+                  }
+                });
+                if (response.ok) {
+                  return await response.json();
+                }
+                return null;
+              } catch (error) {
+                console.error(`Error fetching user ${userId}:`, error);
+                return null;
+              }
+            });
+            
+            const members = await Promise.all(memberDetailsPromises);
+            const validMembers = members.filter(m => m !== null);
+            setTeamMembers(validMembers);
+          } else {
+            setTeamMembers([]);
+          }
+        } else {
+          setTeamMembers([]);
+        }
+      } catch (error) {
+        console.error('Error fetching project team members:', error);
+        setTeamMembers([]);
+      }
+    } else {
+      setTeamMembers([]);
+    }
+    
+    setIsEditingMitigation(true);
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      // Prepare the update data
+      const updateData = {
+        title: editForm.title,
+        description: editForm.description,
+        status: editForm.status,
+        priority: editForm.priority,
+        assignee: editForm.assignee,
+        dueDate: editForm.dueDate ? new Date(editForm.dueDate).toISOString() : null,
+        estimatedCost: editForm.estimatedCost ? parseFloat(editForm.estimatedCost) : null,
+        effectiveness: editForm.effectiveness
+      };
+
+      await MitigationService.updateMitigation(id, updateData);
+      
+      // Refresh mitigation data
+      const updatedMitigation = await MitigationService.getMitigationById(id);
+      setMitigation(updatedMitigation);
+      
+      // Close modal
+      setIsEditingMitigation(false);
+      setTeamMembers([]);
+    } catch (error) {
+      console.error('Error updating mitigation:', error);
+      alert('Failed to update mitigation. Please try again.');
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingMitigation(false);
+    setTeamMembers([]);
+    setEditForm({
+      title: '',
+      description: '',
+      status: '',
+      priority: '',
+      assignee: '',
+      dueDate: '',
+      estimatedCost: '',
+      effectiveness: ''
+    });
+  };
 
   const handleMarkComplete = async () => {
     try {
@@ -191,7 +326,7 @@ const MitigationDetailPage = () => {
           </div>
           <div className="flex gap-3">
             <button
-              onClick={() => navigate(`/mitigations/${id}/edit`)}
+              onClick={handleEditMitigation}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
             >
               Edit Mitigation
@@ -448,7 +583,7 @@ const MitigationDetailPage = () => {
                 {mitigation.status === 'COMPLETED' ? 'Completed' : 'Mark as Complete'}
               </button>
               <button
-                onClick={() => navigate(`/mitigations/${id}/edit`)}
+                onClick={handleEditMitigation}
                 className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors"
               >
                 Edit Mitigation
@@ -457,6 +592,174 @@ const MitigationDetailPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Edit Mitigation Modal */}
+      {isEditingMitigation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-6">Edit Mitigation</h2>
+              
+              <div className="space-y-4">
+                {/* Title */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.title}
+                    onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Description
+                  </label>
+                  <textarea
+                    value={editForm.description}
+                    onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Status */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Status
+                  </label>
+                  <select
+                    value={editForm.status}
+                    onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select Status</option>
+                    <option value="PLANNED">Planned</option>
+                    <option value="IN_PROGRESS">In Progress</option>
+                    <option value="COMPLETED">Completed</option>
+                    <option value="CANCELLED">Cancelled</option>
+                  </select>
+                </div>
+
+                {/* Priority */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Priority
+                  </label>
+                  <select
+                    value={editForm.priority}
+                    onChange={(e) => setEditForm({ ...editForm, priority: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select Priority</option>
+                    <option value="LOW">Low</option>
+                    <option value="MEDIUM">Medium</option>
+                    <option value="HIGH">High</option>
+                    <option value="CRITICAL">Critical</option>
+                  </select>
+                </div>
+
+                {/* Effectiveness */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Effectiveness
+                  </label>
+                  <select
+                    value={editForm.effectiveness}
+                    onChange={(e) => setEditForm({ ...editForm, effectiveness: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="NOT_ASSESSED">Not Assessed</option>
+                    <option value="LOW">Low</option>
+                    <option value="MEDIUM">Medium</option>
+                    <option value="HIGH">High</option>
+                  </select>
+                </div>
+
+                {/* Assignee */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Assignee
+                  </label>
+                  {teamMembers && teamMembers.length > 0 ? (
+                    <select
+                      value={editForm.assignee}
+                      onChange={(e) => setEditForm({ ...editForm, assignee: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Select Team Member</option>
+                      {teamMembers.map((member, index) => (
+                        <option key={member.id || index} value={member.id}>
+                          {member.name || member.username || member.email}
+                          {member.email && member.name ? ` (${member.email})` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      value={editForm.assignee}
+                      onChange={(e) => setEditForm({ ...editForm, assignee: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter assignee user ID"
+                    />
+                  )}
+                  {mitigation?.projectId && teamMembers && teamMembers.length === 0 && (
+                    <p className="mt-1 text-sm text-gray-500">No team members found for this project. You can manually enter a user ID.</p>
+                  )}
+                </div>
+
+                {/* Due Date */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Due Date
+                  </label>
+                  <input
+                    type="date"
+                    value={editForm.dueDate}
+                    onChange={(e) => setEditForm({ ...editForm, dueDate: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Estimated Cost */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Estimated Cost
+                  </label>
+                  <input
+                    type="number"
+                    value={editForm.estimatedCost}
+                    onChange={(e) => setEditForm({ ...editForm, estimatedCost: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter amount"
+                  />
+                </div>
+              </div>
+
+              {/* Modal Actions */}
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  onClick={handleCancelEdit}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveEdit}
+                  className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-md font-medium transition-colors"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
