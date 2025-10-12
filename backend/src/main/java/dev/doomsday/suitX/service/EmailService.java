@@ -211,4 +211,423 @@ public class EmailService {
             logger.error("Failed to send email to: {}", toEmail, e);
         }
     }
+
+    /**
+     * Send a task assignment email to a user
+     * @param toEmail User's email address
+     * @param username User's username
+     * @param taskTitle Title of the task
+     * @param projectName Name of the project
+     * @param priority Task priority
+     * @param dueDate Task due date
+     * @param description Task description
+     */
+    public void sendTaskAssignmentEmail(String toEmail, String username, String taskTitle, 
+                                       String projectName, String priority, String dueDate, String description) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            
+            helper.setFrom(fromEmail);
+            helper.setTo(toEmail);
+            helper.setSubject("New Task Assigned: " + taskTitle);
+            
+            String htmlContent = buildTaskAssignmentEmailContent(username, taskTitle, projectName, 
+                                                                priority, dueDate, description);
+            helper.setText(htmlContent, true);
+            
+            mailSender.send(message);
+            logger.info("Task assignment email sent successfully to: {}", toEmail);
+            
+        } catch (MessagingException e) {
+            logger.error("Failed to send task assignment email to: {}", toEmail, e);
+        }
+    }
+
+    /**
+     * Build HTML content for task assignment email
+     */
+    private String buildTaskAssignmentEmailContent(String username, String taskTitle, 
+                                                   String projectName, String priority, 
+                                                   String dueDate, String description) {
+        String priorityColor = switch (priority != null ? priority.toUpperCase() : "MEDIUM") {
+            case "HIGH" -> "#dc2626";
+            case "MEDIUM" -> "#f59e0b";
+            case "LOW" -> "#10b981";
+            default -> "#6b7280";
+        };
+
+        return """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <style>
+                    body {
+                        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+                        line-height: 1.6;
+                        color: #333;
+                        background-color: #f5f5f5;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .container {
+                        max-width: 600px;
+                        margin: 40px auto;
+                        background-color: #ffffff;
+                        border-radius: 8px;
+                        overflow: hidden;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    }
+                    .header {
+                        background-color: #000000;
+                        color: #ffffff;
+                        padding: 40px 30px;
+                        text-align: center;
+                    }
+                    .header h1 {
+                        margin: 0;
+                        font-size: 36px;
+                        font-weight: bold;
+                    }
+                    .content {
+                        padding: 40px 30px;
+                    }
+                    .content h2 {
+                        color: #000000;
+                        margin-top: 0;
+                        font-size: 24px;
+                        margin-bottom: 20px;
+                    }
+                    .content p {
+                        margin: 16px 0;
+                        font-size: 16px;
+                    }
+                    .task-details {
+                        background-color: #f8f9fa;
+                        border-radius: 8px;
+                        padding: 24px;
+                        margin: 24px 0;
+                    }
+                    .task-details h3 {
+                        margin: 0 0 16px 0;
+                        font-size: 20px;
+                        color: #000000;
+                    }
+                    .detail-row {
+                        display: flex;
+                        margin: 12px 0;
+                        font-size: 15px;
+                    }
+                    .detail-label {
+                        font-weight: 600;
+                        color: #495057;
+                        min-width: 100px;
+                    }
+                    .detail-value {
+                        color: #212529;
+                    }
+                    .priority-badge {
+                        display: inline-block;
+                        padding: 4px 12px;
+                        border-radius: 4px;
+                        font-weight: 600;
+                        font-size: 14px;
+                        color: #ffffff;
+                        background-color: %s;
+                    }
+                    .description {
+                        background-color: #ffffff;
+                        border-left: 4px solid #000000;
+                        padding: 16px;
+                        margin: 16px 0;
+                        font-size: 15px;
+                        color: #495057;
+                    }
+                    .cta-button {
+                        display: inline-block;
+                        background-color: #000000;
+                        color: #ffffff !important;
+                        text-decoration: none;
+                        padding: 14px 32px;
+                        border-radius: 6px;
+                        font-weight: 600;
+                        margin: 24px 0;
+                    }
+                    .button-container {
+                        text-align: center;
+                        margin: 24px 0;
+                    }
+                    .footer {
+                        background-color: #f8f9fa;
+                        padding: 24px 30px;
+                        text-align: center;
+                        font-size: 14px;
+                        color: #6c757d;
+                    }
+                    .footer a {
+                        color: #000000;
+                        text-decoration: none;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>SuitX</h1>
+                    </div>
+                    <div class="content">
+                        <h2>New Task Assigned</h2>
+                        <p>Hello %s,</p>
+                        
+                        <p>You have been assigned to a new task. Here are the details:</p>
+                        
+                        <div class="task-details">
+                            <h3>📋 %s</h3>
+                            
+                            <div class="detail-row">
+                                <span class="detail-label">Project:</span>
+                                <span class="detail-value">%s</span>
+                            </div>
+                            
+                            <div class="detail-row">
+                                <span class="detail-label">Priority:</span>
+                                <span class="priority-badge">%s</span>
+                            </div>
+                            
+                            <div class="detail-row">
+                                <span class="detail-label">Due Date:</span>
+                                <span class="detail-value">%s</span>
+                            </div>
+                            
+                            %s
+                        </div>
+                        
+                        <div class="button-container">
+                            <a href="http://localhost:5173/launchpad" class="cta-button" style="color: #ffffff !important;">View Task</a>
+                        </div>
+                        
+                        <p style="margin-top: 32px; color: #6c757d; font-size: 14px;">
+                            Log in to SuitX to view full details, update progress, and collaborate with your team.
+                        </p>
+                    </div>
+                    <div class="footer">
+                        <p>© 2025 SuitX. All rights reserved.</p>
+                        <p>You received this email because you are a member of this project.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """.formatted(
+                priorityColor,
+                username,
+                taskTitle,
+                projectName,
+                priority != null ? priority : "Not set",
+                dueDate != null && !dueDate.isEmpty() ? dueDate : "Not set",
+                description != null && !description.isEmpty() 
+                    ? "<div class=\"description\"><strong>Description:</strong><br>" + description + "</div>"
+                    : ""
+            );
+    }
+
+    /**
+     * Send a project invitation email to a user
+     * @param toEmail User's email address
+     * @param username User's username
+     * @param projectName Name of the project
+     * @param invitedBy Username of the person who sent the invitation
+     * @param message Optional personal message
+     * @param expiryDate Invitation expiry date
+     */
+    public void sendProjectInvitationEmail(String toEmail, String username, String projectName, 
+                                          String invitedBy, String message, String expiryDate) {
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            
+            helper.setFrom(fromEmail);
+            helper.setTo(toEmail);
+            helper.setSubject("You've been invited to join " + projectName);
+            
+            String htmlContent = buildProjectInvitationEmailContent(username, projectName, 
+                                                                    invitedBy, message, expiryDate);
+            helper.setText(htmlContent, true);
+            
+            mailSender.send(mimeMessage);
+            logger.info("Project invitation email sent successfully to: {}", toEmail);
+            
+        } catch (MessagingException e) {
+            logger.error("Failed to send project invitation email to: {}", toEmail, e);
+        }
+    }
+
+    /**
+     * Build HTML content for project invitation email
+     */
+    private String buildProjectInvitationEmailContent(String username, String projectName, 
+                                                      String invitedBy, String message, String expiryDate) {
+        return """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <style>
+                    body {
+                        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+                        line-height: 1.6;
+                        color: #333;
+                        background-color: #f5f5f5;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .container {
+                        max-width: 600px;
+                        margin: 40px auto;
+                        background-color: #ffffff;
+                        border-radius: 8px;
+                        overflow: hidden;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    }
+                    .header {
+                        background-color: #000000;
+                        color: #ffffff;
+                        padding: 40px 30px;
+                        text-align: center;
+                    }
+                    .header h1 {
+                        margin: 0;
+                        font-size: 36px;
+                        font-weight: bold;
+                    }
+                    .content {
+                        padding: 40px 30px;
+                    }
+                    .content h2 {
+                        color: #000000;
+                        margin-top: 0;
+                        font-size: 24px;
+                        margin-bottom: 20px;
+                    }
+                    .content p {
+                        margin: 16px 0;
+                        font-size: 16px;
+                    }
+                    .invitation-card {
+                        background-color: #f8f9fa;
+                        border-radius: 8px;
+                        padding: 24px;
+                        margin: 24px 0;
+                        border-left: 4px solid #000000;
+                    }
+                    .invitation-card h3 {
+                        margin: 0 0 8px 0;
+                        font-size: 20px;
+                        color: #000000;
+                    }
+                    .invitation-card .project-name {
+                        font-size: 18px;
+                        font-weight: 600;
+                        color: #495057;
+                        margin-bottom: 16px;
+                    }
+                    .invitation-card .invited-by {
+                        font-size: 15px;
+                        color: #6c757d;
+                        margin-bottom: 16px;
+                    }
+                    .message-box {
+                        background-color: #ffffff;
+                        border-radius: 6px;
+                        padding: 16px;
+                        margin: 16px 0;
+                        font-size: 15px;
+                        color: #495057;
+                        font-style: italic;
+                        border: 1px solid #dee2e6;
+                    }
+                    .expiry-notice {
+                        background-color: #fff3cd;
+                        border: 1px solid #ffc107;
+                        border-radius: 6px;
+                        padding: 12px 16px;
+                        margin: 16px 0;
+                        font-size: 14px;
+                        color: #856404;
+                    }
+                    .cta-button {
+                        display: inline-block;
+                        background-color: #000000;
+                        color: #ffffff !important;
+                        text-decoration: none;
+                        padding: 14px 32px;
+                        border-radius: 6px;
+                        font-weight: 600;
+                        margin: 24px 0;
+                    }
+                    .button-container {
+                        text-align: center;
+                        margin: 24px 0;
+                    }
+                    .footer {
+                        background-color: #f8f9fa;
+                        padding: 24px 30px;
+                        text-align: center;
+                        font-size: 14px;
+                        color: #6c757d;
+                    }
+                    .footer a {
+                        color: #000000;
+                        text-decoration: none;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>SuitX</h1>
+                    </div>
+                    <div class="content">
+                        <h2>🎉 Project Invitation</h2>
+                        <p>Hello %s,</p>
+                        
+                        <p>You've been invited to collaborate on an exciting project!</p>
+                        
+                        <div class="invitation-card">
+                            <h3>Project Details</h3>
+                            <div class="project-name">📂 %s</div>
+                            <div class="invited-by">Invited by: <strong>%s</strong></div>
+                            
+                            %s
+                        </div>
+                        
+                        <div class="expiry-notice">
+                            ⏰ <strong>Note:</strong> This invitation expires on <strong>%s</strong>
+                        </div>
+                        
+                        <div class="button-container">
+                            <a href="http://localhost:5173/notifications" class="cta-button" style="color: #ffffff !important;">View Invitation</a>
+                        </div>
+                        
+                        <p style="margin-top: 32px; color: #6c757d; font-size: 14px;">
+                            Log in to SuitX to accept or decline this invitation. Join the team and start collaborating!
+                        </p>
+                    </div>
+                    <div class="footer">
+                        <p>© 2025 SuitX. All rights reserved.</p>
+                        <p>You received this email because someone invited you to join their project.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """.formatted(
+                username,
+                projectName,
+                invitedBy,
+                message != null && !message.isEmpty() 
+                    ? "<div class=\"message-box\">\"" + message + "\"</div>"
+                    : "",
+                expiryDate
+            );
+    }
 }

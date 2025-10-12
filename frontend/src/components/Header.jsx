@@ -3,11 +3,59 @@ import { Link, useNavigate } from 'react-router-dom';
 import notificationIcon from '../assets/header/notifications.png';
 import settingsIcon from '../assets/header/settings-cog.png';
 import profileIcon from '../assets/header/profile.png';
+import NotificationService from '../services/NotificationService';
+import { getPendingInvitations } from '../services/InvitationService';
+import { getCurrentUser } from '../services/AuthService';
 
 const Header = ({ isLanding = false }) => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [pendingInvitationsCount, setPendingInvitationsCount] = useState(0);
+  const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
+
+  // Fetch unread notification count
+  useEffect(() => {
+    if (!isLanding) {
+      fetchCurrentUser();
+      fetchUnreadCount();
+      fetchPendingInvitations();
+      // Poll for new notifications and invitations every 30 seconds
+      const interval = setInterval(() => {
+        fetchUnreadCount();
+        fetchPendingInvitations();
+      }, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [isLanding]);
+
+  const fetchCurrentUser = async () => {
+    try {
+      const user = await getCurrentUser();
+      setCurrentUser(user);
+    } catch (error) {
+      console.error('Error fetching current user:', error);
+    }
+  };
+
+  const fetchUnreadCount = async () => {
+    try {
+      const count = await NotificationService.getUnreadCount();
+      setUnreadCount(count);
+    } catch (error) {
+      console.error('Error fetching unread count:', error);
+    }
+  };
+
+  const fetchPendingInvitations = async () => {
+    try {
+      const invitations = await getPendingInvitations();
+      setPendingInvitationsCount(invitations.length);
+    } catch (error) {
+      console.error('Error fetching pending invitations:', error);
+    }
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -77,8 +125,12 @@ const Header = ({ isLanding = false }) => {
         {/* Notification icon with badge */}
         <Link to="/notifications" className="relative p-2 hover:bg-gray-800 rounded transition-colors">
           <img src={notificationIcon} alt="Notifications" className="w-5 h-5" />
-          {/* Unread badge - you can replace this with actual unread count from backend */}
-          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+          {/* Badge - show when there are unread notifications or pending invitations */}
+          {(unreadCount + pendingInvitationsCount) > 0 && (
+            <span className="absolute top-1 right-1 min-w-[16px] h-4 bg-red-500 rounded-full flex items-center justify-center text-[10px] font-semibold px-1">
+              {(unreadCount + pendingInvitationsCount) > 9 ? '9+' : (unreadCount + pendingInvitationsCount)}
+            </span>
+          )}
         </Link>
 
         {/* Settings icon */}
@@ -89,10 +141,20 @@ const Header = ({ isLanding = false }) => {
         {/* Profile icon with dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button 
-            className="p-2 hover:bg-gray-800 rounded transition-colors"
+            className="hover:opacity-80 rounded-full transition-opacity"
             onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
           >
-            <img src={profileIcon} alt="Profile" className="w-5 h-5" />
+            {currentUser?.avatar ? (
+              <img
+                src={currentUser.avatar}
+                alt={currentUser.username}
+                className="w-8 h-8 rounded-full object-cover border-2 border-gray-700 hover:border-gray-500"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-sm border-2 border-gray-700 hover:border-gray-500">
+                {currentUser?.username?.charAt(0).toUpperCase() || '?'}
+              </div>
+            )}
           </button>
 
           {/* Dropdown Menu */}
