@@ -28,6 +28,7 @@ public class RiskService {
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final GeminiAIService geminiAIService;
+    private final ProjectService projectService;
 
     public List<RiskDto> getAllRisks() {
         return riskRepository.findAll().stream()
@@ -43,6 +44,24 @@ public class RiskService {
 
     public List<RiskDto> getRisksByProject(String projectId) {
         return riskRepository.findByProjectId(projectId).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get all risks for projects the user has access to
+     * @param username Username of the current user
+     * @return List of risks from user's accessible projects
+     */
+    public List<RiskDto> getRisksForUser(String username) {
+        // Get all projects the user has access to
+        List<String> accessibleProjectIds = projectService.getProjectsForUser(username).stream()
+                .map(project -> project.getId())
+                .collect(Collectors.toList());
+        
+        // Get all risks for those projects
+        return riskRepository.findAll().stream()
+                .filter(risk -> accessibleProjectIds.contains(risk.getProjectId()))
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }

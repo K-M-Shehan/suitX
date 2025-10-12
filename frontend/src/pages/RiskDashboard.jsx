@@ -32,7 +32,7 @@ const RiskDashboard = () => {
         });
 
         // Fetch risks
-        const risksData = await RiskService.getAllRisks();
+        const risksData = await RiskService.getRisksForUser();
         setRisks(risksData);
 
         // Fetch active projects
@@ -53,7 +53,7 @@ const RiskDashboard = () => {
     try {
       await RiskService.resolveRisk(riskId);
       // Refresh risks data
-      const updatedRisks = await RiskService.getAllRisks();
+      const updatedRisks = await RiskService.getRisksForUser();
       setRisks(updatedRisks);
       
       // Refresh summary
@@ -71,7 +71,7 @@ const RiskDashboard = () => {
     try {
       await RiskService.ignoreRisk(riskId);
       // Refresh risks data
-      const updatedRisks = await RiskService.getAllRisks();
+      const updatedRisks = await RiskService.getRisksForUser();
       setRisks(updatedRisks);
     } catch (error) {
       console.error('Error ignoring risk:', error);
@@ -93,7 +93,7 @@ const RiskDashboard = () => {
     try {
       await RiskService.updateRisk(editingRisk.id, editForm);
       // Refresh risks data
-      const updatedRisks = await RiskService.getAllRisks();
+      const updatedRisks = await RiskService.getRisksForUser();
       setRisks(updatedRisks);
       
       // Refresh summary

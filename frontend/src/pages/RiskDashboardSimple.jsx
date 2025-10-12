@@ -45,7 +45,7 @@ const RiskDashboard = () => {
 
         // Try to fetch risks
         try {
-          const risksData = await RiskService.getAllRisks();
+          const risksData = await RiskService.getRisksForUser();
           setRisks(Array.isArray(risksData) ? risksData : []);
         } catch (err) {
           console.warn('Risks data not available:', err.message);
@@ -97,7 +97,7 @@ const RiskDashboard = () => {
     try {
       await RiskService.updateRisk(editingRisk.id, editForm);
       // Refresh risks data
-      const risksData = await RiskService.getAllRisks();
+      const risksData = await RiskService.getRisksForUser();
       setRisks(Array.isArray(risksData) ? risksData : []);
       
       // Refresh summary
@@ -136,7 +136,7 @@ const RiskDashboard = () => {
     try {
       await RiskService.resolveRisk(riskId);
       // Refresh risks data
-      const risksData = await RiskService.getAllRisks();
+      const risksData = await RiskService.getRisksForUser();
       setRisks(Array.isArray(risksData) ? risksData : []);
       
       // Refresh summary
