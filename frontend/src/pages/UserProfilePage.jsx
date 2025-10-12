@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { getTasksByAssignee } from "../services/TaskService";
 import profilePic from "../assets/profile-pic.jpg";
 
 export default function UserProfilePage() {
   const { userId } = useParams();
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingTasks, setLoadingTasks] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchUserProfile();
+    fetchUserTasks();
   }, [userId]);
 
   const fetchUserProfile = async () => {
@@ -34,6 +38,60 @@ export default function UserProfilePage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchUserTasks = async () => {
+    try {
+      setLoadingTasks(true);
+      const tasksData = await getTasksByAssignee(userId);
+      setTasks(tasksData || []);
+    } catch (err) {
+      console.error('Error fetching user tasks:', err);
+      // Don't set error, just log it
+      setTasks([]);
+    } finally {
+      setLoadingTasks(false);
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'DONE':
+        return 'bg-green-100 text-green-800';
+      case 'IN_PROGRESS':
+        return 'bg-blue-100 text-blue-800';
+      case 'TODO':
+        return 'bg-gray-100 text-gray-800';
+      case 'BLOCKED':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 'CRITICAL':
+        return 'text-red-600';
+      case 'HIGH':
+        return 'text-orange-600';
+      case 'MEDIUM':
+        return 'text-yellow-600';
+      case 'LOW':
+        return 'text-green-600';
+      default:
+        return 'text-gray-600';
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'No deadline';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   };
 
   if (loading) {
@@ -200,10 +258,115 @@ export default function UserProfilePage() {
           </div>
         </div>
 
-        {/* Stats or Activity could go here in the future */}
+        {/* Activity - Assigned Tasks */}
         <div className="mt-6 bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Activity</h2>
-          <p className="text-gray-500 text-center py-8">Activity information coming soon</p>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">Assigned Tasks</h2>
+            {!loadingTasks && tasks.length > 0 && (
+              <span className="text-sm text-gray-500">
+                {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'}
+              </span>
+            )}
+          </div>
+          
+          {loadingTasks ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          ) : tasks.length === 0 ? (
+            <div className="text-center py-8">
+              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              <p className="text-gray-500 mt-2">No tasks assigned</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {tasks.map((task) => (
+                <div
+                  key={task.id}
+                  onClick={() => navigate(`/projects/${task.projectId}`)}
+                  className="border border-gray-200 rounded-lg p-4 hover:border-blue-400 hover:bg-blue-50 transition-all cursor-pointer"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <h3 className="font-medium text-gray-900">{task.title}</h3>
+                        <span className={`px-2 py-1 text-xs font-medium rounded ${getStatusColor(task.status)}`}>
+                          {task.status}
+                        </span>
+                        {task.priority && (
+                          <span className={`text-xs font-medium ${getPriorityColor(task.priority)}`}>
+                            {task.priority}
+                          </span>
+                        )}
+                      </div>
+                      
+                      {task.description && (
+                        <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                          {task.description}
+                        </p>
+                      )}
+                      
+                      <div className="flex items-center space-x-4 text-xs text-gray-500">
+                        {task.dueDate && (
+                          <div className="flex items-center space-x-1">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span>Due: {formatDate(task.dueDate)}</span>
+                          </div>
+                        )}
+                        {task.projectId && (
+                          <div className="flex items-center space-x-1">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                            </svg>
+                            <span>View Project</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <svg className="w-5 h-5 text-gray-400 flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {!loadingTasks && tasks.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {tasks.filter(t => t.status === 'DONE').length}
+                  </p>
+                  <p className="text-xs text-gray-500">Completed</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {tasks.filter(t => t.status === 'IN_PROGRESS').length}
+                  </p>
+                  <p className="text-xs text-gray-500">In Progress</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-gray-600">
+                    {tasks.filter(t => t.status === 'TODO').length}
+                  </p>
+                  <p className="text-xs text-gray-500">To Do</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-red-600">
+                    {tasks.filter(t => t.status === 'BLOCKED').length}
+                  </p>
+                  <p className="text-xs text-gray-500">Blocked</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

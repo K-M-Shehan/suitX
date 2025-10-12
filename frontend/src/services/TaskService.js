@@ -58,6 +58,32 @@ export async function getTasksByProject(projectId) {
   }
 }
 
+// Get tasks by assignee (user ID)
+export async function getTasksByAssignee(userId) {
+  try {
+    const token = getToken();
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (token) {
+      headers['Authorization'] = token;
+    }
+
+    const response = await fetch(`${API_BASE_URL}/tasks/assignee/${userId}`, {
+      headers: headers,
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch tasks for user');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching user tasks:', error);
+    throw error;
+  }
+}
+
 // Get task by ID
 export async function getTaskById(id) {
   try {
