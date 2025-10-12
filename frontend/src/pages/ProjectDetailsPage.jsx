@@ -351,13 +351,13 @@ const ProjectDetailsPage = () => {
             <button
               onClick={handleAnalyzeRisks}
               disabled={analyzingRisks}
-              className={`px-4 py-2 rounded-lg transition-colors ${
+              className={`px-4 py-2 rounded-lg border-2 transition-colors ${
                 analyzingRisks 
-                  ? 'bg-gray-400 cursor-not-allowed' 
-                  : 'bg-purple-600 hover:bg-purple-700'
-              } text-white`}
+                  ? 'bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed' 
+                  : 'bg-white border-black text-black hover:bg-gray-50'
+              }`}
             >
-              {analyzingRisks ? 'Analyzing...' : '🤖 Analyze Risks'}
+              {analyzingRisks ? 'Analyzing...' : 'Analyze Risks'}
             </button>
             <button
               onClick={() => setIsEditDialogOpen(true)}
