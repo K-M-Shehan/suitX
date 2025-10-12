@@ -4,10 +4,12 @@ import notificationIcon from '../assets/header/notifications.png';
 import settingsIcon from '../assets/header/settings-cog.png';
 import profileIcon from '../assets/header/profile.png';
 import NotificationService from '../services/NotificationService';
+import { getPendingInvitations } from '../services/InvitationService';
 
 const Header = ({ isLanding = false }) => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [pendingInvitationsCount, setPendingInvitationsCount] = useState(0);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
 
@@ -15,8 +17,12 @@ const Header = ({ isLanding = false }) => {
   useEffect(() => {
     if (!isLanding) {
       fetchUnreadCount();
-      // Poll for new notifications every 30 seconds
-      const interval = setInterval(fetchUnreadCount, 30000);
+      fetchPendingInvitations();
+      // Poll for new notifications and invitations every 30 seconds
+      const interval = setInterval(() => {
+        fetchUnreadCount();
+        fetchPendingInvitations();
+      }, 30000);
       return () => clearInterval(interval);
     }
   }, [isLanding]);
@@ -27,6 +33,15 @@ const Header = ({ isLanding = false }) => {
       setUnreadCount(count);
     } catch (error) {
       console.error('Error fetching unread count:', error);
+    }
+  };
+
+  const fetchPendingInvitations = async () => {
+    try {
+      const invitations = await getPendingInvitations();
+      setPendingInvitationsCount(invitations.length);
+    } catch (error) {
+      console.error('Error fetching pending invitations:', error);
     }
   };
 
@@ -98,10 +113,10 @@ const Header = ({ isLanding = false }) => {
         {/* Notification icon with badge */}
         <Link to="/notifications" className="relative p-2 hover:bg-gray-800 rounded transition-colors">
           <img src={notificationIcon} alt="Notifications" className="w-5 h-5" />
-          {/* Unread badge - only show when there are unread notifications */}
-          {unreadCount > 0 && (
+          {/* Badge - show when there are unread notifications or pending invitations */}
+          {(unreadCount + pendingInvitationsCount) > 0 && (
             <span className="absolute top-1 right-1 min-w-[16px] h-4 bg-red-500 rounded-full flex items-center justify-center text-[10px] font-semibold px-1">
-              {unreadCount > 9 ? '9+' : unreadCount}
+              {(unreadCount + pendingInvitationsCount) > 9 ? '9+' : (unreadCount + pendingInvitationsCount)}
             </span>
           )}
         </Link>
