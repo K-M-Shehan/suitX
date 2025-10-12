@@ -20,6 +20,7 @@ public class ProjectService {
 
     private final ProjectRepository projectRepository;
     private final TaskRepository taskRepository;
+    private final UserService userService;
 
     public List<ProjectDto> getAllProjects() {
         return projectRepository.findAll().stream()
@@ -233,5 +234,71 @@ public class ProjectService {
         
         project.setUpdatedAt(LocalDateTime.now());
         projectRepository.save(project);
+    }
+    
+    /**
+     * Add a member to a project
+     * Only project owner can add members
+     */
+    public ProjectDto addMemberToProject(String projectId, String memberUserId, String requestingUsername) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found with id: " + projectId));
+        
+        // Check if requesting user is the owner
+        if (!project.isOwner(requestingUsername)) {
+            throw new RuntimeException("Only project owner can add members");
+        }
+        
+        // Add member if not already added
+        if (!project.isMember(memberUserId) && !project.isOwner(memberUserId)) {
+            project.addMember(memberUserId);
+            project.setUpdatedAt(LocalDateTime.now());
+            Project savedProject = projectRepository.save(project);
+            
+            // Sync user's memberProjects list
+            userService.addMemberProject(memberUserId, projectId);
+            
+            return convertToDto(savedProject);
+        }
+        
+        // Already a member or owner
+        return convertToDto(project);
+    }
+    
+    /**
+     * Remove a member from a project
+     * Only project owner can remove members
+     */
+    public ProjectDto removeMemberFromProject(String projectId, String memberUserId, String requestingUsername) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found with id: " + projectId));
+        
+        // Check if requesting user is the owner
+        if (!project.isOwner(requestingUsername)) {
+            throw new RuntimeException("Only project owner can remove members");
+        }
+        
+        // Cannot remove the owner
+        if (project.isOwner(memberUserId)) {
+            throw new RuntimeException("Cannot remove project owner from members");
+        }
+        
+        project.removeMember(memberUserId);
+        project.setUpdatedAt(LocalDateTime.now());
+        Project savedProject = projectRepository.save(project);
+        
+        // Sync user's memberProjects list
+        userService.removeMemberProject(memberUserId, projectId);
+        
+        return convertToDto(savedProject);
+    }
+    
+    /**
+     * Get all members of a project (excluding owner)
+     */
+    public List<String> getProjectMembers(String projectId) {
+        return projectRepository.findById(projectId)
+                .map(Project::getMemberIds)
+                .orElse(List.of());
     }
 }

@@ -59,6 +59,11 @@ public class TaskService {
             task.setPriority("MEDIUM");
         }
         
+        // Validate assignedTo user has access to project if assigned
+        if (task.getAssignedTo() != null && task.getProjectId() != null) {
+            validateTaskAssignment(task.getProjectId(), task.getAssignedTo());
+        }
+        
         Task savedTask = taskRepository.save(task);
         
         // Add task ID to project's taskIds list
@@ -91,6 +96,12 @@ public class TaskService {
         if (existingTask.isPresent()) {
             Task task = existingTask.get();
             String projectId = task.getProjectId(); // Store project ID before update
+            
+            // Validate assignedTo user has access to project if being assigned/changed
+            if (taskDto.getAssignedTo() != null && projectId != null && 
+                !taskDto.getAssignedTo().equals(task.getAssignedTo())) {
+                validateTaskAssignment(projectId, taskDto.getAssignedTo());
+            }
             
             updateTaskFields(task, taskDto);
             task.setUpdatedAt(LocalDateTime.now());
@@ -218,5 +229,16 @@ public class TaskService {
         if (dto.getActualHours() != null) task.setActualHours(dto.getActualHours());
         if (dto.getDependencies() != null) task.setDependencies(dto.getDependencies());
         if (dto.getTags() != null) task.setTags(dto.getTags());
+    }
+    
+    /**
+     * Validate that assigned user has access to the project
+     * Only project owner and members can be assigned tasks
+     */
+    private void validateTaskAssignment(String projectId, String userId) {
+        if (!projectService.canUserAccessProject(projectId, userId)) {
+            throw new IllegalArgumentException(
+                "User must be project owner or member to be assigned tasks");
+        }
     }
 }

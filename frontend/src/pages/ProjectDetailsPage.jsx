@@ -7,6 +7,7 @@ import ProjectEditDialog from '../components/ProjectEditDialog';
 import TaskFormDialog from '../components/TaskFormDialog';
 import TaskEditDialog from '../components/TaskEditDialog';
 import StatusDropdown from '../components/StatusDropdown';
+import MemberManagement from '../components/MemberManagement';
 
 const ProjectDetailsPage = () => {
   const { projectId } = useParams();
@@ -395,6 +396,9 @@ const ProjectDetailsPage = () => {
       {/* Tab Content */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
+          {/* Member Management */}
+          <MemberManagement projectId={projectId} project={project} />
+
           {/* Description */}
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-3">Description</h2>
@@ -745,6 +749,7 @@ const ProjectDetailsPage = () => {
         onClose={() => setIsTaskDialogOpen(false)}
         onSubmit={handleAddTask}
         projectId={projectId}
+        project={project}
       />
 
       <TaskEditDialog
@@ -755,6 +760,7 @@ const ProjectDetailsPage = () => {
         }}
         onSubmit={handleEditTask}
         task={selectedTask}
+        project={project}
       />
 
       {/* Risk Detail Modal */}

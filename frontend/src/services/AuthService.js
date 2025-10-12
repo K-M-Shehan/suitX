@@ -21,3 +21,20 @@ export async function login(username, password) {
   if (!res.ok) throw new Error(await res.text());
   return await res.json(); // { token: "..." }
 }
+
+export async function getCurrentUser() {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    throw new Error('No token found');
+  }
+
+  const res = await fetch('http://localhost:8080/api/user/me', {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!res.ok) throw new Error('Failed to fetch current user');
+  return await res.json();
+}

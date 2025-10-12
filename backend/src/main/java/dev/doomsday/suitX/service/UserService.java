@@ -162,6 +162,45 @@ public class UserService {
     }
     
     /**
+     * Search users by username or email
+     * Used for finding users to add as project members
+     */
+    public java.util.List<User> searchUsers(String searchTerm) {
+        return userRepository.findByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCase(
+            searchTerm, searchTerm);
+    }
+    
+    /**
+     * Add project to user's memberProjects list
+     */
+    public void addMemberProject(String userId, String projectId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        
+        if (user.getMemberProjects() == null) {
+            user.setMemberProjects(new java.util.ArrayList<>());
+        }
+        
+        if (!user.getMemberProjects().contains(projectId)) {
+            user.getMemberProjects().add(projectId);
+            userRepository.save(user);
+        }
+    }
+    
+    /**
+     * Remove project from user's memberProjects list
+     */
+    public void removeMemberProject(String userId, String projectId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        
+        if (user.getMemberProjects() != null) {
+            user.getMemberProjects().remove(projectId);
+            userRepository.save(user);
+        }
+    }
+    
+    /**
      * Validates email format using a comprehensive regex pattern
      * Matches RFC 5322 standard email addresses
      */

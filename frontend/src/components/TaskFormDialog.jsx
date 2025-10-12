@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { getProjectMembers } from '../services/ProjectService';
 
-const TaskFormDialog = ({ isOpen, onClose, onSubmit, projectId }) => {
+const TaskFormDialog = ({ isOpen, onClose, onSubmit, projectId, project }) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -10,6 +11,74 @@ const TaskFormDialog = ({ isOpen, onClose, onSubmit, projectId }) => {
     dueDate: '',
     estimatedHours: '',
   });
+  
+  const [availableUsers, setAvailableUsers] = useState([]);
+  const [memberDetails, setMemberDetails] = useState([]);
+
+  useEffect(() => {
+    if (isOpen && projectId) {
+      loadProjectMembers();
+    }
+  }, [isOpen, projectId]);
+
+  const loadProjectMembers = async () => {
+    try {
+      if (!projectId) return;
+      
+      // Get member IDs
+      const memberIds = await getProjectMembers(projectId);
+      
+      // Fetch full user details for each member
+      const details = await Promise.all(
+        memberIds.map(async (userId) => {
+          try {
+            const response = await fetch(`http://localhost:8080/api/user/${userId}`, {
+              headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+              },
+            });
+            if (response.ok) {
+              return await response.json();
+            }
+            return null;
+          } catch (err) {
+            console.error(`Error fetching user ${userId}:`, err);
+            return null;
+          }
+        })
+      );
+      
+      const validMembers = details.filter(d => d !== null);
+      
+      // Also add the project owner if not already in members
+      if (project?.createdBy) {
+        const ownerAlreadyIncluded = validMembers.some(m => m.username === project.createdBy);
+        if (!ownerAlreadyIncluded) {
+          try {
+            const response = await fetch(`http://localhost:8080/api/user/search?q=${project.createdBy}`, {
+              headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+              },
+            });
+            if (response.ok) {
+              const users = await response.json();
+              const owner = users.find(u => u.username === project.createdBy);
+              if (owner) {
+                validMembers.unshift(owner); // Add owner at the beginning
+              }
+            }
+          } catch (err) {
+            console.error('Error fetching owner:', err);
+          }
+        }
+      }
+      
+      setMemberDetails(validMembers);
+    } catch (err) {
+      console.error('Error loading project members:', err);
+      // Don't throw error, just log it
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -160,14 +229,21 @@ const TaskFormDialog = ({ isOpen, onClose, onSubmit, projectId }) => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Assigned To
                 </label>
-                <input
-                  type="text"
+                <select
                   name="assignedTo"
                   value={formData.assignedTo}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                  placeholder="Enter username"
-                />
+                >
+                  <option value="">Unassigned</option>
+                  {memberDetails.map((member) => (
+                    <option key={member.id} value={member.id}>
+                      {member.firstName && member.lastName
+                        ? `${member.firstName} ${member.lastName} (${member.username})`
+                        : member.username}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">

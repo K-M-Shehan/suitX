@@ -148,4 +148,51 @@ public class ProjectController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+    
+    @PostMapping("/{id}/members/{userId}")
+    public ResponseEntity<ProjectDto> addMember(@PathVariable String id, @PathVariable String userId, Authentication authentication) {
+        try {
+            if (authentication == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            String username = authentication.getName();
+            
+            ProjectDto updatedProject = projectService.addMemberToProject(id, userId, username);
+            return ResponseEntity.ok(updatedProject);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+    }
+    
+    @DeleteMapping("/{id}/members/{userId}")
+    public ResponseEntity<ProjectDto> removeMember(@PathVariable String id, @PathVariable String userId, Authentication authentication) {
+        try {
+            if (authentication == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            String username = authentication.getName();
+            
+            ProjectDto updatedProject = projectService.removeMemberFromProject(id, userId, username);
+            return ResponseEntity.ok(updatedProject);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+    }
+    
+    @GetMapping("/{id}/members")
+    public ResponseEntity<List<String>> getProjectMembers(@PathVariable String id, Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String username = authentication.getName();
+        
+        // Check if user has access to the project
+        Optional<ProjectDto> project = projectService.getProjectById(id, username);
+        if (project.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        
+        List<String> members = projectService.getProjectMembers(id);
+        return ResponseEntity.ok(members);
+    }
 }
