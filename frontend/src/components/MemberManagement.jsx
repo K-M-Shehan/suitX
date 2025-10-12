@@ -18,10 +18,13 @@ export default function MemberManagement({ projectId, project }) {
 
   useEffect(() => {
     loadCurrentUser();
-    if (projectId) {
+  }, []);
+
+  useEffect(() => {
+    if (projectId && project) {
       loadMembers();
     }
-  }, [projectId]);
+  }, [projectId, project]);
 
   const loadCurrentUser = async () => {
     try {
@@ -35,32 +38,81 @@ export default function MemberManagement({ projectId, project }) {
 
   const loadMembers = async () => {
     try {
-      if (!projectId) return;
+      if (!projectId || !project) return;
       
       const memberIds = await getProjectMembers(projectId);
       setMembers(memberIds);
       
-      // Fetch full user details for each member
-      const details = await Promise.all(
-        memberIds.map(async (userId) => {
-          try {
-            const response = await fetch(`http://localhost:8080/api/user/${userId}`, {
-              headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-              },
-            });
-            if (response.ok) {
-              return await response.json();
-            }
-            return null;
-          } catch (err) {
-            console.error(`Error fetching user ${userId}:`, err);
-            return null;
-          }
-        })
-      );
+      // Fetch owner details - try ownerId first, fallback to fetching by username
+      let ownerDetails = null;
       
-      setMemberDetails(details.filter(d => d !== null));
+      // Try fetching by ownerId
+      if (project.ownerId) {
+        try {
+          const response = await fetch(`http://localhost:8080/api/user/${project.ownerId}`, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            },
+          });
+          if (response.ok) {
+            ownerDetails = await response.json();
+          }
+        } catch (err) {
+          console.error(`Error fetching owner by ownerId:`, err);
+        }
+      }
+      
+      // If ownerId didn't work, try fetching by createdBy username
+      if (!ownerDetails && project.createdBy) {
+        try {
+          const response = await fetch(`http://localhost:8080/api/user/username/${project.createdBy}`, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            },
+          });
+          if (response.ok) {
+            ownerDetails = await response.json();
+          }
+        } catch (err) {
+          console.error(`Error fetching owner by username:`, err);
+        }
+      }
+      
+      // Fetch full user details for each member
+      const memberDetailsPromises = memberIds.map(async (userId) => {
+        try {
+          const response = await fetch(`http://localhost:8080/api/user/${userId}`, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            },
+          });
+          if (response.ok) {
+            return await response.json();
+          }
+          return null;
+        } catch (err) {
+          console.error(`Error fetching user ${userId}:`, err);
+          return null;
+        }
+      });
+      
+      const details = await Promise.all(memberDetailsPromises);
+      const filteredDetails = details.filter(d => d !== null);
+      
+      // Combine owner and members, with owner first
+      const allMembers = [];
+      if (ownerDetails) {
+        allMembers.push({ ...ownerDetails, isOwner: true });
+      }
+      
+      // Add other members (excluding owner if they're also in memberIds)
+      filteredDetails.forEach(member => {
+        if (!ownerDetails || member.id !== ownerDetails.id) {
+          allMembers.push({ ...member, isOwner: false });
+        }
+      });
+      
+      setMemberDetails(allMembers);
     } catch (err) {
       console.error('Error loading members:', err);
       // Don't set error for initial load, just log it
@@ -234,6 +286,15 @@ export default function MemberManagement({ projectId, project }) {
                           ? `${member.firstName} ${member.lastName}`
                           : member.username}
                       </span>
+                      {member.isOwner ? (
+                        <span className="px-2 py-0.5 text-xs font-semibold bg-yellow-100 text-yellow-800 rounded-full">
+                          Owner
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full">
+                          Member
+                        </span>
+                      )}
                       <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
@@ -245,7 +306,7 @@ export default function MemberManagement({ projectId, project }) {
                   </div>
                 </div>
                 
-                {isOwner && (
+                {isOwner && !member.isOwner && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();

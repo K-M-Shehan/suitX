@@ -388,9 +388,9 @@ const ProjectDetailsPage = () => {
                   {risks.length}
                 </span>
               )}
-              {tab === 'team' && project?.memberIds && project.memberIds.length > 0 && (
+              {tab === 'team' && (
                 <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">
-                  {project.memberIds.length}
+                  {(project?.memberIds?.length || 0) + 1}
                 </span>
               )}
             </button>
@@ -472,17 +472,17 @@ const ProjectDetailsPage = () => {
           )}
 
           {/* Members */}
-          {project.memberIds && project.memberIds.length > 0 && (
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-3">Team Members</h2>
-              <div className="space-y-2">
-                <p className="text-sm text-gray-600">
-                  {project.memberIds.length} member{project.memberIds.length !== 1 ? 's' : ''}
-                </p>
-                {/* TODO: Display actual user names when user service is available */}
-              </div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-3">Team Members</h2>
+            <div className="space-y-2">
+              <p className="text-sm text-gray-600">
+                {(project?.memberIds?.length || 0) + 1} member{(project?.memberIds?.length || 0) + 1 !== 1 ? 's' : ''}
+              </p>
+              <p className="text-xs text-gray-500">
+                Click on the Team tab to view and manage members
+              </p>
             </div>
-          )}
+          </div>
 
           {/* Metadata */}
           <div className="bg-white rounded-lg shadow p-6">
@@ -651,11 +651,9 @@ const ProjectDetailsPage = () => {
           <div className="mb-4">
             <h2 className="text-xl font-semibold text-gray-900">
               Team Management
-              {project?.memberIds && project.memberIds.length > 0 && (
-                <span className="ml-3 text-sm font-normal text-gray-500">
-                  ({project.memberIds.length} {project.memberIds.length === 1 ? 'member' : 'members'})
-                </span>
-              )}
+              <span className="ml-3 text-sm font-normal text-gray-500">
+                ({(project?.memberIds?.length || 0) + 1} {(project?.memberIds?.length || 0) + 1 === 1 ? 'member' : 'members'})
+              </span>
             </h2>
             <p className="text-sm text-gray-500 mt-1">
               Manage project team members and send invitations to collaborate

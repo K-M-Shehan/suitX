@@ -95,6 +95,24 @@ public class UserController {
     }
     
     /**
+     * Get user by username (for fetching project owner details)
+     */
+    @GetMapping("/username/{username}")
+    public ResponseEntity<?> getUserByUsername(@PathVariable String username) {
+        try {
+            return userService.findByUsername(username)
+                    .map(user -> {
+                        // Don't send password to frontend
+                        user.setPassword(null);
+                        return ResponseEntity.ok((Object) user);
+                    })
+                    .orElse(ResponseEntity.status(404).body(Map.of("error", "User not found")));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to fetch user: " + e.getMessage()));
+        }
+    }
+    
+    /**
      * Search users by username or email (for adding project members)
      */
     @GetMapping("/search")
