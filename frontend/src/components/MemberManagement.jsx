@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { searchUsers, removeMemberFromProject, getProjectMembers } from '../services/ProjectService';
 import { inviteUserToProject } from '../services/InvitationService';
 import { getCurrentUser } from '../services/AuthService';
 
 export default function MemberManagement({ projectId, project }) {
+  const navigate = useNavigate();
   const [members, setMembers] = useState([]);
   const [memberDetails, setMemberDetails] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -208,9 +210,12 @@ export default function MemberManagement({ projectId, project }) {
             {memberDetails.map((member) => (
               <div
                 key={member.id}
-                className="flex items-center justify-between p-3 border border-gray-200 rounded-md"
+                className="flex items-center justify-between p-3 border border-gray-200 rounded-md hover:border-blue-400 hover:bg-blue-50 transition-all"
               >
-                <div className="flex items-center space-x-3">
+                <div 
+                  className="flex items-center space-x-3 flex-1 cursor-pointer"
+                  onClick={() => navigate(`/user/${member.id}`)}
+                >
                   {member.avatar ? (
                     <img
                       src={member.avatar}
@@ -223,10 +228,15 @@ export default function MemberManagement({ projectId, project }) {
                     </div>
                   )}
                   <div>
-                    <div className="font-medium">
-                      {member.firstName && member.lastName
-                        ? `${member.firstName} ${member.lastName}`
-                        : member.username}
+                    <div className="font-medium flex items-center space-x-2">
+                      <span>
+                        {member.firstName && member.lastName
+                          ? `${member.firstName} ${member.lastName}`
+                          : member.username}
+                      </span>
+                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
                     </div>
                     <div className="text-sm text-gray-500">{member.email}</div>
                     {member.role && (
@@ -237,8 +247,11 @@ export default function MemberManagement({ projectId, project }) {
                 
                 {isOwner && (
                   <button
-                    onClick={() => handleRemoveMember(member.id)}
-                    className="px-3 py-1 text-red-600 hover:bg-red-50 rounded border border-red-300 hover:border-red-500"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveMember(member.id);
+                    }}
+                    className="px-3 py-1 text-red-600 hover:bg-red-50 rounded border border-red-300 hover:border-red-500 transition-colors"
                   >
                     Remove
                   </button>

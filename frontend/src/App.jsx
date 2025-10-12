@@ -10,6 +10,7 @@ import SignupForm from "./pages/SignupForm";
 import LaunchpadPage from "./pages/LaunchpadPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import ProfilePage from "./pages/ProfilePage";
+import UserProfilePage from "./pages/UserProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import RiskDashboard from "./pages/RiskDashboardSimple";
@@ -86,6 +87,11 @@ function App() {
       <Route path="/profile" element={
         <DashboardLayout>
           <ProfilePage />
+        </DashboardLayout>
+      } />
+      <Route path="/user/:userId" element={
+        <DashboardLayout>
+          <UserProfilePage />
         </DashboardLayout>
       } />
       <Route path="/settings" element={
