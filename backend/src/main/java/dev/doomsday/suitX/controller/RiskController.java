@@ -34,6 +34,17 @@ public class RiskController {
         return ResponseEntity.ok(risks);
     }
 
+    @GetMapping("/user")
+    public ResponseEntity<List<RiskDto>> getRisksForUser(Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
+        String username = authentication.getName();
+        List<RiskDto> risks = riskService.getRisksForUser(username);
+        return ResponseEntity.ok(risks);
+    }
+
     @GetMapping("/status/{status}")
     public ResponseEntity<List<RiskDto>> getRisksByStatus(@PathVariable String status) {
         List<RiskDto> risks = riskService.getRisksByStatus(status.toUpperCase());

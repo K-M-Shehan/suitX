@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -30,6 +31,17 @@ public class MitigationController {
     @GetMapping
     public ResponseEntity<List<MitigationDto>> getAllMitigations() {
         List<MitigationDto> mitigations = mitigationService.getAllMitigations();
+        return ResponseEntity.ok(mitigations);
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<List<MitigationDto>> getMitigationsForUser(Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
+        String username = authentication.getName();
+        List<MitigationDto> mitigations = mitigationService.getMitigationsForUser(username);
         return ResponseEntity.ok(mitigations);
     }
 

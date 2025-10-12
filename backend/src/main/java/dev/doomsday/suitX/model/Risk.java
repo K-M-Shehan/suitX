@@ -65,15 +65,12 @@ public class Risk {
     
     private Double aiConfidence; // AI confidence score (0-100)
     
-    // Embedded mitigation suggestions (one-to-few relationship)
-    private List<MitigationSuggestion> mitigationSuggestions = new ArrayList<>();
-    
     // Embedded change history for audit trail
     private List<HistoryEntry> history = new ArrayList<>();
     
     // Related entities
     private List<String> relatedTaskIds = new ArrayList<>();
-    private List<String> relatedMitigationIds = new ArrayList<>();
+    private List<String> relatedMitigationIds = new ArrayList<>(); // References to separate Mitigation entities
     
     // Additional metadata
     private List<String> tags = new ArrayList<>();
@@ -88,19 +85,6 @@ public class Risk {
     private LocalDateTime updatedAt;
     
     private LocalDateTime resolvedAt;
-    
-    // Nested class for mitigation suggestions
-    @Data
-    public static class MitigationSuggestion {
-        private String suggestionId;
-        private String suggestionText;
-        private Boolean aiGenerated = false;
-        private String priority = "MEDIUM"; // LOW, MEDIUM, HIGH
-        private Double estimatedCost;
-        private String estimatedEffort; // e.g., "2 weeks", "40 hours"
-        private LocalDateTime createdAt;
-        private String status = "SUGGESTED"; // SUGGESTED, APPROVED, IMPLEMENTED, REJECTED
-    }
     
     // Nested class for change history
     @Data
@@ -142,19 +126,6 @@ public class Risk {
         };
     }
     
-    public void addMitigationSuggestion(String suggestionText, Boolean aiGenerated, String priority) {
-        if (mitigationSuggestions == null) {
-            mitigationSuggestions = new ArrayList<>();
-        }
-        MitigationSuggestion suggestion = new MitigationSuggestion();
-        suggestion.setSuggestionId(java.util.UUID.randomUUID().toString());
-        suggestion.setSuggestionText(suggestionText);
-        suggestion.setAiGenerated(aiGenerated);
-        suggestion.setPriority(priority);
-        suggestion.setCreatedAt(LocalDateTime.now());
-        mitigationSuggestions.add(suggestion);
-    }
-    
     public void addHistoryEntry(String action, String userId, String previousValue, String newValue, String notes) {
         if (history == null) {
             history = new ArrayList<>();
@@ -167,6 +138,15 @@ public class Risk {
         entry.setNewValue(newValue);
         entry.setNotes(notes);
         history.add(entry);
+    }
+    
+    public void addRelatedMitigation(String mitigationId) {
+        if (relatedMitigationIds == null) {
+            relatedMitigationIds = new ArrayList<>();
+        }
+        if (!relatedMitigationIds.contains(mitigationId)) {
+            relatedMitigationIds.add(mitigationId);
+        }
     }
     
     public boolean isCritical() {

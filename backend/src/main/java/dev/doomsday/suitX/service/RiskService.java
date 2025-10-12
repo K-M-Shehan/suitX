@@ -15,9 +15,12 @@ import dev.doomsday.suitX.dto.RiskDto;
 import dev.doomsday.suitX.dto.RiskSummaryDto;
 import dev.doomsday.suitX.model.Risk;
 import dev.doomsday.suitX.model.Project;
+import dev.doomsday.suitX.model.Mitigation;
+import dev.doomsday.suitX.model.User;
 import dev.doomsday.suitX.repository.ProjectRepository;
 import dev.doomsday.suitX.repository.RiskRepository;
 import dev.doomsday.suitX.repository.UserRepository;
+import dev.doomsday.suitX.repository.MitigationRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -27,7 +30,9 @@ public class RiskService {
     private final RiskRepository riskRepository;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
+    private final MitigationRepository mitigationRepository;
     private final GeminiAIService geminiAIService;
+    private final ProjectService projectService;
 
     public List<RiskDto> getAllRisks() {
         return riskRepository.findAll().stream()
@@ -43,6 +48,24 @@ public class RiskService {
 
     public List<RiskDto> getRisksByProject(String projectId) {
         return riskRepository.findByProjectId(projectId).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get all risks for projects the user has access to
+     * @param username Username of the current user
+     * @return List of risks from user's accessible projects
+     */
+    public List<RiskDto> getRisksForUser(String username) {
+        // Get all projects the user has access to
+        List<String> accessibleProjectIds = projectService.getProjectsForUser(username).stream()
+                .map(project -> project.getId())
+                .collect(Collectors.toList());
+        
+        // Get all risks for those projects
+        return riskRepository.findAll().stream()
+                .filter(risk -> accessibleProjectIds.contains(risk.getProjectId()))
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
@@ -146,8 +169,17 @@ public class RiskService {
     public RiskSummaryDto getRiskSummary(String username) {
         RiskSummaryDto summary = new RiskSummaryDto();
         
-        // Get all projects for the user
-        List<Project> userProjects = projectRepository.findByCreatedBy(username);
+        // Get user by username to get userId
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        String userId = user.getId();
+        
+        // Get all projects where user has access (owner or member)
+        List<Project> allProjects = projectRepository.findAll();
+        List<Project> userProjects = allProjects.stream()
+                .filter(project -> project.hasAccess(userId))
+                .collect(Collectors.toList());
+        
         List<String> userProjectIds = userProjects.stream()
                 .map(Project::getId)
                 .collect(Collectors.toList());
@@ -218,19 +250,6 @@ public class RiskService {
             // Calculate risk score
             risk.calculateRiskScore();
             
-            // Add mitigation suggestions from AI
-            if (aiMitigations != null) {
-                for (AIMitigationStrategy aiMit : aiMitigations) {
-                    if (aiMit.getRiskId() != null && aiMit.getRiskId().equals(aiRisk.getRiskId())) {
-                        risk.addMitigationSuggestion(
-                            aiMit.getDescription(),
-                            true, // AI-generated
-                            aiMit.getImplementationEffort()
-                        );
-                    }
-                }
-            }
-            
             // Add history entry
             risk.addHistoryEntry(
                 "RISK_CREATED",
@@ -247,10 +266,245 @@ public class RiskService {
             proj.addRisk(savedRisk.getId());
             projectRepository.save(proj);
             
+            // Create separate Mitigation entities for each AI mitigation strategy
+            if (aiMitigations != null) {
+                for (AIMitigationStrategy aiMit : aiMitigations) {
+                    if (aiMit.getRiskId() != null && aiMit.getRiskId().equals(aiRisk.getRiskId())) {
+                        String mitigationId = createMitigationFromAI(aiMit, savedRisk.getId(), projectId, userId);
+                        // Link mitigation to risk
+                        savedRisk.addRelatedMitigation(mitigationId);
+                    }
+                }
+                // Update risk with mitigation references
+                if (!savedRisk.getRelatedMitigationIds().isEmpty()) {
+                    riskRepository.save(savedRisk);
+                }
+            }
+            
             savedRisks.add(savedRisk);
         }
         
         return savedRisks;
+    }
+
+    /**
+     * Create a Mitigation entity from AI-generated mitigation strategy
+     * @return The ID of the created mitigation
+     */
+    private String createMitigationFromAI(AIMitigationStrategy aiMit, String riskId, String projectId, String userId) {
+        Mitigation mitigation = new Mitigation();
+        
+        // Basic information - Use AI-generated title if available, otherwise extract from description
+        String title = (aiMit.getTitle() != null && !aiMit.getTitle().trim().isEmpty()) 
+            ? aiMit.getTitle() 
+            : extractMitigationTitle(aiMit.getDescription());
+        mitigation.setTitle(title);
+        mitigation.setDescription(aiMit.getDescription());
+        
+        // Relationships
+        mitigation.setProjectId(projectId);
+        mitigation.setRelatedRiskId(riskId);
+        mitigation.setCreatedBy(userId);
+        
+        // Status and priority based on implementation effort
+        mitigation.setStatus("PLANNED");
+        mitigation.setPriority(mapEffortToPriority(aiMit.getImplementationEffort()));
+        
+        // AI-specific fields
+        mitigation.setAiGenerated(true);
+        
+        // Timeline - set due date based on priority
+        mitigation.setStartDate(LocalDateTime.now());
+        mitigation.setDueDate(calculateDueDate(mitigation.getPriority()));
+        
+        // Progress
+        mitigation.setProgressPercentage(0.0);
+        
+        // Estimated cost based on effort
+        mitigation.setEstimatedCost(estimateCostFromEffort(aiMit.getImplementationEffort()));
+        
+        // Create action items if the description contains steps
+        List<String> steps = extractActionSteps(aiMit.getDescription());
+        for (String step : steps) {
+            mitigation.addAction(step, null, mitigation.getDueDate());
+        }
+        
+        // Timestamps
+        mitigation.setCreatedAt(LocalDateTime.now());
+        mitigation.setUpdatedAt(LocalDateTime.now());
+        
+        // Save the mitigation and return its ID
+        Mitigation savedMitigation = mitigationRepository.save(mitigation);
+        return savedMitigation.getId();
+    }
+
+    /**
+     * Map implementation effort to priority
+     */
+    private String mapEffortToPriority(String effort) {
+        if (effort == null) return "MEDIUM";
+        return switch (effort.toUpperCase()) {
+            case "LOW", "MINIMAL" -> "LOW";
+            case "MEDIUM", "MODERATE" -> "MEDIUM";
+            case "HIGH", "SIGNIFICANT" -> "HIGH";
+            case "CRITICAL", "EXTENSIVE" -> "CRITICAL";
+            default -> "MEDIUM";
+        };
+    }
+
+    /**
+     * Calculate due date based on priority
+     */
+    private LocalDateTime calculateDueDate(String priority) {
+        LocalDateTime now = LocalDateTime.now();
+        return switch (priority) {
+            case "CRITICAL" -> now.plusDays(7);  // 1 week for critical
+            case "HIGH" -> now.plusDays(14);      // 2 weeks for high
+            case "MEDIUM" -> now.plusDays(30);    // 1 month for medium
+            case "LOW" -> now.plusDays(60);       // 2 months for low
+            default -> now.plusDays(30);
+        };
+    }
+
+    /**
+     * Estimate cost from implementation effort
+     */
+    private Double estimateCostFromEffort(String effort) {
+        if (effort == null) return 5000.0;
+        return switch (effort.toUpperCase()) {
+            case "LOW", "MINIMAL" -> 2000.0;
+            case "MEDIUM", "MODERATE" -> 5000.0;
+            case "HIGH", "SIGNIFICANT" -> 10000.0;
+            case "CRITICAL", "EXTENSIVE" -> 20000.0;
+            default -> 5000.0;
+        };
+    }
+
+    /**
+     * Extract action steps from mitigation description
+     * Looks for numbered lists or bullet points
+     */
+    private List<String> extractActionSteps(String description) {
+        List<String> steps = new ArrayList<>();
+        if (description == null) return steps;
+        
+        // Split by newlines and look for numbered or bulleted items
+        String[] lines = description.split("\n");
+        for (String line : lines) {
+            line = line.trim();
+            // Match patterns like "1.", "2.", "-", "*", "•"
+            if (line.matches("^[0-9]+\\..*") || line.matches("^[-*•].*")) {
+                // Remove the number/bullet and add as a step
+                String step = line.replaceFirst("^[0-9]+\\.", "").replaceFirst("^[-*•]", "").trim();
+                if (!step.isEmpty() && step.length() > 5) {
+                    steps.add(step);
+                }
+            }
+        }
+        
+        // If no steps found, create a single action from the whole description
+        if (steps.isEmpty() && description.length() > 10) {
+            steps.add(description.substring(0, Math.min(200, description.length())));
+        }
+        
+        return steps;
+    }
+
+    /**
+     * Extract a concise title from mitigation description
+     * Generates a short, meaningful title by identifying the main action
+     */
+    private String extractMitigationTitle(String description) {
+        if (description == null || description.trim().isEmpty()) {
+            return "Mitigation Strategy";
+        }
+        
+        String cleaned = description.trim();
+        
+        // Common action verbs used in mitigation strategies
+        String[] actionVerbs = {
+            "implement", "create", "establish", "develop", "design", "build",
+            "add", "integrate", "deploy", "install", "configure", "setup",
+            "review", "assess", "evaluate", "analyze", "monitor", "track",
+            "update", "upgrade", "migrate", "refactor", "optimize",
+            "conduct", "perform", "execute", "run", "test",
+            "document", "define", "specify", "clarify",
+            "train", "educate", "teach", "mentor",
+            "negotiate", "discuss", "communicate", "coordinate",
+            "automate", "streamline", "improve", "enhance",
+            "reduce", "minimize", "eliminate", "prevent",
+            "ensure", "verify", "validate", "confirm",
+            "allocate", "assign", "distribute", "dedicate",
+            "schedule", "plan", "organize", "prioritize"
+        };
+        
+        String lowerDesc = cleaned.toLowerCase();
+        
+        // Try to find the first sentence ending
+        int sentenceEnd = findSentenceEnd(cleaned);
+        String firstSentence = sentenceEnd > 0 && sentenceEnd < 150 
+            ? cleaned.substring(0, sentenceEnd).trim() 
+            : cleaned;
+        
+        // Look for action verb patterns like "Verb + Object"
+        for (String verb : actionVerbs) {
+            int verbIndex = lowerDesc.indexOf(verb);
+            if (verbIndex >= 0 && verbIndex < 20) { // Verb appears near the start
+                // Extract from verb to end of first sentence or next punctuation
+                int endIndex = Math.min(firstSentence.length(), verbIndex + 60);
+                
+                // Find natural break points (comma, semicolon, etc.)
+                String fragment = firstSentence.substring(verbIndex, endIndex);
+                int comma = fragment.indexOf(',');
+                int semicolon = fragment.indexOf(';');
+                int dash = fragment.indexOf(" - ");
+                int colon = fragment.indexOf(':');
+                
+                int breakPoint = endIndex - verbIndex;
+                if (comma > 5 && comma < breakPoint) breakPoint = comma;
+                if (semicolon > 5 && semicolon < breakPoint) breakPoint = semicolon;
+                if (dash > 5 && dash < breakPoint) breakPoint = dash;
+                if (colon > 5 && colon < breakPoint) breakPoint = colon;
+                
+                String title = firstSentence.substring(verbIndex, verbIndex + breakPoint).trim();
+                
+                // Capitalize first letter
+                if (!title.isEmpty()) {
+                    title = Character.toUpperCase(title.charAt(0)) + title.substring(1);
+                }
+                
+                return title;
+            }
+        }
+        
+        // Fallback: Use first 50 characters at word boundary
+        if (cleaned.length() <= 50) {
+            return cleaned;
+        }
+        
+        String title = cleaned.substring(0, 50);
+        int lastSpace = title.lastIndexOf(' ');
+        if (lastSpace > 25) {
+            title = title.substring(0, lastSpace);
+        }
+        
+        return title + "...";
+    }
+    
+    /**
+     * Find the end of the first sentence
+     */
+    private int findSentenceEnd(String text) {
+        int period = text.indexOf('.');
+        int exclamation = text.indexOf('!');
+        int question = text.indexOf('?');
+        
+        int sentenceEnd = -1;
+        if (period > 0) sentenceEnd = period;
+        if (exclamation > 0 && (sentenceEnd == -1 || exclamation < sentenceEnd)) sentenceEnd = exclamation;
+        if (question > 0 && (sentenceEnd == -1 || question < sentenceEnd)) sentenceEnd = question;
+        
+        return sentenceEnd;
     }
 
     /**

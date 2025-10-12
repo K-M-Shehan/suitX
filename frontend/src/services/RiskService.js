@@ -31,6 +31,30 @@ class RiskService {
     }
   }
 
+  async getRisksForUser() {
+    try {
+      const token = getToken();
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = token;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/risks/user`, {
+        headers: headers,
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch risks for user');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching risks for user:', error);
+      throw error;
+    }
+  }
+
   async getRisksByStatus(status) {
     try {
       const response = await fetch(`${API_BASE_URL}/risks/status/${status}`);

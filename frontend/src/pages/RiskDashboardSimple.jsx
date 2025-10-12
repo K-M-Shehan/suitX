@@ -34,6 +34,7 @@ const RiskDashboard = () => {
         // Try to fetch risk summary
         try {
           const summary = await RiskService.getRiskSummary();
+          console.log('Risk Summary Response:', summary);
           setRiskSummary({
             totalProjects: summary.totalProjects || 0,
             totalRisks: summary.totalRisks || 0
@@ -45,7 +46,7 @@ const RiskDashboard = () => {
 
         // Try to fetch risks
         try {
-          const risksData = await RiskService.getAllRisks();
+          const risksData = await RiskService.getRisksForUser();
           setRisks(Array.isArray(risksData) ? risksData : []);
         } catch (err) {
           console.warn('Risks data not available:', err.message);
@@ -97,7 +98,7 @@ const RiskDashboard = () => {
     try {
       await RiskService.updateRisk(editingRisk.id, editForm);
       // Refresh risks data
-      const risksData = await RiskService.getAllRisks();
+      const risksData = await RiskService.getRisksForUser();
       setRisks(Array.isArray(risksData) ? risksData : []);
       
       // Refresh summary
@@ -136,7 +137,7 @@ const RiskDashboard = () => {
     try {
       await RiskService.resolveRisk(riskId);
       // Refresh risks data
-      const risksData = await RiskService.getAllRisks();
+      const risksData = await RiskService.getRisksForUser();
       setRisks(Array.isArray(risksData) ? risksData : []);
       
       // Refresh summary
@@ -158,7 +159,10 @@ const RiskDashboard = () => {
   if (loading) {
     return (
       <div className="flex-1 p-8 bg-gray-50 flex items-center justify-center">
-        <div className="text-lg text-gray-600">Loading dashboard data...</div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading dashboard data...</p>
+        </div>
       </div>
     );
   }
@@ -283,9 +287,6 @@ const RiskDashboard = () => {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-900">Risk Analysis</h2>
-            <button className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors text-sm font-medium">
-              + Add New Risk
-            </button>
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -375,9 +376,6 @@ const RiskDashboard = () => {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-900">Risk Analysis</h2>
-            <button className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors text-sm font-medium">
-              + Add New Risk
-            </button>
           </div>
           <div className="bg-white rounded-lg p-8 shadow-sm border text-center">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No Risks Found</h3>
