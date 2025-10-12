@@ -20,11 +20,33 @@ import ProjectDetailsPage from "./pages/ProjectDetailsPage";
 import RiskDetailPage from "./pages/RiskDetailPage";
 import MitigationDetailPage from "./pages/MitigationDetailPage";
 import ApiTest from "./components/ApiTest";
+import { isTokenExpired, handleTokenExpiration } from "./utils/jwtUtils";
 
 function App() {
   const [activeMenuItem, setActiveMenuItem] = useState("Launchpad");
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Check token expiration periodically
+  useEffect(() => {
+    const checkTokenExpiration = () => {
+      const publicRoutes = ['/', '/login', '/signup'];
+      const isPublicRoute = publicRoutes.includes(location.pathname);
+      
+      if (!isPublicRoute && isTokenExpired()) {
+        console.warn('Token expired, redirecting to login...');
+        handleTokenExpiration();
+      }
+    };
+
+    // Check immediately
+    checkTokenExpiration();
+
+    // Check every minute
+    const interval = setInterval(checkTokenExpiration, 60000);
+
+    return () => clearInterval(interval);
+  }, [location.pathname]);
 
   useEffect(() => {
     const path = location.pathname;
