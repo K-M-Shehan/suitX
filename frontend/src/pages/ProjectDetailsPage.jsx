@@ -556,8 +556,8 @@ const ProjectDetailsPage = () => {
                         {task.dueDate && (
                           <span>Due: {formatDate(task.dueDate)}</span>
                         )}
-                        {task.assignedTo && (
-                          <span>Assigned to: {task.assignedTo}</span>
+                        {task.assignedToUsername && (
+                          <span>Assigned to: {task.assignedToUsername}</span>
                         )}
                       </div>
                     </div>
@@ -875,10 +875,10 @@ const ProjectDetailsPage = () => {
                     <span className="ml-2 text-gray-700">{formatDate(selectedRisk.resolvedAt)}</span>
                   </div>
                 )}
-                {selectedRisk.assignedTo && (
+                {selectedRisk.assignedToUsername && (
                   <div>
                     <span className="font-medium text-gray-500">Assigned To:</span>
-                    <span className="ml-2 text-gray-700">{selectedRisk.assignedTo}</span>
+                    <span className="ml-2 text-gray-700">{selectedRisk.assignedToUsername}</span>
                   </div>
                 )}
               </div>

@@ -398,7 +398,7 @@ const RiskDetailPage = () => {
             />
           ) : (
             <p className="text-gray-700">
-              {risk.assignedTo ? `Assigned to: ${risk.assignedTo}` : 'Not assigned'}
+              {risk.assignedToUsername ? `Assigned to: ${risk.assignedToUsername}` : 'Not assigned'}
             </p>
           )}
         </div>

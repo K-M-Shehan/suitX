@@ -202,6 +202,13 @@ public class TaskService {
         dto.setStatus(task.getStatus());
         dto.setPriority(task.getPriority());
         dto.setAssignedTo(task.getAssignedTo());
+        
+        // Populate assignedToUsername if task is assigned
+        if (task.getAssignedTo() != null) {
+            userRepository.findById(task.getAssignedTo())
+                .ifPresent(user -> dto.setAssignedToUsername(user.getUsername()));
+        }
+        
         dto.setCreatedBy(task.getCreatedBy());
         dto.setDueDate(task.getDueDate());
         dto.setStartDate(task.getStartDate());

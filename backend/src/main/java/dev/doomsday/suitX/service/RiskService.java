@@ -17,6 +17,7 @@ import dev.doomsday.suitX.model.Risk;
 import dev.doomsday.suitX.model.Project;
 import dev.doomsday.suitX.repository.ProjectRepository;
 import dev.doomsday.suitX.repository.RiskRepository;
+import dev.doomsday.suitX.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -25,6 +26,7 @@ public class RiskService {
 
     private final RiskRepository riskRepository;
     private final ProjectRepository projectRepository;
+    private final UserRepository userRepository;
     private final GeminiAIService geminiAIService;
 
     public List<RiskDto> getAllRisks() {
@@ -294,6 +296,13 @@ public class RiskService {
         dto.setStatus(risk.getStatus());
         dto.setProjectId(risk.getProjectId());
         dto.setAssignedTo(risk.getAssignedTo());
+        
+        // Populate assignedToUsername if risk is assigned
+        if (risk.getAssignedTo() != null) {
+            userRepository.findById(risk.getAssignedTo())
+                .ifPresent(user -> dto.setAssignedToUsername(user.getUsername()));
+        }
+        
         dto.setCreatedAt(risk.getCreatedAt());
         dto.setUpdatedAt(risk.getUpdatedAt());
         dto.setResolvedAt(risk.getResolvedAt());

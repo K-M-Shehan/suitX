@@ -15,7 +15,8 @@ public class TaskDto {
     private String projectId;
     private String status; // TODO, IN_PROGRESS, DONE, BLOCKED
     private String priority; // LOW, MEDIUM, HIGH, CRITICAL
-    private String assignedTo;
+    private String assignedTo; // User ID
+    private String assignedToUsername; // Username of assigned user (for display)
     private String createdBy;
     
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")

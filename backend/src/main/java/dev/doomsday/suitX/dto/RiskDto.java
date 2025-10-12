@@ -16,7 +16,8 @@ public class RiskDto {
     private String status;
     private String projectId;
     private String projectName; // Added for display in dashboard
-    private String assignedTo;
+    private String assignedTo; // User ID
+    private String assignedToUsername; // Username of assigned user (for display)
     private Boolean aiGenerated; // Added to show AI-generated risks
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
