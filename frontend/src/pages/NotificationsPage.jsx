@@ -1,23 +1,60 @@
 import React, { useState, useEffect } from 'react';
 import InvitationsPanel from '../components/InvitationsPanel';
+import NotificationService from '../services/NotificationService';
 
 function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
-
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // 'all', 'unread', 'read'
 
-  const markAsRead = (id) => {
-    setNotifications(notifications.map(notif => 
-      notif.id === id ? { ...notif, read: true } : notif
-    ));
+  // Fetch notifications on component mount
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      const data = await NotificationService.getUserNotifications();
+      setNotifications(data);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(notif => ({ ...notif, read: true })));
+  const markAsRead = async (id) => {
+    try {
+      await NotificationService.markAsRead(id);
+      setNotifications(notifications.map(notif => 
+        notif.id === id ? { ...notif, isRead: true, readAt: new Date().toISOString() } : notif
+      ));
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
   };
 
-  const deleteNotification = (id) => {
-    setNotifications(notifications.filter(notif => notif.id !== id));
+  const markAllAsRead = async () => {
+    try {
+      await NotificationService.markAllAsRead();
+      setNotifications(notifications.map(notif => ({ 
+        ...notif, 
+        isRead: true, 
+        readAt: new Date().toISOString() 
+      })));
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+    }
+  };
+
+  const deleteNotification = async (id) => {
+    try {
+      await NotificationService.deleteNotification(id);
+      setNotifications(notifications.filter(notif => notif.id !== id));
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+    }
   };
 
   const getTimeAgo = (timestamp) => {
@@ -34,17 +71,34 @@ function NotificationsPage() {
   };
 
   const getTypeIcon = (type) => {
+    // Map backend notification types to icons
     switch (type) {
-      case 'risk':
+      case 'TASK_ASSIGNED':
+      case 'MITIGATION_ASSIGNED':
+        return (
+          <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+        );
+      case 'RISK_DETECTED':
+      case 'RISK_UPDATED':
+      case 'DEADLINE_APPROACHING':
         return (
           <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
         );
-      case 'success':
+      case 'TASK_COMPLETED':
+      case 'PROJECT_INVITED':
         return (
           <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        );
+      case 'COMMENT_ADDED':
+        return (
+          <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
           </svg>
         );
       default:
@@ -57,12 +111,12 @@ function NotificationsPage() {
   };
 
   const filteredNotifications = notifications.filter(notif => {
-    if (filter === 'unread') return !notif.read;
-    if (filter === 'read') return notif.read;
+    if (filter === 'unread') return !notif.isRead;
+    if (filter === 'read') return notif.isRead;
     return true;
   });
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (
     <div className="flex-1 p-8 bg-gray-50">
@@ -128,7 +182,12 @@ function NotificationsPage() {
 
       {/* Notifications list */}
       <div className="space-y-2">
-        {filteredNotifications.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <p className="mt-2 text-sm text-gray-500">Loading notifications...</p>
+          </div>
+        ) : filteredNotifications.length === 0 ? (
           <div className="text-center py-12">
             <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -143,7 +202,7 @@ function NotificationsPage() {
             <div
               key={notification.id}
               className={`bg-white rounded-lg p-4 shadow-sm border transition-colors ${
-                !notification.read ? 'border-blue-200 bg-blue-50' : 'border-gray-200'
+                !notification.isRead ? 'border-blue-200 bg-blue-50' : 'border-gray-200'
               }`}
             >
               <div className="flex items-start space-x-3">
@@ -156,19 +215,19 @@ function NotificationsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h3 className={`text-sm font-semibold ${!notification.read ? 'text-gray-900' : 'text-gray-700'}`}>
+                      <h3 className={`text-sm font-semibold ${!notification.isRead ? 'text-gray-900' : 'text-gray-700'}`}>
                         {notification.title}
-                        {!notification.read && (
+                        {!notification.isRead && (
                           <span className="ml-2 inline-block w-2 h-2 bg-blue-500 rounded-full"></span>
                         )}
                       </h3>
                       <p className="mt-1 text-sm text-gray-600">{notification.message}</p>
-                      <p className="mt-2 text-xs text-gray-500">{getTimeAgo(notification.timestamp)}</p>
+                      <p className="mt-2 text-xs text-gray-500">{getTimeAgo(notification.createdAt)}</p>
                     </div>
 
                     {/* Actions */}
                     <div className="flex items-center space-x-2 ml-4">
-                      {!notification.read && (
+                      {!notification.isRead && (
                         <button
                           onClick={() => markAsRead(notification.id)}
                           className="p-1 text-gray-400 hover:text-blue-600 transition-colors"

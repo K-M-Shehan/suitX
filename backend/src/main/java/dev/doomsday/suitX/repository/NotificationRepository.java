@@ -1,6 +1,7 @@
 package dev.doomsday.suitX.repository;
 
 import dev.doomsday.suitX.model.Notification;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -18,8 +19,14 @@ public interface NotificationRepository extends MongoRepository<Notification, St
     // Find all notifications for a user
     List<Notification> findByUserId(String userId);
     
+    // Find all notifications for a user with sorting
+    List<Notification> findByUserId(String userId, Sort sort);
+    
     // Find unread notifications for a user
     List<Notification> findByUserIdAndIsRead(String userId, Boolean isRead);
+    
+    // Find unread/read notifications for a user with sorting
+    List<Notification> findByUserIdAndIsRead(String userId, Boolean isRead, Sort sort);
     
     // Find notifications by type for a user
     List<Notification> findByUserIdAndType(String userId, String type);

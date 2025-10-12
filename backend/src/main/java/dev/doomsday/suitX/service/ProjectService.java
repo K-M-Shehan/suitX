@@ -117,7 +117,26 @@ public class ProjectService {
         String userId = userOpt.get().getId();
         
         return projectRepository.findById(id)
-                .filter(project -> project.isOwner(userId) || project.isMember(userId))
+                .filter(project -> {
+                    // Check if user is owner (by userId)
+                    if (project.isOwner(userId)) {
+                        return true;
+                    }
+                    // Check if user is member (by userId)
+                    if (project.isMember(userId)) {
+                        return true;
+                    }
+                    // Backward compatibility: check createdBy field (username)
+                    // This handles old projects where ownerId might contain username instead of userId
+                    if (project.getCreatedBy() != null && project.getCreatedBy().equals(username)) {
+                        return true;
+                    }
+                    // Backward compatibility: check if ownerId contains username (old bug)
+                    if (project.getOwnerId() != null && project.getOwnerId().equals(username)) {
+                        return true;
+                    }
+                    return false;
+                })
                 .map(this::convertToDto);
     }
 

@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import dev.doomsday.suitX.dto.ProjectDto;
 import dev.doomsday.suitX.dto.RiskDto;
+import dev.doomsday.suitX.model.User;
+import dev.doomsday.suitX.repository.UserRepository;
 import dev.doomsday.suitX.service.ProjectService;
 import dev.doomsday.suitX.service.RiskService;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ public class ProjectController {
 
     private final ProjectService projectService;
     private final RiskService riskService;
+    private final UserRepository userRepository;
 
     @GetMapping
     public ResponseEntity<List<ProjectDto>> getAllProjects(Authentication authentication) {
@@ -70,8 +73,16 @@ public class ProjectController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
             String username = authentication.getName();
+            
+            // Get userId from username
+            Optional<User> userOpt = userRepository.findByUsername(username);
+            if (userOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            String userId = userOpt.get().getId();
+            
             projectDto.setCreatedBy(username);
-            projectDto.setOwnerId(username); // Set ownerId as well
+            projectDto.setOwnerId(userId); // Set ownerId to userId, not username
             ProjectDto createdProject = projectService.createProject(projectDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdProject);
         } catch (Exception e) {
