@@ -94,6 +94,16 @@ const TaskFormDialog = ({ isOpen, onClose, onSubmit, projectId, project }) => {
       return;
     }
 
+    // Convert date string to ISO 8601 LocalDateTime format if provided
+    let formattedDueDate = null;
+    if (formData.dueDate) {
+      // HTML date input returns YYYY-MM-DD, convert to LocalDateTime format
+      // Set time to end of day (23:59:59) in local timezone
+      const dateObj = new Date(formData.dueDate + 'T23:59:59');
+      // Format as ISO 8601 string (YYYY-MM-DDTHH:mm:ss.sssZ)
+      formattedDueDate = dateObj.toISOString();
+    }
+
     // Prepare data for submission
     const taskData = {
       title: formData.title.trim(),
@@ -102,7 +112,7 @@ const TaskFormDialog = ({ isOpen, onClose, onSubmit, projectId, project }) => {
       status: formData.status,
       priority: formData.priority,
       assignedTo: formData.assignedTo.trim() || null,
-      dueDate: formData.dueDate || null,
+      dueDate: formattedDueDate,
       estimatedHours: formData.estimatedHours ? parseFloat(formData.estimatedHours) : null,
     };
 
