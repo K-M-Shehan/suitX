@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../services/AuthService";
 import Header from "../components/Header";
@@ -10,6 +10,17 @@ export default function LoginForm() {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Check if user is already logged in on mount
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      // User already logged in, clear their session and show message
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setMessage("Previous session cleared. Please log in.");
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
