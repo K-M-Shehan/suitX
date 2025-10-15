@@ -33,8 +33,13 @@ public class ProjectInvitationService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
         
+        // Get the inviter's user ID from username
+        User inviter = userRepository.findByUsername(invitedByUsername)
+                .orElseThrow(() -> new RuntimeException("Inviter user not found"));
+        String inviterUserId = inviter.getId();
+        
         // Verify requesting user is owner
-        if (!project.isOwner(invitedByUsername)) {
+        if (!project.isOwner(inviterUserId)) {
             throw new RuntimeException("Only project owner can invite members");
         }
         
@@ -43,7 +48,7 @@ public class ProjectInvitationService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         
         // Check if user is already a member or owner
-        if (project.isOwner(user.getUsername()) || project.isMember(userId)) {
+        if (project.isOwner(userId) || project.isMember(userId)) {
             throw new RuntimeException("User is already a member of this project");
         }
         
@@ -173,7 +178,11 @@ public class ProjectInvitationService {
         Project project = projectRepository.findById(invitation.getProjectId())
                 .orElseThrow(() -> new RuntimeException("Project not found"));
         
-        if (!project.isOwner(username)) {
+        // Get user ID from username
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        if (!project.isOwner(user.getId())) {
             throw new RuntimeException("Only project owner can cancel invitations");
         }
         
