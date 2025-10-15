@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8080/api/invitations';
+const API_BASE_URL = 'https://suitx-backend-production.up.railway.app/api/invitations';
 
 // Get JWT token from localStorage
 const getToken = () => {

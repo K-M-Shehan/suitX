@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8080/api/settings";
+const API_URL = "https://suitx-backend-production.up.railway.app/api/settings";
 
 /**
  * Get all user settings
