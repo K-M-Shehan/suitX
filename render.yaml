@@ -1,0 +1,46 @@
+services:
+  # Backend API Service
+  - type: web
+    name: suitx-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    region: oregon # Change to your preferred region
+    plan: free # Change to starter/standard for production
+    branch: main # Change to your deployment branch
+    envVars:
+      # MongoDB Connection
+      - key: SPRING_DATA_MONGODB_URI
+        sync: false # Set in Render dashboard
+      - key: SPRING_DATA_MONGODB_DATABASE
+        value: suitx
+      
+      # JWT Configuration
+      - key: JWT_SECRET
+        generateValue: true
+        
+      # Email Configuration (if using)
+      - key: SPRING_MAIL_HOST
+        value: smtp.gmail.com
+      - key: SPRING_MAIL_PORT
+        value: 587
+      - key: SPRING_MAIL_USERNAME
+        sync: false # Set in Render dashboard
+      - key: SPRING_MAIL_PASSWORD
+        sync: false # Set in Render dashboard
+      - key: SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH
+        value: true
+      - key: SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE
+        value: true
+      
+      # Application Configuration
+      - key: SERVER_PORT
+        value: 8080
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+        
+      # CORS Configuration
+      - key: ALLOWED_ORIGINS
+        value: https://your-frontend-url.onrender.com # Update with your frontend URL
+        
+    healthCheckPath: /
