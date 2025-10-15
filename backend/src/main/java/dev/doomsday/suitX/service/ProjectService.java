@@ -64,7 +64,7 @@ public class ProjectService {
             return false;
         }
         
-        // Get user ID for member lookup
+        // Get user ID for owner and member lookup
         Optional<User> userOpt = userRepository.findByUsername(username);
         if (userOpt.isEmpty()) {
             return false;
@@ -72,7 +72,7 @@ public class ProjectService {
         String userId = userOpt.get().getId();
         
         return projectRepository.findById(projectId)
-                .map(project -> project.isOwner(username) || project.isMember(userId))
+                .map(project -> project.isOwner(userId) || project.isMember(userId))
                 .orElse(false);
     }
 

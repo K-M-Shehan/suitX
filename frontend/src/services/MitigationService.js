@@ -175,6 +175,30 @@ class MitigationService {
       throw error;
     }
   }
+
+  async getMitigationsByProject(projectId) {
+    try {
+      const token = getToken();
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = token;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/mitigations/project/${projectId}`, {
+        headers: headers,
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch mitigations for project: ${projectId}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching mitigations by project:', error);
+      throw error;
+    }
+  }
 }
 
 export default new MitigationService();

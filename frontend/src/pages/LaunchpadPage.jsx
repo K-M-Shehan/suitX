@@ -23,8 +23,8 @@ function LaunchpadPage() {
           setProjects(projectData.slice(0, 5));
         }
 
-        // Fetch risks
-        const riskData = await RiskService.getAllRisks();
+        // Fetch risks for current user only (from projects they have access to)
+        const riskData = await RiskService.getRisksForUser();
         if (mounted) {
           // Show only first 3 active/identified risks (exclude IGNORED and RESOLVED)
           const activeRisks = riskData

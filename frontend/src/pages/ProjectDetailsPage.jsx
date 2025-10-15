@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getProjectById, updateProject, analyzeProjectRisks } from '../services/ProjectService';
 import { getTasksByProject, createTask, updateTask } from '../services/TaskService';
 import RiskService from '../services/RiskService';
+import MitigationService from '../services/MitigationService';
 import ProjectEditDialog from '../components/ProjectEditDialog';
 import TaskFormDialog from '../components/TaskFormDialog';
 import TaskEditDialog from '../components/TaskEditDialog';
@@ -15,6 +16,7 @@ const ProjectDetailsPage = () => {
   const [project, setProject] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [risks, setRisks] = useState([]);
+  const [mitigations, setMitigations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
@@ -55,6 +57,15 @@ const ProjectDetailsPage = () => {
       } catch (riskError) {
         console.error('Failed to load risks:', riskError);
         // Continue even if risks fail to load
+      }
+
+      // Fetch project mitigations
+      try {
+        const mitigationsData = await MitigationService.getMitigationsByProject(projectId);
+        setMitigations(mitigationsData);
+      } catch (mitigationError) {
+        console.error('Failed to load mitigations:', mitigationError);
+        // Continue even if mitigations fail to load
       }
       
       setLoading(false);
@@ -372,7 +383,7 @@ const ProjectDetailsPage = () => {
       {/* Tabs */}
       <div className="border-b border-gray-200 mb-6">
         <nav className="-mb-px flex space-x-8">
-          {['overview', 'tasks', 'team', 'risks', 'timeline'].map((tab) => (
+          {['overview', 'tasks', 'team', 'risks', 'mitigations', 'timeline'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -386,6 +397,11 @@ const ProjectDetailsPage = () => {
               {tab === 'risks' && risks.length > 0 && (
                 <span className="ml-2 px-2 py-0.5 bg-red-100 text-red-800 text-xs rounded-full">
                   {risks.length}
+                </span>
+              )}
+              {tab === 'mitigations' && mitigations.length > 0 && (
+                <span className="ml-2 px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">
+                  {mitigations.length}
                 </span>
               )}
               {tab === 'team' && (
@@ -751,6 +767,124 @@ const ProjectDetailsPage = () => {
                       Click to view more details →
                     </p>
                   </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Mitigations Tab */}
+      {activeTab === 'mitigations' && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">
+              Risk Mitigations
+              {mitigations.length > 0 && (
+                <span className="ml-3 text-sm font-normal text-gray-500">
+                  ({mitigations.length} {mitigations.length === 1 ? 'mitigation' : 'mitigations'})
+                </span>
+              )}
+            </h2>
+          </div>
+
+          {mitigations.length === 0 ? (
+            <div className="text-center py-12 bg-white rounded-lg shadow">
+              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <h3 className="mt-2 text-sm font-medium text-gray-900">No mitigations yet</h3>
+              <p className="mt-1 text-sm text-gray-500">
+                Create mitigation strategies for project risks in the Mitigations page
+              </p>
+              <div className="mt-6">
+                <button
+                  onClick={() => navigate('/mitigations')}
+                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800"
+                >
+                  Go to Mitigations
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {mitigations.map((mitigation) => (
+                <div
+                  key={mitigation.id}
+                  onClick={() => navigate(`/mitigations/${mitigation.id}`)}
+                  className="bg-white rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer border border-gray-200 p-5"
+                >
+                  {/* Mitigation Header */}
+                  <div className="flex items-start justify-between mb-3">
+                    <h3 className="text-lg font-semibold text-gray-900 flex-1 pr-2">
+                      {mitigation.title}
+                    </h3>
+                    {mitigation.aiGenerated && (
+                      <span className="flex-shrink-0 px-2 py-1 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                        AI
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                    {mitigation.description || 'No description provided.'}
+                  </p>
+
+                  {/* Status and Priority */}
+                  <div className="flex gap-2 mb-3">
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      mitigation.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
+                      mitigation.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-800' :
+                      mitigation.status === 'PLANNED' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {mitigation.status || 'PLANNED'}
+                    </span>
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      mitigation.priority === 'CRITICAL' ? 'bg-red-100 text-red-800' :
+                      mitigation.priority === 'HIGH' ? 'bg-orange-100 text-orange-800' :
+                      mitigation.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-blue-100 text-blue-800'
+                    }`}>
+                      {mitigation.priority || 'MEDIUM'}
+                    </span>
+                  </div>
+
+                  {/* Progress Bar */}
+                  {mitigation.progress !== null && mitigation.progress !== undefined && (
+                    <div className="mb-3">
+                      <div className="flex justify-between text-xs text-gray-600 mb-1">
+                        <span>Progress</span>
+                        <span>{mitigation.progress}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className={`h-2 rounded-full transition-all ${
+                            mitigation.progress === 100 ? 'bg-green-500' :
+                            mitigation.progress >= 75 ? 'bg-blue-500' :
+                            mitigation.progress >= 50 ? 'bg-yellow-500' :
+                            'bg-orange-500'
+                          }`}
+                          style={{ width: `${mitigation.progress}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Related Risk */}
+                  {mitigation.riskId && (
+                    <div className="text-xs text-gray-500 mt-3 pt-3 border-t border-gray-100">
+                      <span className="font-medium">Related to:</span> {mitigation.riskTitle || 'Risk #' + mitigation.riskId.substring(0, 8)}
+                    </div>
+                  )}
+
+                  {/* Assignee */}
+                  {mitigation.assigneeUsername && (
+                    <div className="text-xs text-gray-500 mt-2">
+                      <span className="font-medium">Assigned to:</span> {mitigation.assigneeUsername}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

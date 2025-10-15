@@ -63,10 +63,13 @@ public class TaskController {
     public ResponseEntity<TaskDto> createTask(@RequestBody TaskDto taskDto, Authentication authentication) {
         try {
             String username = authentication != null ? authentication.getName() : "anonymous";
+            System.out.println("Creating task with dueDate: " + taskDto.getDueDate());
             taskDto.setCreatedBy(username);
             TaskDto createdTask = taskService.createTask(taskDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdTask);
         } catch (Exception e) {
+            System.err.println("Error creating task: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
