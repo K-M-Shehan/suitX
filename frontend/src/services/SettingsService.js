@@ -206,3 +206,29 @@ export async function updateSecuritySettings(security) {
   if (!res.ok) throw new Error("Failed to update security settings");
   return await res.json();
 }
+
+/**
+ * Change user password
+ */
+export async function changePassword(passwordData) {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    throw new Error("No authentication token found");
+  }
+
+  const res = await fetch(`${API_URL}/password`, {
+    method: "PUT",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(passwordData),
+  });
+
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.error || "Failed to change password");
+  }
+
+  return await res.json();
+}
