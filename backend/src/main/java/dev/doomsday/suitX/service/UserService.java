@@ -261,4 +261,3 @@ public class UserService {
         logger.info("Password changed successfully for user: {}", username);
     }
 }
-}
