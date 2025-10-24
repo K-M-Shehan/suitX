@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8080/api/user";
+const API_URL = "https://suitx-backend-production.up.railway.app/api/user";
 
 /**
  * Get current authenticated user's profile

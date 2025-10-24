@@ -26,6 +26,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())  // modern syntax
                 .authorizeHttpRequests(auth -> auth
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/health/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/api/risks/**").permitAll()
                         .requestMatchers("/api/mitigations/**").permitAll()

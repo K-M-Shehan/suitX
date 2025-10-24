@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8080/api/settings";
+const API_URL = "https://suitx-backend-production.up.railway.app/api/settings";
 
 /**
  * Get all user settings
@@ -205,4 +205,43 @@ export async function updateSecuritySettings(security) {
 
   if (!res.ok) throw new Error("Failed to update security settings");
   return await res.json();
+}
+
+/**
+ * Change user password
+ */
+export async function changePassword(passwordData) {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    throw new Error("No authentication token found");
+  }
+
+  const res = await fetch(`https://suitx-backend-production.up.railway.app/api/user/me/password`, {
+    method: "PUT",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(passwordData),
+  });
+
+  if (!res.ok) {
+    // Try to parse error message
+    try {
+      const error = await res.json();
+      throw new Error(error.error || error.message || "Failed to change password");
+    } catch (e) {
+      // If response is not JSON, use status text
+      throw new Error(res.statusText || "Failed to change password");
+    }
+  }
+
+  // Check if response has content before parsing
+  const contentType = res.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    return await res.json();
+  }
+  
+  // Return success object if no JSON content
+  return { success: true, message: "Password changed successfully" };
 }

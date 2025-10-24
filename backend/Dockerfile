@@ -1,9 +1,12 @@
 # Multi-stage build for optimized production image
 # Stage 1: Build the application
-FROM maven:3.9-eclipse-temurin-21 AS build
+FROM maven:3.9-eclipse-temurin-17 AS build
 
 # Set working directory
 WORKDIR /app
+
+# Set Maven options to reduce memory usage and speed up build
+ENV MAVEN_OPTS="-Xmx1024m -Xms512m -XX:+UseSerialGC"
 
 # Copy pom.xml and download dependencies (cached layer)
 COPY pom.xml .
@@ -13,10 +16,11 @@ RUN mvn dependency:go-offline -B
 COPY src ./src
 
 # Build the application (skip tests for faster builds)
-RUN mvn clean package -DskipTests
+# Use fewer threads to reduce memory usage
+RUN mvn clean package -DskipTests -T 1C
 
 # Stage 2: Create the runtime image
-FROM eclipse-temurin:21-jre-jammy
+FROM eclipse-temurin:17-jre-jammy
 
 # Set working directory
 WORKDIR /app
