@@ -226,9 +226,22 @@ export async function changePassword(passwordData) {
   });
 
   if (!res.ok) {
-    const error = await res.json();
-    throw new Error(error.error || "Failed to change password");
+    // Try to parse error message
+    try {
+      const error = await res.json();
+      throw new Error(error.error || error.message || "Failed to change password");
+    } catch (e) {
+      // If response is not JSON, use status text
+      throw new Error(res.statusText || "Failed to change password");
+    }
   }
 
-  return await res.json();
+  // Check if response has content before parsing
+  const contentType = res.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    return await res.json();
+  }
+  
+  // Return success object if no JSON content
+  return { success: true, message: "Password changed successfully" };
 }
