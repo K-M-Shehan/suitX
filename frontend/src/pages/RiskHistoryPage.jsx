@@ -126,38 +126,38 @@ export default function RiskHistoryPage() {
   }
 
   return (
-    <div className="flex-1 p-8 bg-gray-50">
+    <div className="flex-1 p-4 sm:p-6 md:p-8 bg-gray-50">
       {/* Page Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
+      <div className="mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
           <div className="flex items-center">
-            <svg className="w-6 h-6 mr-2 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-gray-700 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <h1 className="text-2xl font-semibold text-gray-900">Risk History</h1>
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Risk History</h1>
           </div>
           <button
             onClick={() => navigate("/risks")}
-            className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium"
+            className="px-3 sm:px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-xs sm:text-sm font-medium w-full sm:w-auto"
           >
             ← Back to Active Risks
           </button>
         </div>
-        <p className="text-gray-600">View and manage completed, accepted, and ignored risks</p>
+        <p className="text-sm sm:text-base text-gray-600">View and manage completed, accepted, and ignored risks</p>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+        <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg">
           <div className="flex items-start">
-            <svg className="h-5 w-5 text-red-400 mt-0.5 mr-3" viewBox="0 0 20 20" fill="currentColor">
+            <svg className="h-4 w-4 sm:h-5 sm:w-5 text-red-400 mt-0.5 mr-2 sm:mr-3 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
             </svg>
             <div>
-              <p className="text-sm font-medium text-red-800">{error}</p>
+              <p className="text-xs sm:text-sm font-medium text-red-800">{error}</p>
               <button
                 onClick={fetchHistoricalRisks}
-                className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+                className="mt-2 text-xs sm:text-sm text-red-600 hover:text-red-800 underline"
               >
                 Try Again
               </button>
@@ -167,57 +167,57 @@ export default function RiskHistoryPage() {
       )}
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-lg p-6 shadow-sm border">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
+        <div className="bg-white rounded-lg p-3 sm:p-4 md:p-6 shadow-sm border">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">Total History</p>
-              <p className="text-3xl font-bold text-gray-900">{riskSummary.total}</p>
+              <p className="text-[10px] sm:text-xs md:text-sm text-gray-600 mb-1">Total History</p>
+              <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">{riskSummary.total}</p>
             </div>
-            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg p-6 shadow-sm border border-green-200">
+        <div className="bg-white rounded-lg p-3 sm:p-4 md:p-6 shadow-sm border border-green-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-green-600 mb-1">Resolved</p>
-              <p className="text-3xl font-bold text-green-700">{riskSummary.resolved}</p>
+              <p className="text-[10px] sm:text-xs md:text-sm text-green-600 mb-1">Resolved</p>
+              <p className="text-xl sm:text-2xl md:text-3xl font-bold text-green-700">{riskSummary.resolved}</p>
             </div>
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg p-6 shadow-sm border border-purple-200">
+        <div className="bg-white rounded-lg p-3 sm:p-4 md:p-6 shadow-sm border border-purple-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-purple-600 mb-1">Accepted</p>
-              <p className="text-3xl font-bold text-purple-700">{riskSummary.accepted}</p>
+              <p className="text-[10px] sm:text-xs md:text-sm text-purple-600 mb-1">Accepted</p>
+              <p className="text-xl sm:text-2xl md:text-3xl font-bold text-purple-700">{riskSummary.accepted}</p>
             </div>
-            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-              <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-300">
+        <div className="bg-white rounded-lg p-3 sm:p-4 md:p-6 shadow-sm border border-gray-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">Ignored</p>
-              <p className="text-3xl font-bold text-gray-700">{riskSummary.ignored}</p>
+              <p className="text-[10px] sm:text-xs md:text-sm text-gray-600 mb-1">Ignored</p>
+              <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-700">{riskSummary.ignored}</p>
             </div>
-            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
               </svg>
             </div>
@@ -226,15 +226,16 @@ export default function RiskHistoryPage() {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="mb-6 bg-white rounded-lg p-6 shadow-sm border">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          {/* Status Filters */}
-          <div className="flex flex-wrap gap-2">
+      <div className="mb-4 sm:mb-6 bg-white rounded-lg p-4 sm:p-6 shadow-sm border">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4">
+          {/* Status Filters - Scrollable on mobile */}
+          <div className="overflow-x-auto scrollbar-hide -mx-4 sm:mx-0 px-4 sm:px-0">
+            <div className="flex gap-2 min-w-max sm:min-w-0">
             {historyFilters.map((filter) => (
               <button
                 key={filter.key}
                 onClick={() => setSelectedFilter(filter.key)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
                   selectedFilter === filter.key
                     ? "bg-black text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -242,7 +243,7 @@ export default function RiskHistoryPage() {
               >
                 {filter.label}
                 {filter.key !== "All" && (
-                  <span className="ml-2 px-2 py-0.5 rounded-full bg-white bg-opacity-30 text-xs">
+                  <span className="ml-2 px-1.5 sm:px-2 py-0.5 rounded-full bg-white bg-opacity-30 text-[10px] sm:text-xs">
                     {filter.key === "RESOLVED" && riskSummary.resolved}
                     {filter.key === "ACCEPTED" && riskSummary.accepted}
                     {filter.key === "IGNORED" && riskSummary.ignored}
@@ -250,19 +251,20 @@ export default function RiskHistoryPage() {
                 )}
               </button>
             ))}
+            </div>
           </div>
 
           {/* Search Bar */}
-          <div className="relative">
+          <div className="relative w-full md:w-64">
             <input
               type="text"
               placeholder="Search risks..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-64"
+              className="pl-8 sm:pl-10 pr-3 sm:pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-xs sm:text-sm"
             />
             <svg
-              className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
+              className="absolute left-2 sm:left-3 top-2.5 h-4 w-4 sm:h-5 sm:w-5 text-gray-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -280,67 +282,67 @@ export default function RiskHistoryPage() {
 
       {/* Risks List */}
       {filteredRisks.length > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {filteredRisks.map((risk, index) => (
             <div
               key={risk.id || index}
-              className="bg-white rounded-lg p-6 shadow-sm border hover:shadow-md transition-shadow cursor-pointer"
+              className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border hover:shadow-md transition-shadow cursor-pointer"
               onClick={() => handleRiskClick(risk.id)}
             >
               {/* Risk Header */}
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900">{risk.title || "Untitled Risk"}</h3>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 break-words">{risk.title || "Untitled Risk"}</h3>
                     {risk.aiGenerated && (
-                      <span className="px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800 border border-purple-300">
+                      <span className="px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800 border border-purple-300 flex-shrink-0">
                         AI
                       </span>
                     )}
                   </div>
                   {risk.projectName && (
                     <div className="flex items-center gap-1 mb-2">
-                      <span className="px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 border border-blue-300">
+                      <span className="px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 border border-blue-300 truncate">
                         📁 {risk.projectName}
                       </span>
                     </div>
                   )}
                 </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(risk.status)}`}>
+                <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap flex-shrink-0 ${getStatusColor(risk.status)}`}>
                   {risk.status}
                 </span>
               </div>
 
               {/* Risk Description */}
-              <p className="text-gray-600 text-sm mb-4 leading-relaxed line-clamp-2">
+              <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 leading-relaxed line-clamp-2 break-words">
                 {risk.description || "No description available"}
               </p>
 
               {/* Risk Details */}
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center justify-between text-sm">
+              <div className="space-y-2 mb-3 sm:mb-4">
+                <div className="flex items-center justify-between text-xs sm:text-sm gap-2">
                   <span className="text-gray-500">Severity:</span>
                   <span className={`px-2 py-1 rounded-md text-xs font-medium ${getSeverityColor(risk.severity)}`}>
                     {risk.severity || "Unknown"}
                   </span>
                 </div>
                 {risk.riskScore && (
-                  <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center justify-between text-xs sm:text-sm gap-2">
                     <span className="text-gray-500">Risk Score:</span>
                     <span className="px-2 py-1 rounded-md text-xs font-bold bg-gray-800 text-white">
                       {risk.riskScore}
                     </span>
                   </div>
                 )}
-                <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center justify-between text-xs sm:text-sm gap-2">
                   <span className="text-gray-500">Type:</span>
-                  <span className="font-medium text-gray-900">{risk.type || "N/A"}</span>
+                  <span className="font-medium text-gray-900 truncate">{risk.type || "N/A"}</span>
                 </div>
               </div>
 
               {/* Timeline Information */}
-              <div className="pt-4 border-t border-gray-200">
-                <div className="grid grid-cols-2 gap-4 text-xs text-gray-500">
+              <div className="pt-3 sm:pt-4 border-t border-gray-200">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 text-[10px] sm:text-xs text-gray-500">
                   <div>
                     <p className="font-medium text-gray-700 mb-1">Identified</p>
                     <p>{formatDate(risk.identifiedDate || risk.createdAt)}</p>

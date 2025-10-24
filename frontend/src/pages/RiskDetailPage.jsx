@@ -187,48 +187,48 @@ const RiskDetailPage = () => {
   }
 
   return (
-    <div className="flex-1 p-8 bg-gray-50">
+    <div className="flex-1 p-4 sm:p-6 md:p-8 bg-gray-50">
       {/* Header */}
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <button
           onClick={() => navigate('/risks')}
-          className="flex items-center text-gray-600 hover:text-gray-900 mb-4 transition-colors"
+          className="flex items-center text-gray-600 hover:text-gray-900 mb-3 sm:mb-4 transition-colors text-sm sm:text-base"
         >
-          <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           Back to Risk Dashboard
         </button>
         
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-bold text-gray-900">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 break-words">
                 {isEditing ? (
                   <input
                     type="text"
                     name="title"
                     value={editForm.title}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                    className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base"
                   />
                 ) : (
                   risk.title
                 )}
               </h1>
               {risk.aiGenerated && (
-                <span className="px-3 py-1 rounded-md text-sm font-medium bg-purple-100 text-purple-800 border border-purple-300">
+                <span className="px-2 sm:px-3 py-1 rounded-md text-xs sm:text-sm font-medium bg-purple-100 text-purple-800 border border-purple-300 self-start sm:self-auto flex-shrink-0">
                   🤖 AI Generated
                 </span>
               )}
             </div>
-            <div className="flex items-center mt-2 space-x-3">
+            <div className="flex flex-wrap items-center mt-2 gap-2 sm:space-x-3">
               {isEditing ? (
                 <select
                   name="status"
                   value={editForm.status}
                   onChange={handleInputChange}
-                  className="px-3 py-1 border border-gray-300 rounded-full text-sm font-medium focus:outline-none focus:ring-2 focus:ring-black"
+                  className="px-2 sm:px-3 py-1 border border-gray-300 rounded-full text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-black"
                 >
                   <option value="OPEN">OPEN</option>
                   <option value="IN_PROGRESS">IN_PROGRESS</option>
@@ -237,37 +237,37 @@ const RiskDetailPage = () => {
                   <option value="IGNORED">IGNORED</option>
                 </select>
               ) : (
-                <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(risk.status)}`}>
+                <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium border ${getStatusColor(risk.status)}`}>
                   {risk.status}
                 </span>
               )}
               {risk.riskScore && (
-                <span className="px-3 py-1 rounded-md text-sm font-bold bg-gray-800 text-white">
+                <span className="px-2 sm:px-3 py-1 rounded-md text-xs sm:text-sm font-bold bg-gray-800 text-white">
                   Risk Score: {risk.riskScore}
                 </span>
               )}
             </div>
           </div>
           
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2 sm:flex-nowrap">
             {!isEditing && risk.status !== 'RESOLVED' && (
               <button
                 onClick={handleResolveRisk}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                className="px-3 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-xs sm:text-sm whitespace-nowrap"
               >
                 ✓ Resolve Risk
               </button>
             )}
             <button
               onClick={isEditing ? handleSaveEdit : handleEditToggle}
-              className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+              className="px-3 sm:px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-xs sm:text-sm whitespace-nowrap"
             >
               {isEditing ? 'Save Changes' : 'Edit Risk'}
             </button>
             {isEditing && (
               <button
                 onClick={handleEditToggle}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                className="px-3 sm:px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors text-xs sm:text-sm whitespace-nowrap"
               >
                 Cancel
               </button>
@@ -279,15 +279,15 @@ const RiskDetailPage = () => {
       <div className="space-y-6">
         {/* Associated Project */}
         {project && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-center justify-between">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
-                <p className="text-sm font-medium text-blue-900">Associated Project</p>
-                <p className="text-lg font-semibold text-blue-700">{project.name}</p>
+                <p className="text-xs sm:text-sm font-medium text-blue-900">Associated Project</p>
+                <p className="text-base sm:text-lg font-semibold text-blue-700 break-words">{project.name}</p>
               </div>
               <button
                 onClick={() => navigate(`/projects/${project.id}`)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                className="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm whitespace-nowrap self-start sm:self-auto"
               >
                 View Project →
               </button>
@@ -296,33 +296,33 @@ const RiskDetailPage = () => {
         )}
 
         {/* Description */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">Description</h2>
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Description</h2>
           {isEditing ? (
             <textarea
               name="description"
               value={editForm.description}
               onChange={handleInputChange}
               rows={6}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base"
             />
           ) : (
-            <p className="text-gray-700 whitespace-pre-wrap">
+            <p className="text-sm sm:text-base text-gray-700 whitespace-pre-wrap break-words">
               {risk.description || 'No description provided.'}
             </p>
           )}
         </div>
 
         {/* Risk Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-sm font-medium text-gray-500 mb-3">Type</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+            <h3 className="text-xs sm:text-sm font-medium text-gray-500 mb-2 sm:mb-3">Type</h3>
             {isEditing ? (
               <select
                 name="type"
                 value={editForm.type}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base"
               >
                 <option value="">Select Type</option>
                 <option value="TECHNICAL">Technical</option>
@@ -335,18 +335,18 @@ const RiskDetailPage = () => {
                 <option value="OPERATIONAL">Operational</option>
               </select>
             ) : (
-              <p className="text-lg font-semibold text-gray-900">{risk.type || 'N/A'}</p>
+              <p className="text-base sm:text-lg font-semibold text-gray-900">{risk.type || 'N/A'}</p>
             )}
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-sm font-medium text-gray-500 mb-3">Severity</h3>
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+            <h3 className="text-xs sm:text-sm font-medium text-gray-500 mb-2 sm:mb-3">Severity</h3>
             {isEditing ? (
               <select
                 name="severity"
                 value={editForm.severity}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base"
               >
                 <option value="">Select Severity</option>
                 <option value="LOW">Low</option>

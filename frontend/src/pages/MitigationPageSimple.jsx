@@ -343,23 +343,24 @@ const MitigationPage = () => {
   };
 
   return (
-    <div className="flex-1 p-8 bg-gray-50">
+    <div className="flex-1 p-4 sm:p-6 md:p-8 bg-gray-50">
       {/* Page Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
         <div className="flex items-center">
-          <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 sm:w-6 sm:h-6 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <h1 className="text-2xl font-semibold text-gray-900">Mitigations</h1>
+          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Mitigations</h1>
         </div>
 
-        {/* Status Filter */}
-        <div className="flex space-x-2">
+        {/* Status Filter - Scrollable on mobile */}
+        <div className="overflow-x-auto scrollbar-hide -mx-4 sm:mx-0 px-4 sm:px-0">
+          <div className="flex space-x-2 min-w-max sm:min-w-0">
           {['All', 'PLANNED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'].map((status) => (
             <button
               key={status}
               onClick={() => setSelectedStatus(status)}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              className={`px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
                 selectedStatus === status
                   ? 'bg-black text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
@@ -368,76 +369,77 @@ const MitigationPage = () => {
               {status === 'IN_PROGRESS' ? 'In Progress' : status.charAt(0) + status.slice(1).toLowerCase()}
             </button>
           ))}
+          </div>
         </div>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-md">
+        <div className="mb-6 sm:mb-8 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-md">
           <div className="flex">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+              <svg className="h-4 w-4 sm:h-5 sm:w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
             </div>
-            <div className="ml-3">
-              <p className="text-sm text-red-800">{error}</p>
+            <div className="ml-2 sm:ml-3">
+              <p className="text-xs sm:text-sm text-red-800">{error}</p>
             </div>
           </div>
         </div>
       )}
 
       {/* Mitigation Summary Section */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">Mitigation Summary</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
-          <div className="bg-black rounded-lg p-6 text-white">
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Mitigation Summary</h2>
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-6 max-w-2xl">
+          <div className="bg-black rounded-lg p-4 sm:p-6 text-white">
             <div className="flex flex-col items-center">
-              <div className="text-6xl font-bold mb-2">{mitigationSummary.totalMitigations}</div>
-              <div className="text-lg font-medium">Total Mitigations</div>
+              <div className="text-3xl sm:text-4xl md:text-6xl font-bold mb-1 sm:mb-2">{mitigationSummary.totalMitigations}</div>
+              <div className="text-xs sm:text-sm md:text-lg font-medium text-center">Total Mitigations</div>
             </div>
           </div>
-          <div className="bg-black rounded-lg p-6 text-white">
+          <div className="bg-black rounded-lg p-4 sm:p-6 text-white">
             <div className="flex flex-col items-center">
-              <div className="text-6xl font-bold mb-2">{mitigationSummary.activeMitigations}</div>
-              <div className="text-lg font-medium">Active Mitigations</div>
+              <div className="text-3xl sm:text-4xl md:text-6xl font-bold mb-1 sm:mb-2">{mitigationSummary.activeMitigations}</div>
+              <div className="text-xs sm:text-sm md:text-lg font-medium text-center">Active Mitigations</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Quick Stats Section */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Stats</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-gray-200 rounded-lg p-6">
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Quick Stats</h2>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+          <div className="bg-gray-200 rounded-lg p-3 sm:p-4 md:p-6">
             <div className="text-center">
-              <h3 className="text-sm font-medium text-gray-700 mb-1">Critical/High Priority</h3>
-              <div className="text-3xl font-bold text-red-600">
+              <h3 className="text-[10px] sm:text-xs md:text-sm font-medium text-gray-700 mb-1">Critical/High Priority</h3>
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-red-600">
                 {mitigations.filter(m => m.priority === 'HIGH' || m.priority === 'CRITICAL').length}
               </div>
             </div>
           </div>
-          <div className="bg-gray-200 rounded-lg p-6">
+          <div className="bg-gray-200 rounded-lg p-3 sm:p-4 md:p-6">
             <div className="text-center">
-              <h3 className="text-sm font-medium text-gray-700 mb-1">Medium Priority</h3>
-              <div className="text-3xl font-bold text-orange-600">
+              <h3 className="text-[10px] sm:text-xs md:text-sm font-medium text-gray-700 mb-1">Medium Priority</h3>
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-orange-600">
                 {mitigations.filter(m => m.priority === 'MEDIUM').length}
               </div>
             </div>
           </div>
-          <div className="bg-gray-200 rounded-lg p-6">
+          <div className="bg-gray-200 rounded-lg p-3 sm:p-4 md:p-6">
             <div className="text-center">
-              <h3 className="text-sm font-medium text-gray-700 mb-1">Completed</h3>
-              <div className="text-3xl font-bold text-green-600">
+              <h3 className="text-[10px] sm:text-xs md:text-sm font-medium text-gray-700 mb-1">Completed</h3>
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-green-600">
                 {mitigations.filter(m => m.status === 'COMPLETED').length}
               </div>
             </div>
           </div>
-          <div className="bg-gray-200 rounded-lg p-6">
+          <div className="bg-gray-200 rounded-lg p-3 sm:p-4 md:p-6">
             <div className="text-center">
-              <h3 className="text-sm font-medium text-gray-700 mb-1">AI Generated</h3>
-              <div className="text-3xl font-bold text-purple-600">
+              <h3 className="text-[10px] sm:text-xs md:text-sm font-medium text-gray-700 mb-1">AI Generated</h3>
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-purple-600">
                 {mitigations.filter(m => m.aiGenerated === true).length}
               </div>
             </div>
@@ -446,15 +448,15 @@ const MitigationPage = () => {
       </div>
 
       {/* Mitigations Section */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">Mitigation Strategies</h2>
-          <div className="flex space-x-3">
+      <div className="mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Mitigation Strategies</h2>
+          <div className="flex space-x-2 sm:space-x-3">
             <button 
               onClick={() => setShowAIAssistant(true)}
-              className="px-4 py-2 bg-white border-2 border-black text-black rounded-md hover:bg-gray-50 transition-colors text-sm font-medium flex items-center space-x-2"
+              className="px-3 sm:px-4 py-2 bg-white border-2 border-black text-black rounded-md hover:bg-gray-50 transition-colors text-xs sm:text-sm font-medium flex items-center space-x-1 sm:space-x-2"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
               <span>AI Assistant</span>
@@ -463,19 +465,19 @@ const MitigationPage = () => {
         </div>
         
         {filteredMitigations.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {filteredMitigations.map((mitigation, index) => (
               <div 
                 key={mitigation.id || index} 
-                className={`rounded-lg p-6 shadow-sm border ${getCardBackgroundColor(index)} hover:shadow-md transition-shadow cursor-pointer`}
+                className={`rounded-lg p-4 sm:p-6 shadow-sm border ${getCardBackgroundColor(index)} hover:shadow-md transition-shadow cursor-pointer`}
                 onClick={() => handleMitigationClick(mitigation.id)}
               >
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">{mitigation.title || 'Untitled Mitigation'}</h3>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900 break-words">{mitigation.title || 'Untitled Mitigation'}</h3>
                       {mitigation.aiGenerated && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200 flex-shrink-0">
                           <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                           </svg>
@@ -486,8 +488,8 @@ const MitigationPage = () => {
                     {/* Project Tag */}
                     {mitigation.projectId && (
                       <div className="mt-1">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
-                          <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <span className="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200 truncate max-w-full">
+                          <svg className="w-3 h-3 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                           </svg>
                           {mitigation.projectName || projects[mitigation.projectId] || 'Unknown Project'}
@@ -495,29 +497,29 @@ const MitigationPage = () => {
                       </div>
                     )}
                   </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(mitigation.status)}`}>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium border whitespace-nowrap flex-shrink-0 ${getStatusColor(mitigation.status)}`}>
                     {mitigation.status || 'Unknown'}
                   </span>
                 </div>
                 
-                <p className="text-gray-600 text-sm mb-4 leading-relaxed">{mitigation.description || 'No description available'}</p>
+                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 leading-relaxed break-words">{mitigation.description || 'No description available'}</p>
                 
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center justify-between text-sm">
+                <div className="space-y-2 mb-3 sm:mb-4">
+                  <div className="flex items-center justify-between text-xs sm:text-sm gap-2">
                     <span className="text-gray-500">Priority:</span>
                     <span className={`px-2 py-1 rounded-md text-xs font-medium ${getPriorityColor(mitigation.priority)}`}>
                       {mitigation.priority || 'Unknown'}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center justify-between text-xs sm:text-sm gap-2">
                     <span className="text-gray-500">Assignee:</span>
-                    <span className="font-medium text-gray-900">{mitigation.assigneeUsername || mitigation.assignee || 'Unassigned'}</span>
+                    <span className="font-medium text-gray-900 truncate max-w-[150px]">{mitigation.assigneeUsername || mitigation.assignee || 'Unassigned'}</span>
                   </div>
                   {mitigation.progressPercentage !== null && mitigation.progressPercentage !== undefined && (
-                    <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center justify-between text-xs sm:text-sm gap-2">
                       <span className="text-gray-500">Progress:</span>
                       <div className="flex items-center gap-2">
-                        <div className="w-20 bg-gray-200 rounded-full h-2">
+                        <div className="w-16 sm:w-20 bg-gray-200 rounded-full h-2">
                           <div 
                             className="bg-blue-600 h-2 rounded-full" 
                             style={{ width: `${mitigation.progressPercentage}%` }}
@@ -528,35 +530,35 @@ const MitigationPage = () => {
                     </div>
                   )}
                   {mitigation.startDate && (
-                    <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center justify-between text-xs sm:text-sm gap-2">
                       <span className="text-gray-500">Start Date:</span>
-                      <span className="font-medium text-gray-900">
+                      <span className="font-medium text-gray-900 text-xs">
                         {new Date(mitigation.startDate).toLocaleDateString()}
                       </span>
                     </div>
                   )}
-                  <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center justify-between text-xs sm:text-sm gap-2">
                     <span className="text-gray-500">Due Date:</span>
-                    <span className="font-medium text-gray-900">
+                    <span className="font-medium text-gray-900 text-xs">
                       {mitigation.dueDate ? new Date(mitigation.dueDate).toLocaleDateString() : 'Not set'}
                     </span>
                   </div>
                   {mitigation.relatedRisk && (
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">Related Risk:</span>
-                      <span className="font-medium text-gray-900 truncate max-w-[200px]" title={mitigation.relatedRisk}>
+                    <div className="flex items-center justify-between text-xs sm:text-sm gap-2">
+                      <span className="text-gray-500 flex-shrink-0">Related Risk:</span>
+                      <span className="font-medium text-gray-900 truncate max-w-[150px] sm:max-w-[200px]" title={mitigation.relatedRisk}>
                         {mitigation.relatedRisk}
                       </span>
                     </div>
                   )}
                   {mitigation.estimatedCost && (
-                    <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center justify-between text-xs sm:text-sm gap-2">
                       <span className="text-gray-500">Est. Cost:</span>
                       <span className="font-medium text-gray-900">${mitigation.estimatedCost.toLocaleString()}</span>
                     </div>
                   )}
                   {mitigation.effectiveness && mitigation.effectiveness !== 'NOT_ASSESSED' && (
-                    <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center justify-between text-xs sm:text-sm gap-2">
                       <span className="text-gray-500">Effectiveness:</span>
                       <span className={`px-2 py-1 rounded-md text-xs font-medium ${getEffectivenessColor(mitigation.effectiveness)}`}>
                         {mitigation.effectiveness}
@@ -565,7 +567,7 @@ const MitigationPage = () => {
                   )}
                 </div>
 
-                <div className="flex space-x-2">
+                <div className="flex flex-wrap gap-2">
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();

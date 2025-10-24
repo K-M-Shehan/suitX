@@ -149,7 +149,9 @@ const Header = ({ isLanding = false }) => {
     <header className="bg-black text-white px-4 sm:px-6 py-4 flex justify-between items-center relative">
       {/* Logo */}
       <div className="flex items-center">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">suitX</h1>
+        <Link to="/launchpad" className="hover:opacity-80 transition-opacity">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">suitX</h1>
+        </Link>
       </div>
 
       {/* Desktop icons */}

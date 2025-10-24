@@ -219,64 +219,66 @@ const RiskDashboard = () => {
   };
 
   return (
-    <div className="flex-1 p-8 bg-gray-50">
+    <div className="flex-1 p-4 sm:p-6 md:p-8 bg-gray-50">
       {/* Page Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
         <div className="flex items-center">
-          <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 sm:w-6 sm:h-6 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.314 15.5c-.77.833-.192 2.5 1.732 2.5z" />
           </svg>
-          <h1 className="text-2xl font-semibold text-gray-900">Risk Dashboard</h1>
+          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Risk Dashboard</h1>
         </div>
 
-        {/* Status Filter */}
-        <div className="flex space-x-2">
-          {['All', 'Identified', 'Monitoring', 'Mitigated', 'Resolved', 'Accepted'].map((status) => (
-            <button
-              key={status}
-              onClick={() => setSelectedStatus(status)}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                selectedStatus === status
-                  ? 'bg-black text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
-              }`}
-            >
-              {status}
-            </button>
-          ))}
+        {/* Status Filter - Scrollable on mobile */}
+        <div className="overflow-x-auto scrollbar-hide -mx-4 sm:mx-0 px-4 sm:px-0">
+          <div className="flex space-x-2 min-w-max sm:min-w-0">
+            {['All', 'Identified', 'Monitoring', 'Mitigated', 'Resolved', 'Accepted'].map((status) => (
+              <button
+                key={status}
+                onClick={() => setSelectedStatus(status)}
+                className={`px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
+                  selectedStatus === status
+                    ? 'bg-black text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+                }`}
+              >
+                {status}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-md">
+        <div className="mb-6 sm:mb-8 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-md">
           <div className="flex">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+              <svg className="h-4 w-4 sm:h-5 sm:w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
             </div>
             <div className="ml-3">
-              <p className="text-sm text-red-800">{error}</p>
+              <p className="text-xs sm:text-sm text-red-800">{error}</p>
             </div>
           </div>
         </div>
       )}
 
       {/* Risk Summary Section */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">Risk Summary</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
-          <div className="bg-black rounded-lg p-6 text-white">
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Risk Summary</h2>
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-6 max-w-2xl">
+          <div className="bg-black rounded-lg p-4 sm:p-6 text-white">
             <div className="flex flex-col items-center">
-              <div className="text-6xl font-bold mb-2">{riskSummary.totalProjects}</div>
-              <div className="text-lg font-medium">Total Projects</div>
+              <div className="text-3xl sm:text-4xl md:text-6xl font-bold mb-1 sm:mb-2">{riskSummary.totalProjects}</div>
+              <div className="text-xs sm:text-sm md:text-lg font-medium text-center">Total Projects</div>
             </div>
           </div>
-          <div className="bg-black rounded-lg p-6 text-white">
+          <div className="bg-black rounded-lg p-4 sm:p-6 text-white">
             <div className="flex flex-col items-center">
-              <div className="text-6xl font-bold mb-2">{riskSummary.totalRisks}</div>
-              <div className="text-lg font-medium">Total Risks</div>
+              <div className="text-3xl sm:text-4xl md:text-6xl font-bold mb-1 sm:mb-2">{riskSummary.totalRisks}</div>
+              <div className="text-xs sm:text-sm md:text-lg font-medium text-center">Total Risks</div>
             </div>
           </div>
         </div>
@@ -284,76 +286,76 @@ const RiskDashboard = () => {
 
       {/* Risks Section */}
       {filteredRisks.length > 0 ? (
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">Risk Analysis</h2>
+        <div className="mb-6 sm:mb-8">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Risk Analysis</h2>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {filteredRisks.map((risk, index) => (
               <div 
                 key={risk.id || index} 
-                className="bg-white rounded-lg p-6 shadow-sm border hover:shadow-md transition-shadow cursor-pointer"
+                className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border hover:shadow-md transition-shadow cursor-pointer"
                 onClick={() => handleRiskClick(risk.id)}
               >
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">{risk.title || 'Untitled Risk'}</h3>
+                <div className="flex justify-between items-start mb-3 gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900 break-words">{risk.title || 'Untitled Risk'}</h3>
                       {risk.aiGenerated && (
-                        <span className="px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800 border border-purple-300">
+                        <span className="px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800 border border-purple-300 flex-shrink-0">
                           AI
                         </span>
                       )}
                     </div>
                     {risk.projectName && (
                       <div className="flex items-center gap-1 mb-2">
-                        <span className="px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 border border-blue-300">
+                        <span className="px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 border border-blue-300 truncate">
                           📁 {risk.projectName}
                         </span>
                       </div>
                     )}
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 flex-shrink-0">
                     {risk.riskScore && (
-                      <span className="px-2 py-1 rounded-md text-xs font-bold bg-gray-800 text-white">
+                      <span className="px-2 py-1 rounded-md text-xs font-bold bg-gray-800 text-white whitespace-nowrap">
                         Score: {risk.riskScore}
                       </span>
                     )}
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(risk.status)}`}>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium border whitespace-nowrap ${getStatusColor(risk.status)}`}>
                       {risk.status || 'Unknown'}
                     </span>
                   </div>
                 </div>
                 
-                <p className="text-gray-600 text-sm mb-4 leading-relaxed">{risk.description || 'No description available'}</p>
+                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 leading-relaxed break-words">{risk.description || 'No description available'}</p>
                 
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center justify-between text-sm">
+                <div className="space-y-2 mb-3 sm:mb-4">
+                  <div className="flex items-center justify-between text-xs sm:text-sm gap-2">
                     <span className="text-gray-500">Severity:</span>
                     <span className={`px-2 py-1 rounded-md text-xs font-medium ${getSeverityColor(risk.severity)}`}>
                       {risk.severity || 'Unknown'}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center justify-between text-xs sm:text-sm gap-2">
                     <span className="text-gray-500">Likelihood:</span>
                     <span className={`px-2 py-1 rounded-md text-xs font-medium ${getLikelihoodColor(risk.likelihood)}`}>
                       {risk.likelihood || 'N/A'}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center justify-between text-xs sm:text-sm gap-2">
                     <span className="text-gray-500">Type:</span>
-                    <span className="font-medium text-gray-900">{risk.type || 'N/A'}</span>
+                    <span className="font-medium text-gray-900 truncate">{risk.type || 'N/A'}</span>
                   </div>
                 </div>
 
-                <div className="flex space-x-2">
+                <div className="flex flex-wrap gap-2">
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
                       handleEditRisk(risk);
                     }}
-                    className="px-3 py-1 text-blue-600 hover:bg-blue-50 rounded-md text-sm font-medium transition-colors"
+                    className="px-3 py-1.5 text-blue-600 hover:bg-blue-50 rounded-md text-xs sm:text-sm font-medium transition-colors"
                   >
                     Edit
                   </button>
@@ -362,7 +364,7 @@ const RiskDashboard = () => {
                       e.stopPropagation();
                       handleResolveRisk(risk.id);
                     }}
-                    className="px-3 py-1 text-green-600 hover:bg-green-50 rounded-md text-sm font-medium transition-colors"
+                    className="px-3 py-1.5 text-green-600 hover:bg-green-50 rounded-md text-xs sm:text-sm font-medium transition-colors disabled:opacity-50"
                     disabled={risk.status === 'RESOLVED' || risk.status === 'Resolved'}
                   >
                     {(risk.status === 'RESOLVED' || risk.status === 'Resolved') ? 'Resolved' : 'Resolve'}
@@ -373,9 +375,9 @@ const RiskDashboard = () => {
           </div>
         </div>
       ) : (
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">Risk Analysis</h2>
+        <div className="mb-6 sm:mb-8">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Risk Analysis</h2>
           </div>
           <div className="bg-white rounded-lg p-8 shadow-sm border text-center">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No Risks Found</h3>

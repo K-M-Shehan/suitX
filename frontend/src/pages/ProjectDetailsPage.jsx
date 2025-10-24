@@ -381,13 +381,13 @@ const ProjectDetailsPage = () => {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 mb-4 sm:mb-6 overflow-x-auto">
-        <nav className="-mb-px flex space-x-4 sm:space-x-8">
+      <div className="border-b border-gray-200 mb-4 sm:mb-6">
+        <nav className="-mb-px flex space-x-0 sm:space-x-4 md:space-x-8 overflow-x-auto scrollbar-hide">
           {['overview', 'tasks', 'team', 'risks', 'mitigations', 'timeline'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
+              className={`py-3 sm:py-4 px-1 sm:px-3 md:px-4 border-b-2 font-medium text-[11px] sm:text-sm transition-colors whitespace-nowrap flex-shrink-0 ${
                 activeTab === tab
                   ? 'border-black text-black'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
