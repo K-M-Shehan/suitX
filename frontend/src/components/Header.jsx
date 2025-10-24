@@ -9,6 +9,7 @@ import { getCurrentUser } from '../services/AuthService';
 
 const Header = ({ isLanding = false }) => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [pendingInvitationsCount, setPendingInvitationsCount] = useState(0);
   const [currentUser, setCurrentUser] = useState(null);
@@ -86,17 +87,16 @@ const Header = ({ isLanding = false }) => {
   };
   if (isLanding) {
     return (
-      <header className="bg-black text-white px-6 py-4 flex justify-between items-center">
+      <header className="bg-black text-white px-4 sm:px-6 py-4 flex justify-between items-center">
         {/* Logo */}
         <div className="flex items-center">
           <Link to="/" className="hover:opacity-80 transition-opacity">
-            <h1 className="text-4xl font-bold">suitX</h1>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">suitX</h1>
           </Link>
         </div>
 
-        {/* Right side navigation */}
-        <div className="flex items-center space-x-6">
-
+        {/* Desktop navigation */}
+        <div className="hidden sm:flex items-center space-x-4 md:space-x-6">
           {/* Auth buttons */}
           <Link to="/signup">
             <button className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors text-sm font-medium">
@@ -109,19 +109,53 @@ const Header = ({ isLanding = false }) => {
             </button>
           </Link>
         </div>
+
+        {/* Mobile menu button */}
+        <button
+          className="sm:hidden p-2 hover:bg-gray-800 rounded transition-colors"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {isMobileMenuOpen ? (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            ) : (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            )}
+          </svg>
+        </button>
+
+        {/* Mobile dropdown menu */}
+        {isMobileMenuOpen && (
+          <div className="absolute top-full left-0 right-0 bg-black border-t border-gray-800 sm:hidden z-50">
+            <div className="flex flex-col p-4 space-y-3">
+              <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
+                <button className="w-full px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors text-sm font-medium">
+                  Get started
+                </button>
+              </Link>
+              <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                <button className="w-full px-4 py-2 border border-gray-600 text-white rounded hover:bg-gray-800 transition-colors text-sm">
+                  Sign in
+                </button>
+              </Link>
+            </div>
+          </div>
+        )}
       </header>
     );
   }
 
   return (
-    <header className="bg-black text-white px-6 py-4 flex justify-between items-center">
+    <header className="bg-black text-white px-4 sm:px-6 py-4 flex justify-between items-center relative">
       {/* Logo */}
       <div className="flex items-center">
-        <h1 className="text-4xl font-bold">suitX</h1>
+        <Link to="/launchpad" className="hover:opacity-80 transition-opacity">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">suitX</h1>
+        </Link>
       </div>
 
-      {/* Right side icons */}
-      <div className="flex items-center space-x-4">
+      {/* Desktop icons */}
+      <div className="hidden md:flex items-center space-x-4">
         {/* Notification icon with badge */}
         <Link to="/notifications" className="relative p-2 hover:bg-gray-800 rounded transition-colors">
           <img src={notificationIcon} alt="Notifications" className="w-5 h-5" />
@@ -184,6 +218,80 @@ const Header = ({ isLanding = false }) => {
           )}
         </div>
       </div>
+
+      {/* Mobile menu button */}
+      <button
+        className="md:hidden p-2 hover:bg-gray-800 rounded transition-colors"
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          {isMobileMenuOpen ? (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          ) : (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          )}
+        </svg>
+      </button>
+
+      {/* Mobile dropdown menu */}
+      {isMobileMenuOpen && (
+        <div className="absolute top-full left-0 right-0 bg-black border-t border-gray-800 md:hidden z-50">
+          <div className="flex flex-col p-4 space-y-3">
+            {/* Notifications */}
+            <Link 
+              to="/notifications" 
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 rounded transition-colors"
+            >
+              <div className="relative">
+                <img src={notificationIcon} alt="Notifications" className="w-5 h-5" />
+                {(unreadCount + pendingInvitationsCount) > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-4 bg-red-500 rounded-full flex items-center justify-center text-[10px] font-semibold px-1">
+                    {(unreadCount + pendingInvitationsCount) > 9 ? '9+' : (unreadCount + pendingInvitationsCount)}
+                  </span>
+                )}
+              </div>
+              <span>Notifications</span>
+            </Link>
+
+            {/* Settings */}
+            <Link 
+              to="/settings" 
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 rounded transition-colors"
+            >
+              <img src={settingsIcon} alt="Settings" className="w-5 h-5" />
+              <span>Settings</span>
+            </Link>
+
+            {/* Profile */}
+            <Link 
+              to="/profile" 
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 rounded transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              <span>Profile</span>
+            </Link>
+
+            {/* Logout */}
+            <button
+              onClick={() => {
+                handleLogout();
+                setIsMobileMenuOpen(false);
+              }}
+              className="flex items-center space-x-3 px-4 py-2 text-red-500 hover:bg-gray-800 rounded transition-colors w-full text-left"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+      )}
     </header>
   );
 };

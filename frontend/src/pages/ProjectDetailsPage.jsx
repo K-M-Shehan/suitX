@@ -303,10 +303,10 @@ const ProjectDetailsPage = () => {
 
   if (loading) {
     return (
-      <div className="flex-1 p-8 bg-gray-50 flex items-center justify-center">
+      <div className="flex-1 p-4 sm:p-6 md:p-8 bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading project details...</p>
+          <p className="mt-4 text-gray-600 text-sm sm:text-base">Loading project details...</p>
         </div>
       </div>
     );
@@ -314,14 +314,14 @@ const ProjectDetailsPage = () => {
 
   if (error || !project) {
     return (
-      <div className="flex-1 p-8 bg-gray-50">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+      <div className="flex-1 p-4 sm:p-6 md:p-8 bg-gray-50">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative text-sm sm:text-base">
           <strong className="font-bold">Error: </strong>
           <span className="block sm:inline">{error || 'Project not found'}</span>
         </div>
         <button
           onClick={() => navigate('/projects')}
-          className="mt-4 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors"
+          className="mt-4 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm sm:text-base"
         >
           ← Back to Projects
         </button>
@@ -330,39 +330,39 @@ const ProjectDetailsPage = () => {
   }
 
   return (
-    <div className="flex-1 p-8 bg-gray-50">
+    <div className="flex-1 p-4 sm:p-6 md:p-8 bg-gray-50">
       {/* Header */}
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <button
           onClick={() => navigate('/projects')}
-          className="flex items-center text-gray-600 hover:text-gray-900 mb-4 transition-colors"
+          className="flex items-center text-gray-600 hover:text-gray-900 mb-3 sm:mb-4 transition-colors text-sm sm:text-base"
         >
-          <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           Back to Projects
         </button>
         
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{project.name}</h1>
-            <div className="flex items-center mt-2 space-x-3">
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(project.status)}`}>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 break-words">{project.name}</h1>
+            <div className="flex flex-wrap items-center mt-2 gap-2 sm:gap-3">
+              <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getStatusColor(project.status)}`}>
                 {project.status}
               </span>
               {project.progressPercentage !== null && (
-                <span className="text-sm text-gray-600">
+                <span className="text-xs sm:text-sm text-gray-600">
                   Progress: {project.progressPercentage}%
                 </span>
               )}
             </div>
           </div>
           
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <button
               onClick={handleAnalyzeRisks}
               disabled={analyzingRisks}
-              className={`px-4 py-2 rounded-lg border-2 transition-colors ${
+              className={`px-3 sm:px-4 py-2 rounded-lg border-2 transition-colors text-sm sm:text-base ${
                 analyzingRisks 
                   ? 'bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed' 
                   : 'bg-white border-black text-black hover:bg-gray-50'
@@ -372,7 +372,7 @@ const ProjectDetailsPage = () => {
             </button>
             <button
               onClick={() => setIsEditDialogOpen(true)}
-              className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+              className="px-3 sm:px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-sm sm:text-base"
             >
               Edit Project
             </button>
@@ -381,13 +381,13 @@ const ProjectDetailsPage = () => {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 mb-6">
-        <nav className="-mb-px flex space-x-8">
+      <div className="border-b border-gray-200 mb-4 sm:mb-6">
+        <nav className="-mb-px flex space-x-0 sm:space-x-4 md:space-x-8 overflow-x-auto scrollbar-hide">
           {['overview', 'tasks', 'team', 'risks', 'mitigations', 'timeline'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+              className={`py-3 sm:py-4 px-1 sm:px-3 md:px-4 border-b-2 font-medium text-[11px] sm:text-sm transition-colors whitespace-nowrap flex-shrink-0 ${
                 activeTab === tab
                   ? 'border-black text-black'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -395,17 +395,17 @@ const ProjectDetailsPage = () => {
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
               {tab === 'risks' && risks.length > 0 && (
-                <span className="ml-2 px-2 py-0.5 bg-red-100 text-red-800 text-xs rounded-full">
+                <span className="ml-1 sm:ml-2 px-1.5 sm:px-2 py-0.5 bg-red-100 text-red-800 text-xs rounded-full">
                   {risks.length}
                 </span>
               )}
               {tab === 'mitigations' && mitigations.length > 0 && (
-                <span className="ml-2 px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">
+                <span className="ml-1 sm:ml-2 px-1.5 sm:px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">
                   {mitigations.length}
                 </span>
               )}
               {tab === 'team' && (
-                <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">
+                <span className="ml-1 sm:ml-2 px-1.5 sm:px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">
                   {(project?.memberIds?.length || 0) + 1}
                 </span>
               )}
@@ -416,20 +416,20 @@ const ProjectDetailsPage = () => {
 
       {/* Tab Content */}
       {activeTab === 'overview' && (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Description */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-3">Description</h2>
-            <p className="text-gray-700 whitespace-pre-wrap">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-3">Description</h2>
+            <p className="text-sm sm:text-base text-gray-700 whitespace-pre-wrap break-words">
               {project.description || 'No description provided.'}
             </p>
           </div>
 
           {/* Project Details Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {/* Timeline */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-sm font-medium text-gray-500 mb-3">Timeline</h3>
+            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+              <h3 className="text-xs sm:text-sm font-medium text-gray-500 mb-2 sm:mb-3">Timeline</h3>
               <div className="space-y-2">
                 <div>
                   <p className="text-xs text-gray-500">Start Date</p>
@@ -444,9 +444,9 @@ const ProjectDetailsPage = () => {
 
             {/* Budget */}
             {project.budget !== null && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-sm font-medium text-gray-500 mb-3">Budget</h3>
-                <p className="text-2xl font-bold text-gray-900">
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+                <h3 className="text-xs sm:text-sm font-medium text-gray-500 mb-2 sm:mb-3">Budget</h3>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 break-words">
                   ${project.budget?.toLocaleString() || '0'}
                 </p>
               </div>

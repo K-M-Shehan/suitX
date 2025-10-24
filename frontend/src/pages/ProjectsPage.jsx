@@ -69,19 +69,19 @@ const ProjectsPage = () => {
   };
 
   return (
-    <div className="flex-1 p-8 bg-gray-50">
+    <div className="flex-1 p-4 sm:p-6 md:p-8 bg-gray-50">
       {/* Page title */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-gray-900">All Projects</h1>
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">All Projects</h1>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="mb-4 p-3 rounded bg-red-100 text-red-700">{error}</div>
+        <div className="mb-4 p-3 rounded bg-red-100 text-red-700 text-sm sm:text-base">{error}</div>
       )}
 
       {/* Projects grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
         {/* Add Project Card - Always first */}
         <AddProjectCard onAddProject={handleAddProject} />
         

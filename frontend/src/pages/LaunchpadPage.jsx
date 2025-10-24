@@ -110,32 +110,32 @@ function LaunchpadPage() {
   };
 
   return (
-    <div className="flex-1 p-8 bg-gray-50">
+    <div className="flex-1 p-4 sm:p-6 md:p-8 bg-gray-50">
       {/* Page title */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-gray-900">Launchpad</h1>
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Launchpad</h1>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="mb-4 p-3 rounded bg-red-100 text-red-700">{error}</div>
+        <div className="mb-4 p-3 rounded bg-red-100 text-red-700 text-sm sm:text-base">{error}</div>
       )}
       
       {/* Projects Section */}
-      <section className="mb-8">
+      <section className="mb-6 sm:mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">My Projects</h2>
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900">My Projects</h2>
           <Link 
             to="/projects"
-            className="text-sm font-medium text-cyan-600 hover:text-cyan-700 transition-colors flex items-center gap-1"
+            className="text-xs sm:text-sm font-medium text-cyan-600 hover:text-cyan-700 transition-colors flex items-center gap-1"
           >
             View All
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </Link>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
           {/* Add Project Card */}
           <AddProjectCard onAddProject={handleAddProject} />
           
@@ -153,33 +153,33 @@ function LaunchpadPage() {
       {/* Risks Section */}
       <section>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Active Risks</h2>
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900">Active Risks</h2>
           <Link 
             to="/risks"
-            className="text-sm font-medium text-cyan-600 hover:text-cyan-700 transition-colors flex items-center gap-1"
+            className="text-xs sm:text-sm font-medium text-cyan-600 hover:text-cyan-700 transition-colors flex items-center gap-1"
           >
             View All
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </Link>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {risks.length === 0 ? (
-            <div className="col-span-full text-center py-8 text-gray-500">
+            <div className="col-span-full text-center py-8 text-gray-500 text-sm sm:text-base">
               No active risks. Great job! 🎉
             </div>
           ) : (
             risks.map((risk) => (
               <div 
                 key={risk.id} 
-                className={`${getSeverityColor(risk.severity)} rounded-lg p-6 cursor-pointer hover:shadow-md transition-shadow`}
+                className={`${getSeverityColor(risk.severity)} rounded-lg p-4 sm:p-6 cursor-pointer hover:shadow-md transition-shadow`}
                 onClick={() => navigate(`/risks/${risk.id}`)}
               >
                 {/* Risk Header */}
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="text-lg font-semibold text-gray-900 flex-1">{risk.title}</h3>
-                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                <div className="flex items-start justify-between mb-2 gap-2">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex-1 break-words">{risk.title}</h3>
+                  <span className={`text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap ${
                     risk.severity === 'CRITICAL' ? 'bg-red-200 text-red-800' :
                     risk.severity === 'HIGH' ? 'bg-orange-200 text-orange-800' :
                     risk.severity === 'MEDIUM' ? 'bg-yellow-200 text-yellow-800' :
@@ -190,12 +190,12 @@ function LaunchpadPage() {
                 </div>
                 
                 {/* Risk Description */}
-                <p className="text-sm text-gray-600 mb-4 leading-relaxed line-clamp-3">
+                <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 leading-relaxed line-clamp-3">
                   {risk.description || 'No description provided.'}
                 </p>
 
                 {/* Risk Type & AI Badge */}
-                <div className="flex gap-2 mb-4">
+                <div className="flex gap-2 mb-3 sm:mb-4 flex-wrap">
                   {risk.type && (
                     <span className="text-xs px-2 py-1 rounded bg-gray-200 text-gray-700">
                       {risk.type}

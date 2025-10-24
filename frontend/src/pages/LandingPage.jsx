@@ -20,34 +20,34 @@ function LandingPage() {
       {/* Hero Section */}
       <section 
         ref={heroRef}
-        className={`flex flex-col items-center justify-center py-20 px-6 transition-all duration-1000 ease-out ${
+        className={`flex flex-col items-center justify-center py-12 sm:py-16 md:py-20 px-4 sm:px-6 transition-all duration-1000 ease-out ${
           heroVisible 
             ? 'opacity-100 transform translate-y-0' 
             : 'opacity-0 transform translate-y-10'
         }`}
       >
-        <div className="text-center max-w-4xl">
-          <h1 className="text-5xl md:text-6xl font-bold mb-8">
+        <div className="text-center max-w-4xl w-full">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 sm:mb-8 px-2">
             Your Project's Sixth<br />
             Sense
           </h1>
           
-          <div className="flex justify-center space-x-4 mb-16">
-            <Link to="/signup">
-              <button className="px-6 py-3 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium">
+          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-8 sm:mb-12 md:mb-16 px-4">
+            <Link to="/signup" className="w-full sm:w-auto">
+              <button className="w-full sm:w-auto px-6 py-3 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium">
                 Get started
               </button>
             </Link>
-            <Link to="/login">
-              <button className="px-6 py-3 border border-gray-600 text-white rounded hover:bg-gray-800 transition-colors">
+            <Link to="/login" className="w-full sm:w-auto">
+              <button className="w-full sm:w-auto px-6 py-3 border border-gray-600 text-white rounded hover:bg-gray-800 transition-colors">
                 Sign in
               </button>
             </Link>
           </div>
 
           {/* Suit/Tuxedo Illustration */}
-          <div className="flex justify-center mb-20">
-            <div className="w-[864px] h-[864px] md:w-[1125px] md:h-[1125px] flex items-center justify-center">
+          <div className="flex justify-center mb-12 sm:mb-16 md:mb-20">
+            <div className="w-full max-w-[300px] h-[300px] sm:max-w-[400px] sm:h-[400px] md:max-w-[600px] md:h-[600px] lg:max-w-[864px] lg:h-[864px] xl:max-w-[1125px] xl:h-[1125px] flex items-center justify-center">
               <img 
                 src={tuxImage} 
                 alt="Elegant tuxedo with bow tie" 
@@ -61,71 +61,71 @@ function LandingPage() {
       {/* Features Section */}
       <section 
         ref={featuresRef}
-        className={`py-20 px-6 transition-all duration-1000 ease-out ${
+        className={`py-12 sm:py-16 md:py-20 px-4 sm:px-6 transition-all duration-1000 ease-out ${
           featuresVisible 
             ? 'opacity-100 transform translate-y-0' 
             : 'opacity-0 transform translate-y-10'
         }`}
       >
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8 lg:gap-12">
             {/* Title on the left */}
-            <div className="lg:w-1/2 mb-12 lg:mb-0">
-              <h2 className="text-3xl font-bold">What's Under the Hood</h2>
+            <div className="lg:w-1/2">
+              <h2 className="text-2xl sm:text-3xl font-bold">What's Under the Hood</h2>
             </div>
             
             {/* Cards on the right */}
-            <div className="lg:w-1/2 grid grid-cols-1 gap-6">
+            <div className="lg:w-1/2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 sm:gap-6">
               {/* Real-time Risk Detection */}
               <div 
-                className={`bg-white text-black p-6 rounded-lg transition-all duration-1000 ease-out delay-200 ${
+                className={`bg-white text-black p-4 sm:p-6 rounded-lg transition-all duration-1000 ease-out delay-200 ${
                   featuresVisible 
                     ? 'opacity-100 transform translate-y-0' 
                     : 'opacity-0 transform translate-y-10'
                 }`}
               >
-                <div className="text-2xl mb-3">⚡</div>
-                <h3 className="font-bold mb-2">Real-time Risk Detection</h3>
-                <p className="text-sm text-gray-600">Monitor your projects continuously with AI-powered analysis</p>
+                <div className="text-xl sm:text-2xl mb-2 sm:mb-3">⚡</div>
+                <h3 className="font-bold mb-1 sm:mb-2 text-base sm:text-lg">Real-time Risk Detection</h3>
+                <p className="text-xs sm:text-sm text-gray-600">Monitor your projects continuously with AI-powered analysis</p>
               </div>
 
               {/* Smart Mitigation Plans */}
               <div 
-                className={`bg-white text-black p-6 rounded-lg transition-all duration-1000 ease-out delay-300 ${
+                className={`bg-white text-black p-4 sm:p-6 rounded-lg transition-all duration-1000 ease-out delay-300 ${
                   featuresVisible 
                     ? 'opacity-100 transform translate-y-0' 
                     : 'opacity-0 transform translate-y-10'
                 }`}
               >
-                <div className="text-2xl mb-3">🔮</div>
-                <h3 className="font-bold mb-2">Smart Mitigation Plans</h3>
-                <p className="text-sm text-gray-600">Get personalized recommendations based on historical data</p>
+                <div className="text-xl sm:text-2xl mb-2 sm:mb-3">🔮</div>
+                <h3 className="font-bold mb-1 sm:mb-2 text-base sm:text-lg">Smart Mitigation Plans</h3>
+                <p className="text-xs sm:text-sm text-gray-600">Get personalized recommendations based on historical data</p>
               </div>
 
               {/* Predictive Analytics */}
               <div 
-                className={`bg-white text-black p-6 rounded-lg transition-all duration-1000 ease-out delay-500 ${
+                className={`bg-white text-black p-4 sm:p-6 rounded-lg transition-all duration-1000 ease-out delay-500 ${
                   featuresVisible 
                     ? 'opacity-100 transform translate-y-0' 
                     : 'opacity-0 transform translate-y-10'
                 }`}
               >
-                <div className="text-2xl mb-3">📈</div>
-                <h3 className="font-bold mb-2">Predictive Analytics</h3>
-                <p className="text-sm text-gray-600">Identify potential issues before they impact your timeline</p>
+                <div className="text-xl sm:text-2xl mb-2 sm:mb-3">📈</div>
+                <h3 className="font-bold mb-1 sm:mb-2 text-base sm:text-lg">Predictive Analytics</h3>
+                <p className="text-xs sm:text-sm text-gray-600">Identify potential issues before they impact your timeline</p>
               </div>
 
               {/* Data-Driven Insights */}
               <div 
-                className={`bg-white text-black p-6 rounded-lg transition-all duration-1000 ease-out delay-700 ${
+                className={`bg-white text-black p-4 sm:p-6 rounded-lg transition-all duration-1000 ease-out delay-700 ${
                   featuresVisible 
                     ? 'opacity-100 transform translate-y-0' 
                     : 'opacity-0 transform translate-y-10'
                 }`}
               >
-                <div className="text-2xl mb-3">📊</div>
-                <h3 className="font-bold mb-2">Data-Driven Insights</h3>
-                <p className="text-sm text-gray-600">Learn from past project patterns to improve future outcomes</p>
+                <div className="text-xl sm:text-2xl mb-2 sm:mb-3">📊</div>
+                <h3 className="font-bold mb-1 sm:mb-2 text-base sm:text-lg">Data-Driven Insights</h3>
+                <p className="text-xs sm:text-sm text-gray-600">Learn from past project patterns to improve future outcomes</p>
               </div>
             </div>
           </div>
@@ -135,88 +135,88 @@ function LandingPage() {
       {/* Process Section */}
       <section 
         ref={processRef}
-        className={`py-20 px-6 transition-all duration-1000 ease-out ${
+        className={`py-12 sm:py-16 md:py-20 px-4 sm:px-6 transition-all duration-1000 ease-out ${
           processVisible 
             ? 'opacity-100 transform translate-y-0' 
             : 'opacity-0 transform translate-y-10'
         }`}
       >
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             {/* Connect Your Project Data */}
             <div 
-              className={`bg-white text-black p-6 rounded-lg transition-all duration-1000 ease-out delay-200 ${
+              className={`bg-white text-black p-4 sm:p-6 rounded-lg transition-all duration-1000 ease-out delay-200 ${
                 processVisible 
                   ? 'opacity-100 transform translate-y-0' 
                   : 'opacity-0 transform translate-y-10'
               }`}
             >
-              <div className="h-72 rounded mb-4 overflow-hidden">
+              <div className="h-48 sm:h-56 md:h-72 rounded mb-3 sm:mb-4 overflow-hidden">
                 <img 
                   src={connectImage} 
                   alt="Connect Your Project Data" 
                   className="w-full h-full object-cover"
                 />
               </div>
-              <h3 className="text-xl font-bold mb-3">Connect Your Project Data</h3>
-              <p className="text-base text-gray-600">Import or input project information</p>
+              <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3">Connect Your Project Data</h3>
+              <p className="text-sm sm:text-base text-gray-600">Import or input project information</p>
             </div>
 
             {/* AI Analysis */}
             <div 
-              className={`bg-white text-black p-6 rounded-lg transition-all duration-1000 ease-out delay-400 ${
+              className={`bg-white text-black p-4 sm:p-6 rounded-lg transition-all duration-1000 ease-out delay-400 ${
                 processVisible 
                   ? 'opacity-100 transform translate-y-0' 
                   : 'opacity-0 transform translate-y-10'
               }`}
             >
-              <div className="h-72 rounded mb-4 overflow-hidden">
+              <div className="h-48 sm:h-56 md:h-72 rounded mb-3 sm:mb-4 overflow-hidden">
                 <img 
                   src={analyseImage} 
                   alt="AI Analysis" 
                   className="w-full h-full object-cover"
                 />
               </div>
-              <h3 className="text-xl font-bold mb-3">AI Analysis</h3>
-              <p className="text-base text-gray-600">Our system analyzes risks in real-time</p>
+              <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3">AI Analysis</h3>
+              <p className="text-sm sm:text-base text-gray-600">Our system analyzes risks in real-time</p>
             </div>
 
             {/* Get Solutions */}
             <div 
-              className={`bg-white text-black p-6 rounded-lg transition-all duration-1000 ease-out delay-600 ${
+              className={`bg-white text-black p-4 sm:p-6 rounded-lg transition-all duration-1000 ease-out delay-600 ${
                 processVisible 
                   ? 'opacity-100 transform translate-y-0' 
                   : 'opacity-0 transform translate-y-10'
               }`}
             >
-              <div className="h-72 rounded mb-4 overflow-hidden">
+              <div className="h-48 sm:h-56 md:h-72 rounded mb-3 sm:mb-4 overflow-hidden">
                 <img 
                   src={solutionsImage} 
                   alt="Get Solutions" 
                   className="w-full h-full object-cover"
                 />
               </div>
-              <h3 className="text-xl font-bold mb-3">Get Solutions</h3>
-              <p className="text-base text-gray-600">Receive actionable mitigation strategies</p>
+              <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3">Get Solutions</h3>
+              <p className="text-sm sm:text-base text-gray-600">Receive actionable mitigation strategies</p>
             </div>
 
             {/* Track Progress */}
             <div 
-              className={`bg-white text-black p-6 rounded-lg transition-all duration-1000 ease-out delay-800 ${
+              className={`bg-white text-black p-4 sm:p-6 rounded-lg transition-all duration-1000 ease-out delay-800 ${
                 processVisible 
                   ? 'opacity-100 transform translate-y-0' 
                   : 'opacity-0 transform translate-y-10'
               }`}
             >
-              <div className="h-72 rounded mb-4 overflow-hidden">
+              <div className="h-48 sm:h-56 md:h-72 rounded mb-3 sm:mb-4 overflow-hidden">
                 <img 
                   src={trackImage} 
                   alt="Track Progress" 
                   className="w-full h-full object-cover"
                 />
               </div>
-              <h3 className="text-xl font-bold mb-3">Track Progress</h3>
-              <p className="text-base text-gray-600">Monitor improvements and prevent future risks</p>
+              <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3">Track Progress</h3>
+              <p className="text-sm sm:text-base text-gray-600">Monitor improvements and prevent future risks</p>
             </div>
           </div>
         </div>

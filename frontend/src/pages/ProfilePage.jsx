@@ -145,10 +145,10 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex-1 p-8 bg-gray-50 flex items-center justify-center">
+      <div className="flex-1 p-4 sm:p-6 md:p-8 bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading profile...</p>
+          <p className="mt-4 text-gray-600 text-sm sm:text-base">Loading profile...</p>
         </div>
       </div>
     );
@@ -156,14 +156,14 @@ export default function ProfilePage() {
 
   if (error && !user) {
     return (
-      <div className="flex-1 p-8 bg-gray-50">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+      <div className="flex-1 p-4 sm:p-6 md:p-8 bg-gray-50">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative text-sm sm:text-base">
           <strong className="font-bold">Error: </strong>
           <span className="block sm:inline">{error}</span>
         </div>
         <button
           onClick={fetchUserProfile}
-          className="mt-4 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors"
+          className="mt-4 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm sm:text-base"
         >
           Retry
         </button>
@@ -172,17 +172,17 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="flex-1 p-8 bg-gray-50">
+    <div className="flex-1 p-4 sm:p-6 md:p-8 bg-gray-50">
       {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-gray-900">My Profile</h1>
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">My Profile</h1>
       </div>
 
       {/* Success Message */}
       {successMessage && (
-        <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+        <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg text-sm sm:text-base">
           <div className="flex items-center">
-            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
             {successMessage}
@@ -192,9 +192,9 @@ export default function ProfilePage() {
 
       {/* Error Message */}
       {error && (
-        <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+        <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm sm:text-base">
           <div className="flex items-center">
-            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
             </svg>
             {error}
@@ -205,20 +205,20 @@ export default function ProfilePage() {
       <div className="max-w-4xl">
         <div className="bg-white rounded-lg shadow">
           {/* Profile Header Section */}
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex items-center space-x-6">
+          <div className="p-4 sm:p-6 border-b border-gray-200">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
               {/* Profile Image */}
               <div className="flex-shrink-0">
                 <img
                   src={profile.avatar || profilePic}
                   alt="Profile"
-                  className="w-24 h-24 rounded-full object-cover border-2 border-gray-300"
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-gray-300"
                   onError={(e) => {
                     e.target.src = profilePic;
                   }}
                 />
                 {isEditing && (
-                  <label className="mt-2 cursor-pointer bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded-lg text-xs inline-block text-center w-full">
+                  <label className="mt-2 cursor-pointer bg-gray-200 hover:bg-gray-300 px-2 sm:px-3 py-1 rounded-lg text-xs inline-block text-center w-full">
                     Change Photo
                     <input 
                       type="file" 
@@ -231,35 +231,35 @@ export default function ProfilePage() {
               </div>
 
               {/* Profile Info */}
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold text-gray-900">
+              <div className="flex-1 text-center sm:text-left">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 break-words">
                   {profile.firstName || profile.lastName 
                     ? `${profile.firstName} ${profile.lastName}`.trim() 
                     : profile.username}
                 </h2>
-                <p className="text-gray-500">@{profile.username}</p>
+                <p className="text-sm sm:text-base text-gray-500 break-words">@{profile.username}</p>
                 {user?.role && (
-                  <span className="mt-2 inline-block px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
+                  <span className="mt-2 inline-block px-2 sm:px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs sm:text-sm font-medium">
                     {user.role}
                   </span>
                 )}
               </div>
 
               {/* Action Buttons */}
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0 w-full sm:w-auto">
                 {isEditing ? (
-                  <div className="flex space-x-3">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                     <button
                       onClick={handleCancel}
                       disabled={isSaving}
-                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="px-3 sm:px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleSave}
                       disabled={isSaving}
-                      className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
+                      className="px-3 sm:px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors text-sm sm:text-base"
                     >
                       {isSaving ? (
                         <>
@@ -277,7 +277,7 @@ export default function ProfilePage() {
                 ) : (
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+                    className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-sm sm:text-base"
                   >
                     Edit Profile
                   </button>
@@ -287,18 +287,18 @@ export default function ProfilePage() {
           </div>
 
           {/* Profile Details Section */}
-          <div className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">Profile Information</h3>
+          <div className="p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6">Profile Information</h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               {/* Username - Read Only */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Username</label>
                 <input
                   type="text"
                   value={profile.username}
                   disabled={true}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed text-sm sm:text-base"
                   title="Username cannot be changed"
                 />
                 <p className="text-xs text-gray-500 mt-1">Username cannot be changed</p>
@@ -306,7 +306,7 @@ export default function ProfilePage() {
 
               {/* Email */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                   Email <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -316,33 +316,33 @@ export default function ProfilePage() {
                   onChange={handleChange}
                   disabled={!isEditing}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100 disabled:text-gray-500 focus:ring-2 focus:ring-black focus:border-transparent transition-colors"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100 disabled:text-gray-500 focus:ring-2 focus:ring-black focus:border-transparent transition-colors text-sm sm:text-base"
                 />
               </div>
 
               {/* First Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">First Name</label>
                 <input
                   type="text"
                   name="firstName"
                   value={profile.firstName}
                   onChange={handleChange}
                   disabled={!isEditing}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100 disabled:text-gray-500 focus:ring-2 focus:ring-black focus:border-transparent transition-colors"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100 disabled:text-gray-500 focus:ring-2 focus:ring-black focus:border-transparent transition-colors text-sm sm:text-base"
                 />
               </div>
 
               {/* Last Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Last Name</label>
                 <input
                   type="text"
                   name="lastName"
                   value={profile.lastName}
                   onChange={handleChange}
                   disabled={!isEditing}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100 disabled:text-gray-500 focus:ring-2 focus:ring-black focus:border-transparent transition-colors"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100 disabled:text-gray-500 focus:ring-2 focus:ring-black focus:border-transparent transition-colors text-sm sm:text-base"
                 />
               </div>
 
