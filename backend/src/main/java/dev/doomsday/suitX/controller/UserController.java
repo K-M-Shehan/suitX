@@ -137,4 +137,32 @@ public class UserController {
             return ResponseEntity.status(500).body(Map.of("error", "Failed to search users: " + e.getMessage()));
         }
     }
+    
+    /**
+     * Change user password
+     */
+    @PutMapping("/me/password")
+    public ResponseEntity<?> changePassword(@RequestBody Map<String, String> passwordData, Authentication authentication) {
+        try {
+            if (authentication == null || authentication.getPrincipal() == null) {
+                return ResponseEntity.status(401).body(Map.of("error", "Not authenticated"));
+            }
+            
+            String username = authentication.getName();
+            String currentPassword = passwordData.get("currentPassword");
+            String newPassword = passwordData.get("newPassword");
+            
+            if (currentPassword == null || newPassword == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Current password and new password are required"));
+            }
+            
+            userService.changePassword(username, currentPassword, newPassword);
+            
+            return ResponseEntity.ok(Map.of("success", true, "message", "Password changed successfully"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to change password: " + e.getMessage()));
+        }
+    }
 }

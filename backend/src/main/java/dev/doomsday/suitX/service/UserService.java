@@ -229,4 +229,36 @@ public class UserService {
     public boolean checkPassword(String rawPassword, String encodedPassword) {
         return passwordEncoder.matches(rawPassword, encodedPassword);
     }
+    
+    /**
+     * Change user password
+     */
+    public void changePassword(String username, String currentPassword, String newPassword) {
+        // Find the user
+        User user = findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        
+        // Verify current password
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Current password is incorrect");
+        }
+        
+        // Validate new password
+        if (newPassword == null || newPassword.isEmpty()) {
+            throw new IllegalArgumentException("New password is required");
+        }
+        if (newPassword.length() < 8) {
+            throw new IllegalArgumentException("New password must be at least 8 characters long");
+        }
+        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new IllegalArgumentException("New password must be different from current password");
+        }
+        
+        // Encode and save new password
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        
+        logger.info("Password changed successfully for user: {}", username);
+    }
+}
 }

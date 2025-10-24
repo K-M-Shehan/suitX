@@ -216,7 +216,7 @@ export async function changePassword(passwordData) {
     throw new Error("No authentication token found");
   }
 
-  const res = await fetch(`${API_URL}/password`, {
+  const res = await fetch(`https://suitx-backend-production.up.railway.app/api/user/me/password`, {
     method: "PUT",
     headers: {
       "Authorization": `Bearer ${token}`,
