@@ -1,0 +1,294 @@
+# suitX — Complete Project Documentation
+
+An AI project risk manager
+
+Repository: https://github.com/K-M-Shehan/suitX  
+Homepage: https://suit-x.vercel.app  
+Default branch: main  
+License: MIT
+
+This document provides a comprehensive guide to the suitX project: architecture, local development, configuration, deployment, and references to the canonical documents in the repository.
+
+## 1) Repository overview
+
+- Purpose: suitX is described as “An AI project risk manager.”
+- Monorepo layout with separate backend and frontend directories.
+- Canonical docs and infra manifests included (database schema, schema implementation, render deployment).
+
+### Top-level contents (selected)
+
+- [.gitignore](https://github.com/K-M-Shehan/suitX/blob/main/.gitignore)
+- [LICENSE](https://github.com/K-M-Shehan/suitX/blob/main/LICENSE) (MIT License)
+- [README.md](https://github.com/K-M-Shehan/suitX/blob/main/README.md)
+- [render.yaml](https://github.com/K-M-Shehan/suitX/blob/main/render.yaml) (Infrastructure-as-code for Render.com)
+- [pom.xml](https://github.com/K-M-Shehan/suitX/blob/main/pom.xml) (Maven descriptor at repository root)
+- Directories:
+  - [backend/](https://github.com/K-M-Shehan/suitX/tree/main/backend)
+  - [frontend/](https://github.com/K-M-Shehan/suitX/tree/main/frontend)
+  - [diagrams/](https://github.com/K-M-Shehan/suitX/tree/main/diagrams)
+
+### Language composition (bytes)
+
+- JavaScript: 431,729
+- Java: 280,860
+- HTML: 15,757
+- Dockerfile: 1,165
+- CSS: 1,151
+
+This indicates a Java-based backend (Maven) and a JavaScript-powered frontend, with some static assets (HTML/CSS) and containerization support (Dockerfile). The project homepage is hosted on Vercel, suggesting the frontend is deployed there.
+
+## 2) Architecture
+
+- Frontend
+  - Location: [frontend/](https://github.com/K-M-Shehan/suitX/tree/main/frontend)
+  - Technologies: JavaScript with HTML/CSS (exact framework/tooling should be checked in frontend’s package.json and project files).
+  - Deployment: Homepage points to Vercel (https://suit-x.vercel.app).
+
+- Backend
+  - Location: [backend/](https://github.com/K-M-Shehan/suitX/tree/main/backend)
+  - Build: Maven (Maven Wrapper present: mvnw/mvnw.cmd).
+  - Likely Spring Boot-based (presence of Maven wrapper, HELP.md typical of Spring scaffolding).
+  - Dockerized via [backend/Dockerfile](https://github.com/K-M-Shehan/suitX/blob/main/backend/Dockerfile).
+  - Database documentation:
+    - [DATABASE_SCHEMA.md](https://github.com/K-M-Shehan/suitX/blob/main/backend/DATABASE_SCHEMA.md)
+    - [SCHEMA_IMPLEMENTATION.md](https://github.com/K-M-Shehan/suitX/blob/main/backend/SCHEMA_IMPLEMENTATION.md)
+
+- Infra/Deployment
+  - Render.com setup defined in [render.yaml](https://github.com/K-M-Shehan/suitX/blob/main/render.yaml) (commonly used to define services for Render deployment pipelines).
+  - Vercel frontend hosting (per homepage).
+
+## 3) Backend details
+
+Backend directory contents (selected):
+
+- [.dockerignore](https://github.com/K-M-Shehan/suitX/blob/main/backend/.dockerignore)
+- [Dockerfile](https://github.com/K-M-Shehan/suitX/blob/main/backend/Dockerfile)
+- [DATABASE_SCHEMA.md](https://github.com/K-M-Shehan/suitX/blob/main/backend/DATABASE_SCHEMA.md)
+- [SCHEMA_IMPLEMENTATION.md](https://github.com/K-M-Shehan/suitX/blob/main/backend/SCHEMA_IMPLEMENTATION.md)
+- [HELP.md](https://github.com/K-M-Shehan/suitX/blob/main/backend/HELP.md)
+- [README.md](https://github.com/K-M-Shehan/suitX/blob/main/backend/README.md)
+- Maven Wrapper: [mvnw](https://github.com/K-M-Shehan/suitX/blob/main/backend/mvnw), [mvnw.cmd](https://github.com/K-M-Shehan/suitX/blob/main/backend/mvnw.cmd)
+- Backend POM: [backend/pom.xml](https://github.com/K-M-Shehan/suitX/blob/main/backend/pom.xml)
+- Source root: [backend/src/](https://github.com/K-M-Shehan/suitX/tree/main/backend/src)
+
+### Prerequisites
+
+- Java JDK (version should match the backend’s Maven configuration; check [backend/pom.xml](https://github.com/K-M-Shehan/suitX/blob/main/backend/pom.xml) for `maven-compiler-plugin` target/release).
+- Maven (Maven Wrapper provided, so system Maven is optional).
+- Docker (optional, for containerized runs).
+- A database engine compatible with the documented schema (see the DATABASE_SCHEMA.md).
+
+### Configure environment
+
+Spring Boot-style apps typically read configuration from:
+- Environment variables
+- `application.properties` or `application.yml` under `src/main/resources` (check the repo’s `backend/src` tree for the actual config files).
+
+Common configurations to prepare (actual names may differ; consult the codebase and the schema docs):
+- Database URL/host/port/name
+- Database user/password
+- Application port (defaults to 8080 in Spring Boot unless overridden)
+- CORS allowed origins (for the frontend)
+- Any service keys/secrets used by the risk analysis logic
+
+### Build and run (local)
+
+- Using Maven Wrapper (Linux/macOS):
+  - Build: `cd backend && ./mvnw clean package`
+  - Run (dev): `./mvnw spring-boot:run`
+  - Run (jar): `java -jar target/*.jar`
+- Using Maven Wrapper (Windows):
+  - Build: `cd backend && mvnw.cmd clean package`
+  - Run (dev): `mvnw.cmd spring-boot:run`
+  - Run (jar): `java -jar target\*.jar`
+
+Default port is commonly 8080 unless changed in configuration or code.
+
+### Run with Docker
+
+From repository root or the backend folder:
+- Build image:
+  - `docker build -f backend/Dockerfile -t suitx-backend:local .`
+- Run container:
+  - `docker run --rm -p 8080:8080 --env-file .env suitx-backend:local`
+  - Alternatively pass env vars using `-e KEY=value` for DB and other configs.
+
+Check [.dockerignore](https://github.com/K-M-Shehan/suitX/blob/main/backend/.dockerignore) to see which files are excluded from build context.
+
+### Database
+
+- Canonical schema: [DATABASE_SCHEMA.md](https://github.com/K-M-Shehan/suitX/blob/main/backend/DATABASE_SCHEMA.md)
+- Implementation notes/mappings: [SCHEMA_IMPLEMENTATION.md](https://github.com/K-M-Shehan/suitX/blob/main/backend/SCHEMA_IMPLEMENTATION.md)
+
+Follow those documents for:
+- Table definitions and relationships used by the risk management engine.
+- Indexes/constraints.
+- ORM/entity mappings and any naming conventions.
+- Seed data or reference data if applicable.
+
+If the project uses migrations (Flyway/Liquibase), those will be referenced in `backend/pom.xml` and present under `src/main/resources/db/` (check the tree under `backend/src`).
+
+### API
+
+- For a running backend, API routes and models are typically documented via OpenAPI/Swagger if included (look in `backend/pom.xml` for `springdoc-openapi` or Swagger dependencies).
+- If not present, inspect `backend/src/main/java/.../controller` packages for controllers and request mappings to discover endpoints.
+
+### Testing
+
+- Unit/integration tests can be run with:
+  - `cd backend && ./mvnw test` (or `mvnw.cmd test` on Windows)
+- Look for tests under `backend/src/test/java`.
+
+## 4) Frontend details
+
+- Location: [frontend/](https://github.com/K-M-Shehan/suitX/tree/main/frontend)
+- Languages: JavaScript, HTML, CSS (see language composition). The exact framework (e.g., React/Next.js/Vite) can be determined by inspecting `frontend/package.json` and project structure.
+- Deployment: The project homepage is on Vercel (https://suit-x.vercel.app).
+
+Typical local steps (confirm in `frontend/README.md` or `package.json` scripts):
+- Prerequisites: Node.js (LTS) and npm or yarn/pnpm.
+- Install dependencies:
+  - `cd frontend && npm install`
+- Start dev server:
+  - `npm run dev` (or `npm start`, depending on scripts)
+- Build for production:
+  - `npm run build`
+- Serve production build:
+  - `npm run preview` or framework-specific command
+
+Environment variables:
+- Frontend builds often use `.env` files (e.g., `.env.local`, `.env.production`) with variables like API base URL. Consult the codebase for variable names and how they’re read.
+
+CORS/Networking:
+- Ensure the backend’s CORS settings allow the frontend origin(s) during development and production.
+
+## 5) Diagrams
+
+- Architectural or data flow diagrams: [diagrams/](https://github.com/K-M-Shehan/suitX/tree/main/diagrams)
+- Use these for onboarding and understanding system interactions and risk modeling workflows if provided.
+
+## 6) Deployment
+
+### Backend on Render.com
+
+- The repository includes [render.yaml](https://github.com/K-M-Shehan/suitX/blob/main/render.yaml), which typically defines Render services (web service, environment, build/run commands).
+- General Render deployment flow:
+  1. Connect the GitHub repository to Render.
+  2. Render detects `render.yaml` and provisions services accordingly.
+  3. Configure environment variables/secrets in Render dashboard (database credentials, app secrets, allowed origins, etc.).
+  4. Trigger deployment; Render builds using the specified commands and runs the service.
+
+Review `render.yaml` for:
+- Service type (e.g., web service), build command, start command, health checks.
+- Any database add-ons or persistent disk configuration.
+- Environment variable placeholders.
+
+### Frontend on Vercel
+
+- The homepage is live on Vercel, which suggests the frontend is configured there.
+- General Vercel flow:
+  1. Connect GitHub repository or import the frontend directory.
+  2. Set the project root to `frontend` if needed.
+  3. Configure build command and output directory per framework.
+  4. Set environment variables (API base URL, analytics keys, etc.).
+  5. Deploy and configure custom domain if desired.
+
+## 7) Configuration matrix (reference)
+
+Backend (examples; verify actual names in code/pom/config):
+- APP_PORT / server.port
+- DB_URL / SPRING_DATASOURCE_URL
+- DB_USER / SPRING_DATASOURCE_USERNAME
+- DB_PASS / SPRING_DATASOURCE_PASSWORD
+- CORS_ALLOWED_ORIGINS
+- LOGGING_LEVEL_ROOT
+
+Frontend (examples; verify in code):
+- API_BASE_URL
+- FEATURE_FLAGS (if any)
+- Analytics / service keys (if any)
+
+Store secrets in:
+- Local: `.env` files not committed to VCS
+- Cloud: Render/Vercel dashboard environment settings
+
+## 8) Development workflow
+
+- Branching strategy: Use feature branches from main; create PRs for review.
+- Code style:
+  - Backend: Follow standard Java/Spring conventions; format via `mvn spotless:apply` or similar if configured.
+  - Frontend: Follow the project’s lint rules (ESLint/Prettier if configured in `frontend`).
+- Commit hygiene: Conventional commits recommended for clear history.
+- Pre-commit hooks: If configured, ensure they run (e.g., linting/tests).
+
+## 9) Security and secrets
+
+- Do not commit secrets (DB passwords, API keys) to the repo.
+- Use Render/Vercel environment management for production secrets.
+- CORS: Restrict to production frontend origin(s).
+- HTTPS: Enforce for all deployed endpoints.
+- Database: Use least-privilege credentials and strong passwords.
+
+## 10) Observability
+
+- Logging: Configure appropriate log levels for dev vs. prod.
+- Metrics/Health:
+  - If Spring Boot Actuator is enabled, set up `/actuator/health` and other endpoints.
+  - Use Render/Vercel logs and monitors.
+
+## 11) Troubleshooting
+
+- Build fails (backend):
+  - Verify JDK version matches `backend/pom.xml` configuration.
+  - Clear caches: `./mvnw clean`.
+- Port in use:
+  - Change `server.port` or free the port.
+- DB connection errors:
+  - Verify DB host/port, credentials, SSL flags as required by your DB.
+  - Confirm the schema is applied as per [DATABASE_SCHEMA.md](https://github.com/K-M-Shehan/suitX/blob/main/backend/DATABASE_SCHEMA.md) / [SCHEMA_IMPLEMENTATION.md](https://github.com/K-M-Shehan/suitX/blob/main/backend/SCHEMA_IMPLEMENTATION.md).
+- CORS errors:
+  - Update backend CORS config to include the frontend origin(s).
+
+## 12) Contributing
+
+- Open issues for bugs/feature requests.
+- Fork and PR workflow:
+  - Fork -> branch -> commit -> PR to main.
+- Include tests where applicable.
+- Follow code style and include documentation updates for user-facing changes.
+
+## 13) Legal
+
+- License: [MIT License](https://github.com/K-M-Shehan/suitX/blob/main/LICENSE)
+- Attribution and usage should comply with the MIT terms.
+
+## 14) Quick start (summary)
+
+- Backend
+  - `cd backend`
+  - Create `.env` or set env vars (DB, port, CORS, etc.)
+  - `./mvnw spring-boot:run`
+- Frontend
+  - `cd frontend`
+  - `npm install`
+  - Set `API_BASE_URL`
+  - `npm run dev`
+- Open the frontend dev URL, ensure it can reach the backend, and iterate.
+
+## 15) Canonical references in the repo
+
+- Backend database design:
+  - [backend/DATABASE_SCHEMA.md](https://github.com/K-M-Shehan/suitX/blob/main/backend/DATABASE_SCHEMA.md)
+  - [backend/SCHEMA_IMPLEMENTATION.md](https://github.com/K-M-Shehan/suitX/blob/main/backend/SCHEMA_IMPLEMENTATION.md)
+- Backend Docker:
+  - [backend/Dockerfile](https://github.com/K-M-Shehan/suitX/blob/main/backend/Dockerfile)
+  - [backend/.dockerignore](https://github.com/K-M-Shehan/suitX/blob/main/backend/.dockerignore)
+- Backend build:
+  - [backend/pom.xml](https://github.com/K-M-Shehan/suitX/blob/main/backend/pom.xml)
+  - [backend/mvnw](https://github.com/K-M-Shehan/suitX/blob/main/backend/mvnw), [backend/mvnw.cmd](https://github.com/K-M-Shehan/suitX/blob/main/backend/mvnw.cmd)
+- Infra:
+  - [render.yaml](https://github.com/K-M-Shehan/suitX/blob/main/render.yaml)
+- License:
+  - [LICENSE](https://github.com/K-M-Shehan/suitX/blob/main/LICENSE)
+
+If you’d like, I can tailor this documentation further by incorporating the specific frameworks and configuration keys from the frontend and the exact backend configuration and API surface once those files are reviewed.
