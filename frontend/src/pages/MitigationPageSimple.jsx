@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import MitigationService from '../services/MitigationService';
 import { getAllProjects, getProjectById } from '../services/ProjectService';
 import AIAssistant from '../components/AIAssistant';
-import { API_BASE_URL } from '../utils/apiClient';
+
+const API_BASE_URL = 'https://suitx-backend-production-1854.up.railway.app';
 
 const MitigationPage = () => {
   const navigate = useNavigate();

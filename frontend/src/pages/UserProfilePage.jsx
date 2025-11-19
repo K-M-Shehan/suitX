@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getTasksByAssignee } from "../services/TaskService";
 import profilePic from "../assets/profile-pic.jpg";
-import { API_BASE_URL } from '../utils/apiClient';
+
+const API_BASE_URL = 'https://suitx-backend-production-1854.up.railway.app';
 
 export default function UserProfilePage() {
   const { userId } = useParams();

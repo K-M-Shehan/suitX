@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { searchUsers, removeMemberFromProject, getProjectMembers } from '../services/ProjectService';
 import { inviteUserToProject } from '../services/InvitationService';
 import { getCurrentUser } from '../services/AuthService';
-import { API_BASE_URL } from '../utils/apiClient';
+
+const API_BASE_URL = 'https://suitx-backend-production-1854.up.railway.app';
 
 export default function MemberManagement({ projectId, project }) {
   const navigate = useNavigate();
