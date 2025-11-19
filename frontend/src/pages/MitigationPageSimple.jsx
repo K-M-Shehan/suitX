@@ -4,7 +4,7 @@ import MitigationService from '../services/MitigationService';
 import { getAllProjects, getProjectById } from '../services/ProjectService';
 import AIAssistant from '../components/AIAssistant';
 
-const API_BASE_URL = 'https://suitx-backend-production-1854.up.railway.app';
+const API_BASE_URL = 'https://suitx-backend-production.up.railway.app';
 
 const MitigationPage = () => {
   const navigate = useNavigate();
