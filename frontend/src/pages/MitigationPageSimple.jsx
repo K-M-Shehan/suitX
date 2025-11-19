@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import MitigationService from '../services/MitigationService';
 import { getAllProjects, getProjectById } from '../services/ProjectService';
 import AIAssistant from '../components/AIAssistant';
+import { API_BASE_URL } from '../utils/apiClient';
 
 const MitigationPage = () => {
   const navigate = useNavigate();
@@ -180,7 +181,7 @@ const MitigationPage = () => {
             // Fetch user details for each member ID using the correct endpoint
             const memberDetailsPromises = allMemberIds.map(async (userId) => {
               try {
-                const response = await fetch(`http://localhost:8080/api/user/${userId}`, {
+                const response = await fetch(`${API_BASE_URL}/api/user/${userId}`, {
                   headers: {
                     'Authorization': token ? `Bearer ${token}` : '',
                     'Content-Type': 'application/json'

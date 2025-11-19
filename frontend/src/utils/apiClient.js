@@ -1,6 +1,6 @@
 import { isTokenExpired, handleTokenExpiration } from './jwtUtils';
 
-const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
 /**
  * Enhanced fetch wrapper with automatic token expiration handling
@@ -135,3 +135,5 @@ export async function apiDelete(url) {
   const text = await response.text();
   return text ? JSON.parse(text) : null;
 }
+
+export { API_BASE_URL };

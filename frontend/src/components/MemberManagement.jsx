@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { searchUsers, removeMemberFromProject, getProjectMembers } from '../services/ProjectService';
 import { inviteUserToProject } from '../services/InvitationService';
 import { getCurrentUser } from '../services/AuthService';
+import { API_BASE_URL } from '../utils/apiClient';
 
 export default function MemberManagement({ projectId, project }) {
   const navigate = useNavigate();
@@ -49,7 +50,7 @@ export default function MemberManagement({ projectId, project }) {
       // Try fetching by ownerId
       if (project.ownerId) {
         try {
-          const response = await fetch(`http://localhost:8080/api/user/${project.ownerId}`, {
+          const response = await fetch(`${API_BASE_URL}/api/user/${project.ownerId}`, {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('token')}`,
             },
@@ -65,7 +66,7 @@ export default function MemberManagement({ projectId, project }) {
       // If ownerId didn't work, try fetching by createdBy username
       if (!ownerDetails && project.createdBy) {
         try {
-          const response = await fetch(`http://localhost:8080/api/user/username/${project.createdBy}`, {
+          const response = await fetch(`${API_BASE_URL}/api/user/username/${project.createdBy}`, {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('token')}`,
             },
@@ -81,7 +82,7 @@ export default function MemberManagement({ projectId, project }) {
       // Fetch full user details for each member
       const memberDetailsPromises = memberIds.map(async (userId) => {
         try {
-          const response = await fetch(`http://localhost:8080/api/user/${userId}`, {
+          const response = await fetch(`${API_BASE_URL}/api/user/${userId}`, {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('token')}`,
             },

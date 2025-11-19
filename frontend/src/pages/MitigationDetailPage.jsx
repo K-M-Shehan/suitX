@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import MitigationService from '../services/MitigationService';
 import RiskService from '../services/RiskService';
 import { getProjectById } from '../services/ProjectService';
+import { API_BASE_URL } from '../utils/apiClient';
 
 const MitigationDetailPage = () => {
   const { id } = useParams();
@@ -111,7 +112,7 @@ const MitigationDetailPage = () => {
             // Fetch user details for each member ID
             const memberDetailsPromises = allMemberIds.map(async (userId) => {
               try {
-                const response = await fetch(`http://localhost:8080/api/user/${userId}`, {
+                const response = await fetch(`${API_BASE_URL}/api/user/${userId}`, {
                   headers: {
                     'Authorization': token ? `Bearer ${token}` : '',
                     'Content-Type': 'application/json'
