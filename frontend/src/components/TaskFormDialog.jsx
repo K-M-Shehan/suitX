@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getProjectMembers } from '../services/ProjectService';
-import { API_BASE_URL } from '../utils/apiClient';
+
+const API_BASE_URL = 'https://suitx-backend-production-1854.up.railway.app';
 
 const TaskFormDialog = ({ isOpen, onClose, onSubmit, projectId, project }) => {
   const [formData, setFormData] = useState({

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { API_BASE_URL } from '../utils/apiClient';
+
+const API_BASE_URL = 'https://suitx-backend-production-1854.up.railway.app';
 
 const ApiTest = () => {
   const [results, setResults] = useState({});
