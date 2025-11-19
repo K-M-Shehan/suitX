@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_BASE_URL } from '../utils/apiClient';
 
 const ApiTest = () => {
   const [results, setResults] = useState({});
@@ -23,7 +24,7 @@ const ApiTest = () => {
         headers['Authorization'] = token;
       }
 
-      const response = await fetch(`http://localhost:8080/api${endpoint}`, {
+      const response = await fetch(`${API_BASE_URL}/api${endpoint}`, {
         headers: headers,
       });
       

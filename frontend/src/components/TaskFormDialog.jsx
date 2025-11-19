@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getProjectMembers } from '../services/ProjectService';
+import { API_BASE_URL } from '../utils/apiClient';
 
 const TaskFormDialog = ({ isOpen, onClose, onSubmit, projectId, project }) => {
   const [formData, setFormData] = useState({
@@ -32,7 +33,7 @@ const TaskFormDialog = ({ isOpen, onClose, onSubmit, projectId, project }) => {
       const details = await Promise.all(
         memberIds.map(async (userId) => {
           try {
-            const response = await fetch(`http://localhost:8080/api/user/${userId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/user/${userId}`, {
               headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`,
               },
@@ -55,7 +56,7 @@ const TaskFormDialog = ({ isOpen, onClose, onSubmit, projectId, project }) => {
         const ownerAlreadyIncluded = validMembers.some(m => m.username === project.createdBy);
         if (!ownerAlreadyIncluded) {
           try {
-            const response = await fetch(`http://localhost:8080/api/user/search?q=${project.createdBy}`, {
+            const response = await fetch(`${API_BASE_URL}/api/user/search?q=${project.createdBy}`, {
               headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`,
               },
