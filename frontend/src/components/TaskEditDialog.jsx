@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getProjectMembers } from '../services/ProjectService';
 
-const API_BASE_URL = 'https://suitx-backend-production.up.railway.app';
+import { API_BASE_URL } from '../utils/apiConfig';
 
 const TaskEditDialog = ({ isOpen, onClose, onSubmit, task, project }) => {
   const [formData, setFormData] = useState({

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getTasksByAssignee } from "../services/TaskService";
 import profilePic from "../assets/profile-pic.jpg";
 
-const API_BASE_URL = 'https://suitx-backend-production.up.railway.app';
+import { API_BASE_URL } from '../utils/apiConfig';
 
 export default function UserProfilePage() {
   const { userId } = useParams();

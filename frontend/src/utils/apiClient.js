@@ -1,6 +1,5 @@
+import { API_BASE_URL } from './apiConfig';
 import { isTokenExpired, handleTokenExpiration } from './jwtUtils';
-
-const API_BASE_URL = 'https://suitx-backend-production.up.railway.app';
 
 /**
  * Enhanced fetch wrapper with automatic token expiration handling

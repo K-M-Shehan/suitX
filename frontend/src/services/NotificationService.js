@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_URL = 'https://suitx-backend-production.up.railway.app/api/notifications';
+import { API_BASE_URL } from '../utils/apiConfig';
+
+const API_URL = `${API_BASE_URL}/api/notifications`;
 
 // Get authorization header with JWT token
 const getAuthHeader = () => {

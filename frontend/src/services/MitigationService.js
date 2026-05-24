@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://suitx-backend-production.up.railway.app/api';
+import { API_BASE_URL } from '../utils/apiConfig';
 
 // Get JWT token from localStorage
 const getToken = () => {

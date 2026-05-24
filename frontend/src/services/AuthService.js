@@ -1,4 +1,6 @@
-const API_URL = "https://suitx-backend-production.up.railway.app/auth";
+import { API_BASE_URL } from '../utils/apiConfig';
+
+const API_URL = `${API_BASE_URL}/auth`;
 
 export async function signup(username, email, password) {
   const res = await fetch(`${API_URL}/signup`, {
@@ -28,7 +30,7 @@ export async function getCurrentUser() {
     throw new Error('No token found');
   }
 
-  const res = await fetch('https://suitx-backend-production.up.railway.app/api/user/me', {
+  const res = await fetch(`${API_BASE_URL}/api/user/me`, {
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',

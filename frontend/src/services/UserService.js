@@ -1,4 +1,6 @@
-const API_URL = "https://suitx-backend-production.up.railway.app/api/user";
+import { API_BASE_URL } from '../utils/apiConfig';
+
+const API_URL = `${API_BASE_URL}/api/user`;
 
 /**
  * Get current authenticated user's profile
