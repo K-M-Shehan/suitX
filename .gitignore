@@ -49,4 +49,6 @@ yarn.lock
 # ====================
 .DS_Store
 Thumbs.db
-\n# Ignore local and production env files\nfrontend/.env*
+
+# Ignore local and production env files
+frontend/.env*
