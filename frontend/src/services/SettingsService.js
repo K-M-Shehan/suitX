@@ -1,4 +1,6 @@
-const API_URL = "https://suitx-backend-production.up.railway.app/api/settings";
+import { API_BASE_URL } from '../utils/apiConfig';
+
+const API_URL = `${API_BASE_URL}/api/settings`;
 
 /**
  * Get all user settings
@@ -216,7 +218,7 @@ export async function changePassword(passwordData) {
     throw new Error("No authentication token found");
   }
 
-  const res = await fetch(`https://suitx-backend-production.up.railway.app/api/user/me/password`, {
+  const res = await fetch(`${API_BASE_URL}/api/user/me/password`, {
     method: "PUT",
     headers: {
       "Authorization": `Bearer ${token}`,

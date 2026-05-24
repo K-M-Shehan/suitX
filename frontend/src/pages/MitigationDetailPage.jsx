@@ -4,7 +4,7 @@ import MitigationService from '../services/MitigationService';
 import RiskService from '../services/RiskService';
 import { getProjectById } from '../services/ProjectService';
 
-const API_BASE_URL = 'https://suitx-backend-production.up.railway.app';
+import { API_BASE_URL } from '../utils/apiConfig';
 
 const MitigationDetailPage = () => {
   const { id } = useParams();

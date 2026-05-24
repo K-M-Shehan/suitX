@@ -4,7 +4,7 @@ import { searchUsers, removeMemberFromProject, getProjectMembers } from '../serv
 import { inviteUserToProject } from '../services/InvitationService';
 import { getCurrentUser } from '../services/AuthService';
 
-const API_BASE_URL = 'https://suitx-backend-production.up.railway.app';
+import { API_BASE_URL } from '../utils/apiConfig';
 
 export default function MemberManagement({ projectId, project }) {
   const navigate = useNavigate();

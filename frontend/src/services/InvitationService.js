@@ -1,4 +1,6 @@
-const API_BASE_URL = 'https://suitx-backend-production.up.railway.app/api/invitations';
+import { API_BASE_URL } from '../utils/apiConfig';
+
+const INVITATION_API_URL = `${API_BASE_URL}/api/invitations`;
 
 // Get JWT token from localStorage
 const getToken = () => {
@@ -18,7 +20,7 @@ export async function inviteUserToProject(projectId, userId, message = '') {
       headers['Authorization'] = token;
     }
 
-    const response = await fetch(`${API_BASE_URL}`, {
+    const response = await fetch(`${INVITATION_API_URL}`, {
       method: 'POST',
       headers: headers,
       body: JSON.stringify({ projectId, userId, message }),
@@ -48,7 +50,7 @@ export async function getMyInvitations() {
       headers['Authorization'] = token;
     }
 
-    const response = await fetch(`${API_BASE_URL}/my-invitations`, {
+    const response = await fetch(`${INVITATION_API_URL}/my-invitations`, {
       headers: headers,
     });
     
@@ -75,7 +77,7 @@ export async function getPendingInvitations() {
       headers['Authorization'] = token;
     }
 
-    const response = await fetch(`${API_BASE_URL}/pending`, {
+    const response = await fetch(`${INVITATION_API_URL}/pending`, {
       headers: headers,
     });
     
@@ -102,7 +104,7 @@ export async function acceptInvitation(invitationId) {
       headers['Authorization'] = token;
     }
 
-    const response = await fetch(`${API_BASE_URL}/${invitationId}/accept`, {
+    const response = await fetch(`${INVITATION_API_URL}/${invitationId}/accept`, {
       method: 'POST',
       headers: headers,
     });
@@ -131,7 +133,7 @@ export async function rejectInvitation(invitationId) {
       headers['Authorization'] = token;
     }
 
-    const response = await fetch(`${API_BASE_URL}/${invitationId}/reject`, {
+    const response = await fetch(`${INVITATION_API_URL}/${invitationId}/reject`, {
       method: 'POST',
       headers: headers,
     });
@@ -160,7 +162,7 @@ export async function cancelInvitation(invitationId) {
       headers['Authorization'] = token;
     }
 
-    const response = await fetch(`${API_BASE_URL}/${invitationId}`, {
+    const response = await fetch(`${INVITATION_API_URL}/${invitationId}`, {
       method: 'DELETE',
       headers: headers,
     });
