@@ -26,9 +26,7 @@ export async function login(username, password) {
 
 export async function getCurrentUser() {
   const token = localStorage.getItem('token');
-  if (!token) {
-    throw new Error('No token found');
-  }
+  if (!token) return null;
 
   const res = await fetch(`${API_BASE_URL}/api/user/me`, {
     headers: {

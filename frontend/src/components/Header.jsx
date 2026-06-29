@@ -19,6 +19,11 @@ const Header = ({ isLanding = false }) => {
   // Fetch unread notification count
   useEffect(() => {
     if (!isLanding) {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        return;
+      }
+
       fetchCurrentUser();
       fetchUnreadCount();
       fetchPendingInvitations();
@@ -34,7 +39,9 @@ const Header = ({ isLanding = false }) => {
   const fetchCurrentUser = async () => {
     try {
       const user = await getCurrentUser();
-      setCurrentUser(user);
+      if (user) {
+        setCurrentUser(user);
+      }
     } catch (error) {
       console.error('Error fetching current user:', error);
     }
