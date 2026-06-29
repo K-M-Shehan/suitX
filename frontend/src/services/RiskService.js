@@ -18,7 +18,7 @@ class RiskService {
         headers['Authorization'] = token;
       }
 
-      const response = await fetch(`${API_BASE_URL}/risks`, {
+      const response = await fetch(`${API_BASE_URL}/api/risks`, {
         headers: headers,
       });
       if (!response.ok) {
@@ -42,7 +42,7 @@ class RiskService {
         headers['Authorization'] = token;
       }
 
-      const response = await fetch(`${API_BASE_URL}/risks/user`, {
+      const response = await fetch(`${API_BASE_URL}/api/risks/user`, {
         headers: headers,
       });
       if (!response.ok) {
@@ -57,7 +57,7 @@ class RiskService {
 
   async getRisksByStatus(status) {
     try {
-      const response = await fetch(`${API_BASE_URL}/risks/status/${status}`);
+      const response = await fetch(`${API_BASE_URL}/api/risks/status/${status}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch risks with status: ${status}`);
       }
@@ -79,7 +79,7 @@ class RiskService {
         headers['Authorization'] = token;
       }
 
-      const response = await fetch(`${API_BASE_URL}/risks/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/risks/${id}`, {
         headers: headers,
       });
       if (!response.ok) {
@@ -94,7 +94,7 @@ class RiskService {
 
   async createRisk(riskData) {
     try {
-      const response = await fetch(`${API_BASE_URL}/risks`, {
+      const response = await fetch(`${API_BASE_URL}/api/risks`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -122,7 +122,7 @@ class RiskService {
         headers['Authorization'] = token;
       }
 
-      const response = await fetch(`${API_BASE_URL}/risks/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/risks/${id}`, {
         method: 'PUT',
         headers: headers,
         body: JSON.stringify(riskData),
@@ -139,7 +139,7 @@ class RiskService {
 
   async deleteRisk(id) {
     try {
-      const response = await fetch(`${API_BASE_URL}/risks/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/risks/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) {
@@ -162,7 +162,7 @@ class RiskService {
         headers['Authorization'] = token;
       }
 
-      const response = await fetch(`${API_BASE_URL}/risks/${id}/resolve`, {
+      const response = await fetch(`${API_BASE_URL}/api/risks/${id}/resolve`, {
         method: 'PATCH',
         headers: headers,
       });
@@ -190,9 +190,9 @@ class RiskService {
       }
 
       console.log('Ignoring risk with id:', id);
-      console.log('Request URL:', `${API_BASE_URL}/risks/${id}/ignore`);
+      console.log('Request URL:', `${API_BASE_URL}/api/risks/${id}/ignore`);
       
-      const response = await fetch(`${API_BASE_URL}/risks/${id}/ignore`, {
+      const response = await fetch(`${API_BASE_URL}/api/risks/${id}/ignore`, {
         method: 'PATCH',
         headers: headers,
       });
@@ -226,7 +226,7 @@ class RiskService {
         headers['Authorization'] = token;
       }
 
-      const response = await fetch(`${API_BASE_URL}/risks/${id}/accept`, {
+      const response = await fetch(`${API_BASE_URL}/api/risks/${id}/accept`, {
         method: 'PATCH',
         headers: headers,
       });
@@ -253,7 +253,7 @@ class RiskService {
         headers['Authorization'] = token;
       }
 
-      const response = await fetch(`${API_BASE_URL}/risks/project/${projectId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/risks/project/${projectId}`, {
         headers: headers,
       });
       if (!response.ok) {
@@ -277,7 +277,7 @@ class RiskService {
         headers['Authorization'] = token;
       }
 
-      const response = await fetch(`${API_BASE_URL}/risks/summary`, {
+      const response = await fetch(`${API_BASE_URL}/api/risks/summary`, {
         headers: headers,
       });
       if (!response.ok) {

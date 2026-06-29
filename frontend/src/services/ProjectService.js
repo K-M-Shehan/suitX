@@ -18,7 +18,7 @@ export async function getAllProjects() {
       headers['Authorization'] = token;
     }
 
-    const response = await fetch(`${API_BASE_URL}/projects`, {
+    const response = await fetch(`${API_BASE_URL}/api/projects`, {
       headers: headers,
     });
     
@@ -43,7 +43,7 @@ export async function getActiveProjects() {
       headers['Authorization'] = token;
     }
 
-    const response = await fetch(`${API_BASE_URL}/projects/active`, {
+    const response = await fetch(`${API_BASE_URL}/api/projects/active`, {
       headers: headers,
     });
     
@@ -68,7 +68,7 @@ export async function getProjectById(id) {
       headers['Authorization'] = token;
     }
 
-    const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/projects/${id}`, {
       headers: headers,
     });
     
@@ -99,7 +99,7 @@ export async function createProject(projectData) {
       ? { name: projectData, description: '' }
       : projectData;
 
-    const response = await fetch(`${API_BASE_URL}/projects`, {
+    const response = await fetch(`${API_BASE_URL}/api/projects`, {
       method: 'POST',
       headers: headers,
       body: JSON.stringify(requestData),
@@ -126,7 +126,7 @@ export async function updateProject(id, projectData) {
       headers['Authorization'] = token;
     }
 
-    const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/projects/${id}`, {
       method: 'PUT',
       headers: headers,
       body: JSON.stringify(projectData),
@@ -154,7 +154,7 @@ export async function deleteProject(id) {
       headers['Authorization'] = token;
     }
 
-    const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/projects/${id}`, {
       method: 'DELETE',
       headers: headers,
     });
@@ -180,7 +180,7 @@ export async function analyzeProjectRisks(projectId) {
       headers['Authorization'] = token;
     }
 
-    const response = await fetch(`${API_BASE_URL}/projects/${projectId}/analyze-risks`, {
+    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/analyze-risks`, {
       method: 'POST',
       headers: headers,
     });
@@ -210,7 +210,7 @@ export async function addMemberToProject(projectId, userId) {
       headers['Authorization'] = token;
     }
 
-    const response = await fetch(`${API_BASE_URL}/projects/${projectId}/members/${userId}`, {
+    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/members/${userId}`, {
       method: 'POST',
       headers: headers,
     });
@@ -239,7 +239,7 @@ export async function removeMemberFromProject(projectId, userId) {
       headers['Authorization'] = token;
     }
 
-    const response = await fetch(`${API_BASE_URL}/projects/${projectId}/members/${userId}`, {
+    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/members/${userId}`, {
       method: 'DELETE',
       headers: headers,
     });
@@ -268,7 +268,7 @@ export async function getProjectMembers(projectId) {
       headers['Authorization'] = token;
     }
 
-    const response = await fetch(`${API_BASE_URL}/projects/${projectId}/members`, {
+    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/members`, {
       headers: headers,
     });
     
@@ -295,7 +295,7 @@ export async function searchUsers(searchTerm) {
       headers['Authorization'] = token;
     }
 
-    const response = await fetch(`${API_BASE_URL}/user/search?q=${encodeURIComponent(searchTerm)}`, {
+    const response = await fetch(`${API_BASE_URL}/api/user/search?q=${encodeURIComponent(searchTerm)}`, {
       headers: headers,
     });
     
