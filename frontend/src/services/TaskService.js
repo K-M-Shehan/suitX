@@ -18,7 +18,7 @@ export async function getAllTasks() {
       headers['Authorization'] = token;
     }
 
-    const response = await fetch(`${API_BASE_URL}/tasks`, {
+    const response = await fetch(`${API_BASE_URL}/api/tasks`, {
       headers: headers,
     });
     
@@ -44,7 +44,7 @@ export async function getTasksByProject(projectId) {
       headers['Authorization'] = token;
     }
 
-    const response = await fetch(`${API_BASE_URL}/tasks/project/${projectId}`, {
+    const response = await fetch(`${API_BASE_URL}/api/tasks/project/${projectId}`, {
       headers: headers,
     });
     
@@ -70,7 +70,7 @@ export async function getTasksByAssignee(userId) {
       headers['Authorization'] = token;
     }
 
-    const response = await fetch(`${API_BASE_URL}/tasks/assignee/${userId}`, {
+    const response = await fetch(`${API_BASE_URL}/api/tasks/assignee/${userId}`, {
       headers: headers,
     });
     
@@ -96,7 +96,7 @@ export async function getTaskById(id) {
       headers['Authorization'] = token;
     }
 
-    const response = await fetch(`${API_BASE_URL}/tasks/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/tasks/${id}`, {
       headers: headers,
     });
     
@@ -122,7 +122,7 @@ export async function createTask(taskData) {
       headers['Authorization'] = token;
     }
 
-    const response = await fetch(`${API_BASE_URL}/tasks`, {
+    const response = await fetch(`${API_BASE_URL}/api/tasks`, {
       method: 'POST',
       headers: headers,
       body: JSON.stringify(taskData),
@@ -150,7 +150,7 @@ export async function createMultipleTasks(tasks, projectId) {
       headers['Authorization'] = token;
     }
 
-    const response = await fetch(`${API_BASE_URL}/tasks/bulk?projectId=${projectId}`, {
+    const response = await fetch(`${API_BASE_URL}/api/tasks/bulk?projectId=${projectId}`, {
       method: 'POST',
       headers: headers,
       body: JSON.stringify(tasks),
@@ -178,7 +178,7 @@ export async function updateTask(id, taskData) {
       headers['Authorization'] = token;
     }
 
-    const response = await fetch(`${API_BASE_URL}/tasks/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/tasks/${id}`, {
       method: 'PUT',
       headers: headers,
       body: JSON.stringify(taskData),
@@ -207,7 +207,7 @@ export async function deleteTask(id) {
       headers['Authorization'] = token;
     }
 
-    const response = await fetch(`${API_BASE_URL}/tasks/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/tasks/${id}`, {
       method: 'DELETE',
       headers: headers,
     });
