@@ -18,7 +18,7 @@ export async function analyzeProjectRisks(analysisRequest) {
       headers['Authorization'] = token;
     }
 
-    const response = await fetch(`${API_BASE_URL}/ai/analyze-risks`, {
+    const response = await fetch(`${API_BASE_URL}/api/ai/analyze-risks`, {
       method: 'POST',
       headers: headers,
       body: JSON.stringify(analysisRequest),
@@ -39,7 +39,7 @@ export async function analyzeProjectRisks(analysisRequest) {
 // Health check for AI service
 export async function checkAIServiceHealth() {
   try {
-    const response = await fetch(`${API_BASE_URL}/ai/health`);
+    const response = await fetch(`${API_BASE_URL}/api/ai/health`);
     
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);

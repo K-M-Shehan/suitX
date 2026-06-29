@@ -18,7 +18,7 @@ class MitigationService {
         headers['Authorization'] = token;
       }
 
-      const response = await fetch(`${API_BASE_URL}/mitigations/user`, {
+      const response = await fetch(`${API_BASE_URL}/api/mitigations/user`, {
         headers: headers,
       });
       if (!response.ok) {
@@ -33,7 +33,7 @@ class MitigationService {
 
   async getMitigationsByStatus(status) {
     try {
-      const response = await fetch(`${API_BASE_URL}/mitigations/status/${status}`);
+      const response = await fetch(`${API_BASE_URL}/api/mitigations/status/${status}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch mitigations with status: ${status}`);
       }
@@ -46,7 +46,7 @@ class MitigationService {
 
   async getMitigationsByPriority(priority) {
     try {
-      const response = await fetch(`${API_BASE_URL}/mitigations/priority/${priority}`);
+      const response = await fetch(`${API_BASE_URL}/api/mitigations/priority/${priority}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch mitigations with priority: ${priority}`);
       }
@@ -59,7 +59,7 @@ class MitigationService {
 
   async getMitigationById(id) {
     try {
-      const response = await fetch(`${API_BASE_URL}/mitigations/${id}`);
+      const response = await fetch(`${API_BASE_URL}/api/mitigations/${id}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch mitigation with id: ${id}`);
       }
@@ -72,7 +72,7 @@ class MitigationService {
 
   async createMitigation(mitigationData) {
     try {
-      const response = await fetch(`${API_BASE_URL}/mitigations`, {
+      const response = await fetch(`${API_BASE_URL}/api/mitigations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -100,7 +100,7 @@ class MitigationService {
         headers['Authorization'] = token;
       }
 
-      const response = await fetch(`${API_BASE_URL}/mitigations/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/mitigations/${id}`, {
         method: 'PUT',
         headers: headers,
         body: JSON.stringify(mitigationData),
@@ -117,7 +117,7 @@ class MitigationService {
 
   async deleteMitigation(id) {
     try {
-      const response = await fetch(`${API_BASE_URL}/mitigations/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/mitigations/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) {
@@ -131,7 +131,7 @@ class MitigationService {
 
   async markAsCompleted(id) {
     try {
-      const response = await fetch(`${API_BASE_URL}/mitigations/${id}/complete`, {
+      const response = await fetch(`${API_BASE_URL}/api/mitigations/${id}/complete`, {
         method: 'PATCH',
       });
       if (!response.ok) {
@@ -146,7 +146,7 @@ class MitigationService {
 
   async updateProgress(id, progress) {
     try {
-      const response = await fetch(`${API_BASE_URL}/mitigations/${id}/progress`, {
+      const response = await fetch(`${API_BASE_URL}/api/mitigations/${id}/progress`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -165,7 +165,7 @@ class MitigationService {
 
   async getMitigationSummary() {
     try {
-      const response = await fetch(`${API_BASE_URL}/mitigations/summary`);
+      const response = await fetch(`${API_BASE_URL}/api/mitigations/summary`);
       if (!response.ok) {
         throw new Error('Failed to fetch mitigation summary');
       }
@@ -187,7 +187,7 @@ class MitigationService {
         headers['Authorization'] = token;
       }
 
-      const response = await fetch(`${API_BASE_URL}/mitigations/project/${projectId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/mitigations/project/${projectId}`, {
         headers: headers,
       });
       if (!response.ok) {
